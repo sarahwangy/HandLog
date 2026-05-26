@@ -16,8 +16,6 @@ export async function POST(req: NextRequest) {
 
   const formData = await req.formData();
   const audioBlob = formData.get("audio") as Blob | null;
-  const language = (formData.get("language") as string | null) ?? "en";
-
   if (!audioBlob) {
     return NextResponse.json({ error: "Missing audio" }, { status: 400 });
   }
