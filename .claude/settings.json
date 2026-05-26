@@ -21,10 +21,21 @@
       "Read(//private/tmp/**)",
       "Bash(curl -s http://localhost:3000/zh)",
       "Bash(pkill -f \"next dev\")",
-      "Bash(grep -v \"^#\\\\|^$\" .env.example)"
+      "Bash(grep -v \"^#\\\\|^$\" .env.example)",
+      "Bash(mkdir -p \"src/app/[locale]\")",
+      "Bash(curl -s http://localhost:3000/zh/capture -o /dev/null -w \"%{http_code}\\\\n\")",
+      "Bash(node -e \"const t = require\\('@notionhq/client/build/src/api-endpoints'\\); console.log\\(Object.keys\\(t\\).filter\\(k => k.includes\\('Query'\\) || k.includes\\('Database'\\)\\)\\)\")",
+      "Bash(node -e \"const {Client} = require\\('@notionhq/client'\\); const c = new Client\\({auth:'x'}\\); console.log\\(Object.keys\\(c.databases\\)\\)\")",
+      "Bash(node -e \"const {Client} = require\\('@notionhq/client'\\); const c = new Client\\({auth:'x'}\\); console.log\\(Object.keys\\(c\\)\\)\")",
+      "Bash(mkdir -p \"src/app/[locale]/capture\" && mkdir -p \"src/components/layout\")",
+      "Bash(pkill -f \"next dev\" 2>/dev/null; sleep 1 *)",
+      "Bash(open http://localhost:3000/zh/capture)"
     ],
     "additionalDirectories": [
-      "/Users/sha/Code/AI-code-26/weekly-journal-review/src/app/api/auth"
+      "/Users/sha/Code/AI-code-26/weekly-journal-review/src/app/api/auth",
+      "/Users/sha/Code/AI-code-26/weekly-journal-review/src/app",
+      "/Users/sha/Code/AI-code-26/weekly-journal-review/src/app/[locale]",
+      "/private/tmp"
     ]
   }
 }

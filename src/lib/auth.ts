@@ -86,6 +86,10 @@ export const authOptions: NextAuthOptions = {
     error: "/onboarding",  // 登录出错时也跳转到 onboarding
   },
 
+  // 开发阶段：关闭强制登录保护，方便直接查看页面效果
+  // 上线前需要在各页面加回 getAuthSession() 检查
+  // TODO: E9 完成后移除此注释并在各页面加认证保护
+
   // session 用 JWT 方式存储（不需要数据库存 session）
   session: {
     strategy: "jwt",

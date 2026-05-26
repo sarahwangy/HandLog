@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
+    "@notionhq/client": "^2.3.0",
     "@sentry/nextjs": "^10.53.1",
     "@vercel/analytics": "^2.0.1",
     "@vercel/kv": "^3.0.0",
