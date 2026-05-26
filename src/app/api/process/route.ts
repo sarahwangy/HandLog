@@ -17,17 +17,25 @@ export async function POST(req: NextRequest) {
     userId = session.userId;
   }
 
-  const { date } = await req.json();
+  const { date, journal: inlineJournal } = await req.json();
   if (!date) {
     return NextResponse.json({ error: "Missing date" }, { status: 400 });
   }
 
-  // Read draft from KV (falls back to empty string if not saved yet)
-  const journal = await getDraft(userId, date) ?? "";
+  // Accept inline journal text (from client) OR read from KV
+  let journal = inlineJournal as string | undefined;
+  if (!journal?.trim()) {
+    journal = await getDraft(userId, date) ?? "";
+  }
   if (!journal.trim()) {
     return NextResponse.json({ error: "No journal content found" }, { status: 400 });
   }
 
-  const review = await generateDailyReview(journal, date);
-  return NextResponse.json(review);
+  try {
+    const review = await generateDailyReview(journal, date);
+    return NextResponse.json(review);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }

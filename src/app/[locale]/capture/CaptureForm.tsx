@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import { useAutosave } from "@/hooks/useAutosave";
 import { useWhisper } from "@/hooks/useWhisper";
 import { useTaskComplete } from "@/hooks/useTaskComplete";
@@ -13,6 +15,8 @@ interface CaptureFormProps {
 export default function CaptureForm({ today, dateKey }: CaptureFormProps) {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const locale = useLocale();
   const { status, saveNow } = useAutosave({ content: text, date: dateKey });
   const notify = useTaskComplete();
 
@@ -114,6 +118,7 @@ export default function CaptureForm({ today, dateKey }: CaptureFormProps) {
       {/* 提交按钮 */}
       <button
         type="button"
+        onClick={() => { saveNow(); router.push(`/${locale}/review`); }}
         className="w-full bg-[#2C1F14] text-[#FAF6F0] rounded-xl py-4 text-base hover:bg-[#4A3728] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         disabled={charCount < 10}
       >

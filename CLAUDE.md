@@ -5,6 +5,10 @@
 我是一个刚入门的开发者，正在通过这个项目学习 Next.js / TypeScript / API 集成。
 你的任务不只是写代码，更要帮我理解每一段代码在做什么。
 
+
+## 重要！！！
+每次更新文档，还有提交 commit 到 GitHub repo 的时候，要仔细检查有没有敏感的数据被 hardcode 了。如果敏感的数据全部要写到 env 里面。 
+
 # notion 字段映射表，需要遵守docs/notion.md
 ## 教学模式要求
 
