@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAutosave } from "@/hooks/useAutosave";
-import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+import { useWhisper } from "@/hooks/useWhisper";
 
 interface CaptureFormProps {
   today: string;
@@ -12,12 +12,13 @@ interface CaptureFormProps {
 export default function CaptureForm({ today, dateKey }: CaptureFormProps) {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
+  const [lang, setLang] = useState<"en-US" | "zh-CN">("en-US");
   const { status, saveNow } = useAutosave({ content: text, date: dateKey });
 
-  // 语音识别：每次收到一段转写文字，追加到 textarea（不覆盖已有内容）
+  // 语音识别：录完后发给 Whisper API，返回带标点的文字追加到 textarea
   const { status: micStatus, errorMessage: micError, isSupported: micSupported, start: startMic, stop: stopMic } =
-    useSpeechRecognition({
-      language: "en-US",
+    useWhisper({
+      language: lang,
       onTranscript: (chunk) => setText((prev) => prev ? `${prev} ${chunk}` : chunk),
     });
 
@@ -51,14 +52,41 @@ export default function CaptureForm({ today, dateKey }: CaptureFormProps) {
 
       {/* 麦克风按钮区 */}
       <div className="bg-[#F5EFE4] rounded-2xl p-5 border border-[rgba(139,107,74,0.2)] mb-5 text-center">
+        {/* 语言切换 */}
+        <div className="flex justify-center gap-2 mb-4">
+          <button
+            type="button"
+            onClick={() => setLang("en-US")}
+            className={`px-3 py-1 rounded-full text-xs transition-colors ${
+              lang === "en-US"
+                ? "bg-[#8B6B4A] text-[#FAF6F0]"
+                : "text-[#8B6B4A] hover:bg-[#E8D9C4]"
+            }`}
+          >
+            English
+          </button>
+          <button
+            type="button"
+            onClick={() => setLang("zh-CN")}
+            className={`px-3 py-1 rounded-full text-xs transition-colors ${
+              lang === "zh-CN"
+                ? "bg-[#8B6B4A] text-[#FAF6F0]"
+                : "text-[#8B6B4A] hover:bg-[#E8D9C4]"
+            }`}
+          >
+            中文
+          </button>
+        </div>
         <button
           type="button"
           onClick={micStatus === "recording" ? stopMic : startMic}
-          disabled={!micSupported}
+          disabled={!micSupported || micStatus === "transcribing"}
           className={`w-[68px] h-[68px] rounded-full flex items-center justify-center text-3xl mx-auto mb-3 shadow-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed
             ${micStatus === "recording"
               ? "bg-[#C4907A] animate-pulse"
-              : "bg-[#2C1F14] hover:bg-[#4A3728]"
+              : micStatus === "transcribing"
+              ? "bg-[#8B6B4A]"
+              : "bg-[#4A3728] hover:bg-[#5C4535]"
             }`}
         >
           🎙
@@ -67,16 +95,21 @@ export default function CaptureForm({ today, dateKey }: CaptureFormProps) {
         {micStatus === "recording" ? (
           <>
             <p className="text-sm text-[#C4907A] font-medium">Recording... tap to stop</p>
-            <p className="text-xs text-[#8B6B4A] opacity-60 mt-1">Speak naturally, words appear below</p>
+            <p className="text-xs text-[#8B6B4A] opacity-60 mt-1">Speak naturally, tap stop when done</p>
+          </>
+        ) : micStatus === "transcribing" ? (
+          <>
+            <p className="text-sm text-[#8B6B4A] font-medium">Transcribing...</p>
+            <p className="text-xs text-[#8B6B4A] opacity-60 mt-1">Whisper is converting your speech</p>
           </>
         ) : micError ? (
           <p className="text-xs text-[#C4907A] mt-1">{micError}</p>
         ) : !micSupported ? (
-          <p className="text-xs text-[#8B6B4A] opacity-60 mt-1">Voice not supported — use Chrome</p>
+          <p className="text-xs text-[#8B6B4A] opacity-60 mt-1">Recording not supported in this browser</p>
         ) : (
           <>
             <p className="text-sm text-[#8B6B4A]">Tap to record</p>
-            <p className="text-xs text-[#8B6B4A] opacity-60 mt-1">Speak freely, AI will structure it</p>
+            <p className="text-xs text-[#8B6B4A] opacity-60 mt-1">Powered by Whisper — punctuation included</p>
           </>
         )}
       </div>

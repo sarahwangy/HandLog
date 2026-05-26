@@ -42,21 +42,21 @@ export function useSpeechRecognition({
 
     const recognition = new SpeechRecognitionAPI();
     recognition.lang = language;
-    recognition.continuous = true;      // keep listening until we call stop()
-    recognition.interimResults = false; // only fire onresult for final chunks
+    recognition.continuous = true;
+    recognition.interimResults = false;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recognition.onresult = (event: any) => {
-      // Each result is one spoken phrase; append it to the textarea
-      const transcript = Array.from(event.results)
-        .slice(event.resultIndex)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .map((r: any) => r[0].transcript)
-        .join(" ")
-        .trim();
-
-      if (transcript && onTranscript) {
-        onTranscript(transcript);
+      // Only process results starting from resultIndex to avoid duplicates.
+      // event.resultIndex points to the first NEW result in this event.
+      let newText = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          newText += event.results[i][0].transcript;
+        }
+      }
+      if (newText.trim() && onTranscript) {
+        onTranscript(newText.trim());
       }
     };
 
