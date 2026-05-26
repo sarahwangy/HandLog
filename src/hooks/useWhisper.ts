@@ -5,7 +5,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 type WhisperStatus = "idle" | "recording" | "transcribing" | "error";
 
 interface UseWhisperOptions {
-  language?: "en-US" | "zh-CN";
   onTranscript?: (text: string) => void;
 }
 
@@ -18,7 +17,6 @@ interface UseWhisperReturn {
 }
 
 export function useWhisper({
-  language = "en-US",
   onTranscript,
 }: UseWhisperOptions = {}): UseWhisperReturn {
   const [status, setStatus] = useState<WhisperStatus>("idle");
@@ -77,7 +75,6 @@ export function useWhisper({
       try {
         const formData = new FormData();
         formData.append("audio", audioBlob);
-        formData.append("language", language);
 
         const res = await fetch("/api/transcribe", {
           method: "POST",
@@ -99,7 +96,7 @@ export function useWhisper({
 
     recorder.start();
     setStatus("recording");
-  }, [isSupported, language, onTranscript]);
+  }, [isSupported, onTranscript]);
 
   const stop = useCallback(() => {
     mediaRecorderRef.current?.stop();

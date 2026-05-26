@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAutosave } from "@/hooks/useAutosave";
 import { useWhisper } from "@/hooks/useWhisper";
+import { useTaskComplete } from "@/hooks/useTaskComplete";
 
 interface CaptureFormProps {
   today: string;
@@ -12,14 +13,15 @@ interface CaptureFormProps {
 export default function CaptureForm({ today, dateKey }: CaptureFormProps) {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
-  const [lang, setLang] = useState<"en-US" | "zh-CN">("en-US");
   const { status, saveNow } = useAutosave({ content: text, date: dateKey });
+  const notify = useTaskComplete();
 
-  // 语音识别：录完后发给 Whisper API，返回带标点的文字追加到 textarea
   const { status: micStatus, errorMessage: micError, isSupported: micSupported, start: startMic, stop: stopMic } =
     useWhisper({
-      language: lang,
-      onTranscript: (chunk) => setText((prev) => prev ? `${prev} ${chunk}` : chunk),
+      onTranscript: (chunk) => {
+        setText((prev) => prev ? `${prev} ${chunk}` : chunk);
+        notify("Voice transcription");
+      },
     });
 
   // 页面加载时从 KV 读取今天的草稿（如果有的话）
@@ -52,31 +54,6 @@ export default function CaptureForm({ today, dateKey }: CaptureFormProps) {
 
       {/* 麦克风按钮区 */}
       <div className="bg-[#F5EFE4] rounded-2xl p-5 border border-[rgba(139,107,74,0.2)] mb-5 text-center">
-        {/* 语言切换 */}
-        <div className="flex justify-center gap-2 mb-4">
-          <button
-            type="button"
-            onClick={() => setLang("en-US")}
-            className={`px-3 py-1 rounded-full text-xs transition-colors ${
-              lang === "en-US"
-                ? "bg-[#8B6B4A] text-[#FAF6F0]"
-                : "text-[#8B6B4A] hover:bg-[#E8D9C4]"
-            }`}
-          >
-            English
-          </button>
-          <button
-            type="button"
-            onClick={() => setLang("zh-CN")}
-            className={`px-3 py-1 rounded-full text-xs transition-colors ${
-              lang === "zh-CN"
-                ? "bg-[#8B6B4A] text-[#FAF6F0]"
-                : "text-[#8B6B4A] hover:bg-[#E8D9C4]"
-            }`}
-          >
-            中文
-          </button>
-        </div>
         <button
           type="button"
           onClick={micStatus === "recording" ? stopMic : startMic}
@@ -136,6 +113,7 @@ export default function CaptureForm({ today, dateKey }: CaptureFormProps) {
 
       {/* 提交按钮 */}
       <button
+        type="button"
         className="w-full bg-[#2C1F14] text-[#FAF6F0] rounded-xl py-4 text-base hover:bg-[#4A3728] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         disabled={charCount < 10}
       >

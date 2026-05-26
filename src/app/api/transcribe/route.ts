@@ -6,9 +6,12 @@ import { getAuthSession } from "@/lib/auth";
 // Body: FormData with field "audio" (audio/webm or audio/mp4 blob)
 // Returns: { transcript: string }
 export async function POST(req: NextRequest) {
-  const session = await getAuthSession();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // Skip auth in development so voice input can be tested without login
+  if (process.env.NODE_ENV !== "development") {
+    const session = await getAuthSession();
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
   }
 
   const formData = await req.formData();
@@ -24,10 +27,10 @@ export async function POST(req: NextRequest) {
   // Whisper needs a File object with a filename — browser Blobs don't have one
   const audioFile = new File([audioBlob], "recording.webm", { type: audioBlob.type });
 
+  // No language specified — Whisper auto-detects Chinese, English, mixed, etc.
   const response = await openai.audio.transcriptions.create({
     file: audioFile,
     model: "whisper-1",
-    language: language === "zh-CN" ? "zh" : "en",
   });
 
   return NextResponse.json({ transcript: response.text });
