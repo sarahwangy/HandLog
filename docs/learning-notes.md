@@ -69,3 +69,31 @@
 - **用到的关键 API/函数：** Node.js 内置 `crypto` 模块的 `createCipheriv`、`createDecipheriv`、`randomBytes`，不需要装额外的包
 - **容易踩的坑：** `ENCRYPTION_KEY` 必须是 64 位十六进制字符串（32字节），长度不对会报错；密钥丢了就永远解不开已存的 token
 - **一句话总结：** 用 AES-256-GCM 加密 Notion token 再存 KV，读取时解密，KV 里只有密文，即使泄露也没用
+
+---
+
+### T-304 — 自动保存草稿到 Vercel KV
+
+- **学到的核心概念：** 防抖（debounce）——用户每次击键都重置定时器，停止输入 3 秒后才真正保存；`useRef` 存 timer ID，因为改它不会触发重新渲染（和 `useState` 的区别）
+- **用到的关键 API/函数：** `setTimeout` / `clearTimeout`、`useRef`、`useEffect` cleanup 函数
+- **容易踩的坑：** 组件卸载时必须 `clearTimeout`，否则定时器还在内存里跑（内存泄漏）
+- **一句话总结：** 用防抖模式实现自动保存：用户停止输入 3 秒后才发请求，失焦时立即保存
+
+---
+
+### T-305 — 草稿恢复（页面加载时读 KV）
+
+- **学到的核心概念：** Mount effect——`useEffect(() => {...}, [])` 只在组件第一次显示时执行一次，用来做"页面加载时初始化"；loading 状态防止用户刚打字就被服务器数据覆盖
+- **用到的关键 API/函数：** `useEffect`、`fetch`、`useState` 管理 loading 状态
+- **容易踩的坑：** 草稿加载完之前要 `disabled` 输入框，否则用户输入会被服务端数据覆盖
+- **一句话总结：** 页面加载时调 GET /api/draft 恢复草稿，loading 期间禁用输入框
+
+---
+
+### T-306~308 — 语音输入（OpenAI Whisper）
+
+- **学到的核心概念：** `MediaRecorder` API——浏览器原生录音，收集音频 chunks；Whisper API——OpenAI 的语音转文字服务，自动识别语言，中英文混说都支持，带标点
+- **用到的关键 API/函数：** `navigator.mediaDevices.getUserMedia()`、`MediaRecorder`、`openai.audio.transcriptions.create()`
+- **容易踩的坑：** Hydration 错误——`isSupported` 必须在 `useEffect` 里设置，不能在 render 时直接读 `window`，因为服务端没有 window；OpenAI 初始化不能放模块顶层，会在 build 时报"Missing credentials"
+- **行业常用模式：** "录完再发"（和 Web Speech API 实时出字不同）——用户松开按钮后发一整段音频，1-2 秒后返回完整文字，准确率更高
+- **一句话总结：** 用 MediaRecorder 录音，发给 Whisper API 转文字，自动识别语言无需手动切换
