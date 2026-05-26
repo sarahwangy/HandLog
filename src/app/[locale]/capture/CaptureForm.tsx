@@ -1,17 +1,35 @@
 "use client";
 
-// CaptureForm 是客户端组件（有状态、有交互）
-// page.tsx 是服务端组件，把静态数据传进来
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAutosave } from "@/hooks/useAutosave";
 
 interface CaptureFormProps {
   today: string;
+  dateKey: string; // "2026-05-26" 格式，用于 KV key
 }
 
-export default function CaptureForm({ today }: CaptureFormProps) {
+export default function CaptureForm({ today, dateKey }: CaptureFormProps) {
   const [text, setText] = useState("");
+  const [loading, setLoading] = useState(true);
+  const { status, saveNow } = useAutosave({ content: text, date: dateKey });
+
+  // 页面加载时从 KV 读取今天的草稿（如果有的话）
+  useEffect(() => {
+    fetch(`/api/draft?date=${dateKey}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.content) setText(data.content);
+      })
+      .finally(() => setLoading(false));
+  }, [dateKey]);
 
   const charCount = text.length;
+
+  const saveLabel =
+    status === "saving" ? "保存中..." :
+    status === "saved"  ? "✓ 草稿已保存" :
+    status === "error"  ? "保存失败，请重试" :
+    charCount > 0       ? "等待保存..." : "";
 
   return (
     <div>
@@ -36,11 +54,12 @@ export default function CaptureForm({ today }: CaptureFormProps) {
 
       {/* 文字输入框（T-303） */}
       <textarea
-        className="w-full h-[220px] bg-white border border-[rgba(139,107,74,0.2)] rounded-xl p-4 text-sm leading-relaxed text-[#2C1F14] resize-none outline-none focus:border-[#8B6B4A] transition-colors"
-        style={{ fontFamily: "Georgia, serif" }}
-        placeholder="写写今天发生了什么，不用精简，越真实越好..."
+        className="w-full h-[220px] bg-white border border-[rgba(139,107,74,0.2)] rounded-xl p-4 text-sm leading-relaxed text-[#2C1F14] resize-none outline-none focus:border-[#8B6B4A] transition-colors font-serif disabled:opacity-50"
+        placeholder={loading ? "加载草稿中..." : "写写今天发生了什么，不用精简，越真实越好..."}
         value={text}
         onChange={(e) => setText(e.target.value)}
+        onBlur={saveNow}
+        disabled={loading}
       />
 
       {/* 字数统计 + 自动保存状态 */}
@@ -48,8 +67,8 @@ export default function CaptureForm({ today }: CaptureFormProps) {
         <span className="text-xs text-[#8B6B4A] opacity-60">
           已输入 {charCount} 字
         </span>
-        <span className="text-xs text-[#7A8C6E]">
-          {charCount > 0 ? "✓ 草稿已保存" : ""}
+        <span className={`text-xs ${status === "error" ? "text-[#C4907A]" : "text-[#7A8C6E]"}`}>
+          {saveLabel}
         </span>
       </div>
 

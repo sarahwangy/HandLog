@@ -4,19 +4,21 @@ import CaptureForm from "./CaptureForm";
 // capture 页面：用户输入日记的主界面
 // 对照 ui-mockup.html 的 #capture 部分
 export default function CapturePage() {
-  // 获取今天的日期，用于显示在页面标题
-  const today = new Date().toLocaleDateString("zh-CN", {
+  const now = new Date();
+  const today = now.toLocaleDateString("zh-CN", {
     year: "numeric",
     month: "long",
     day: "numeric",
     weekday: "long",
   });
+  // ISO date key for KV storage: "2026-05-26"
+  const dateKey = now.toISOString().slice(0, 10);
 
   return (
     <div className="min-h-screen bg-[#FAF6F0]">
       <AppNav />
       <main className="max-w-5xl mx-auto px-10 py-8 grid grid-cols-[1fr_300px] gap-8">
-        <CaptureForm today={today} />
+        <CaptureForm today={today} dateKey={dateKey} />
         <CapturePanel />
       </main>
     </div>
