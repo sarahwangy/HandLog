@@ -62,3 +62,10 @@
 - **用到的关键 API/函数：** `Sentry.init()`（客户端和服务端分别初始化）、`<Analytics />`（React 组件，放在 layout 里全局生效）
 - **容易踩的坑：** Sentry 有两个配置文件（client / server），因为浏览器端和服务器端是两个完全不同的运行环境；`NEXT_PUBLIC_SENTRY_DSN` 需要 `NEXT_PUBLIC_` 前缀，因为浏览器端也需要读取它
 - **一句话总结：** 加入错误监控（Sentry）和访问统计（Vercel Analytics），均只在生产环境激活
+
+### T-203 — 加密存储 Notion access token
+
+- **学到的核心概念：** AES-256-GCM 对称加密——同一个密钥加密和解密；IV（初始向量）每次随机生成确保相同内容加密结果不同；authTag 防止密文被篡改
+- **用到的关键 API/函数：** Node.js 内置 `crypto` 模块的 `createCipheriv`、`createDecipheriv`、`randomBytes`，不需要装额外的包
+- **容易踩的坑：** `ENCRYPTION_KEY` 必须是 64 位十六进制字符串（32字节），长度不对会报错；密钥丢了就永远解不开已存的 token
+- **一句话总结：** 用 AES-256-GCM 加密 Notion token 再存 KV，读取时解密，KV 里只有密文，即使泄露也没用

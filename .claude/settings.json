@@ -20,7 +20,8 @@
       "Bash(curl -s http://localhost:3000/zh -o /dev/null -w \"%{http_code}\\\\n\")",
       "Read(//private/tmp/**)",
       "Bash(curl -s http://localhost:3000/zh)",
-      "Bash(pkill -f \"next dev\")"
+      "Bash(pkill -f \"next dev\")",
+      "Bash(grep -v \"^#\\\\|^$\" .env.example)"
     ],
     "additionalDirectories": [
       "/Users/sha/Code/AI-code-26/weekly-journal-review/src/app/api/auth"

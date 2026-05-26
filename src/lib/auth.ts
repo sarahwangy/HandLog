@@ -1,5 +1,6 @@
 import { NextAuthOptions, getServerSession } from "next-auth";
 import { kv } from "@vercel/kv";
+import { encrypt, decrypt } from "./encryption";
 
 // ── Notion OAuth Provider 配置 ──────────────────────
 // NextAuth 支持很多第三方登录（GitHub、Google 等），
@@ -58,13 +59,12 @@ export const authOptions: NextAuthOptions = {
       if (account?.access_token) {
         token.notionAccessToken = account.access_token;
 
-        // 同时把 token 存一份到 KV，key 按 userId 隔离
-        // 这样服务端 API route 也能拿到，不只是前端 session
+        // 存入 KV 前先加密，防止 KV 被访问时直接看到明文 token
         if (token.sub) {
           await kv.set(
             `notion_token:${token.sub}`,
-            account.access_token,
-            { ex: 60 * 60 * 24 * 30 } // 30 天过期
+            encrypt(account.access_token), // 加密后存储
+            { ex: 60 * 60 * 24 * 30 }     // 30 天过期
           );
         }
       }
@@ -100,7 +100,9 @@ export async function getAuthSession() {
   return getServerSession(authOptions);
 }
 
-// ── 工具函数：从 KV 获取用户的 Notion access token ──
+// ── 工具函数：从 KV 获取用户的 Notion access token（解密后返回明文）──
 export async function getNotionToken(userId: string): Promise<string | null> {
-  return kv.get<string>(`notion_token:${userId}`);
+  const encrypted = await kv.get<string>(`notion_token:${userId}`);
+  if (!encrypted) return null;
+  return decrypt(encrypted); // 读出来后解密，返回可直接使用的明文 token
 }
