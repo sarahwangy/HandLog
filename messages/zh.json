@@ -1,0 +1,79 @@
+{
+  "nav": {
+    "capture": "记录",
+    "timeline": "时间轴",
+    "dashboard": "看板",
+    "settings": "设置"
+  },
+  "capture": {
+    "title": "今天过得怎么样？",
+    "placeholder": "说说今天发生了什么，或者直接开口录音...",
+    "voiceStart": "点击录音",
+    "voiceStop": "停止录音",
+    "voiceRecording": "录音中",
+    "submit": "AI 开始整理复盘 →",
+    "autosaved": "已自动保存",
+    "aiFollowup": "AI 想多了解一些",
+    "charCount": "已输入 {count} 字"
+  },
+  "review": {
+    "title": "AI 复盘草稿",
+    "fieldDaily": "简短日常",
+    "fieldInsight": "一句话感悟",
+    "fieldReview": "复盘",
+    "fieldPsych": "心理学正能量",
+    "fieldNextSteps": "下一步行动",
+    "fieldTags": "标签",
+    "fieldScore": "今日评分",
+    "regenerate": "重生成",
+    "edit": "编辑",
+    "confirm": "确认 · 生成手账图 →",
+    "saveDraft": "保存草稿"
+  },
+  "handlog": {
+    "title": "你的手账图已生成",
+    "downloadPng": "下载 PNG",
+    "downloadPdf": "PDF (A5)",
+    "uploadNotion": "上传 Notion 封面",
+    "submitNotion": "确认提交 Notion →",
+    "templateMinimal": "极简",
+    "templateCute": "可爱",
+    "templateRetro": "复古"
+  },
+  "timeline": {
+    "title": "我的手账时间轴",
+    "searchPlaceholder": "搜索关键词...",
+    "filterAll": "全部"
+  },
+  "dashboard": {
+    "title": "数据看板",
+    "periodWeek": "周",
+    "periodMonth": "月",
+    "periodAll": "全部",
+    "statDays": "记录天数",
+    "statScore": "平均评分",
+    "statAdopted": "建议采纳数",
+    "statHandlogs": "手账图数"
+  },
+  "settings": {
+    "title": "设置",
+    "notionConnection": "Notion 连接",
+    "subDatabases": "子库映射",
+    "aiStyle": "AI 风格",
+    "template": "手账模板",
+    "language": "语言",
+    "exportData": "导出数据",
+    "deleteAccount": "删除账号",
+    "connected": "已连接",
+    "notConnected": "未配置",
+    "reconnect": "重新授权",
+    "disconnect": "断开"
+  },
+  "common": {
+    "cancel": "取消",
+    "confirm": "确认",
+    "save": "保存",
+    "loading": "加载中...",
+    "error": "出错了，请重试"
+  }
+}

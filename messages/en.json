@@ -1,0 +1,79 @@
+{
+  "nav": {
+    "capture": "Capture",
+    "timeline": "Timeline",
+    "dashboard": "Dashboard",
+    "settings": "Settings"
+  },
+  "capture": {
+    "title": "How was your day?",
+    "placeholder": "Write about your day, or tap the mic to record...",
+    "voiceStart": "Start recording",
+    "voiceStop": "Stop recording",
+    "voiceRecording": "Recording",
+    "submit": "Let AI process my journal →",
+    "autosaved": "Auto-saved",
+    "aiFollowup": "AI wants to know more",
+    "charCount": "{count} characters"
+  },
+  "review": {
+    "title": "AI Draft Review",
+    "fieldDaily": "Daily summary",
+    "fieldInsight": "Key insight",
+    "fieldReview": "Reflection",
+    "fieldPsych": "Positive psychology note",
+    "fieldNextSteps": "Next steps",
+    "fieldTags": "Tags",
+    "fieldScore": "Today's score",
+    "regenerate": "Regenerate",
+    "edit": "Edit",
+    "confirm": "Confirm · Generate HandLog →",
+    "saveDraft": "Save draft"
+  },
+  "handlog": {
+    "title": "Your HandLog is ready",
+    "downloadPng": "Download PNG",
+    "downloadPdf": "PDF (A5)",
+    "uploadNotion": "Upload to Notion",
+    "submitNotion": "Submit to Notion →",
+    "templateMinimal": "Minimal",
+    "templateCute": "Cute",
+    "templateRetro": "Retro"
+  },
+  "timeline": {
+    "title": "My HandLog Timeline",
+    "searchPlaceholder": "Search entries...",
+    "filterAll": "All"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "periodWeek": "Week",
+    "periodMonth": "Month",
+    "periodAll": "All",
+    "statDays": "Days logged",
+    "statScore": "Avg score",
+    "statAdopted": "Suggestions adopted",
+    "statHandlogs": "HandLogs created"
+  },
+  "settings": {
+    "title": "Settings",
+    "notionConnection": "Notion Connection",
+    "subDatabases": "Database Mapping",
+    "aiStyle": "AI Style",
+    "template": "HandLog Template",
+    "language": "Language",
+    "exportData": "Export Data",
+    "deleteAccount": "Delete Account",
+    "connected": "Connected",
+    "notConnected": "Not configured",
+    "reconnect": "Reconnect",
+    "disconnect": "Disconnect"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "loading": "Loading...",
+    "error": "Something went wrong, please retry"
+  }
+}
