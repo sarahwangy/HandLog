@@ -6,7 +6,24 @@
       "Bash(./node_modules/.bin/tsc --noEmit)",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(mkdir -p src/app/api/auth/[...nextauth])",
+      "Bash(mkdir -p \"src/app/api/auth/[...nextauth]\")",
+      "Bash(npm run *)",
+      "Bash(curl -s http://localhost:3000 -o /dev/null -w \"%{http_code}\")",
+      "Bash(node node_modules/next/dist/bin/next --version)",
+      "Bash(node node_modules/.bin/next --version)",
+      "Bash(curl -s http://localhost:3000/api/auth/providers -o /dev/null -w \"%{http_code}\")",
+      "Bash(kill %1)",
+      "Bash(npm run dev > /tmp/nextdev.log 2>&1 & *)",
+      "Read(//tmp/**)",
+      "Bash(curl -s http://localhost:3000/zh -o /dev/null -w \"%{http_code}\\\\n\")",
+      "Read(//private/tmp/**)",
+      "Bash(curl -s http://localhost:3000/zh)",
+      "Bash(pkill -f \"next dev\")"
+    ],
+    "additionalDirectories": [
+      "/Users/sha/Code/AI-code-26/weekly-journal-review/src/app/api/auth"
     ]
   }
 }
