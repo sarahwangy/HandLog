@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Providers } from "@/components/providers";
+import { Analytics } from "@vercel/analytics/react";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -29,6 +30,7 @@ export default function RootLayout({
     <html lang="zh" suppressHydrationWarning>
       <body className={cn(geistSans.variable, geistMono.variable, "antialiased")}>
         <Providers>{children}</Providers>
+        <Analytics />
       </body>
     </html>
   );
