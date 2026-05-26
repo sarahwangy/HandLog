@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAutosave } from "@/hooks/useAutosave";
+import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 
 interface CaptureFormProps {
   today: string;
@@ -12,6 +13,13 @@ export default function CaptureForm({ today, dateKey }: CaptureFormProps) {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
   const { status, saveNow } = useAutosave({ content: text, date: dateKey });
+
+  // 语音识别：每次收到一段转写文字，追加到 textarea（不覆盖已有内容）
+  const { status: micStatus, errorMessage: micError, isSupported: micSupported, start: startMic, stop: stopMic } =
+    useSpeechRecognition({
+      language: "en-US",
+      onTranscript: (chunk) => setText((prev) => prev ? `${prev} ${chunk}` : chunk),
+    });
 
   // 页面加载时从 KV 读取今天的草稿（如果有的话）
   useEffect(() => {
@@ -26,36 +34,57 @@ export default function CaptureForm({ today, dateKey }: CaptureFormProps) {
   const charCount = text.length;
 
   const saveLabel =
-    status === "saving" ? "保存中..." :
-    status === "saved"  ? "✓ 草稿已保存" :
-    status === "error"  ? "保存失败，请重试" :
-    charCount > 0       ? "等待保存..." : "";
+    status === "saving" ? "Saving..." :
+    status === "saved"  ? "✓ Draft saved" :
+    status === "error"  ? "Save failed, try again" :
+    charCount > 0       ? "Waiting to save..." : "";
 
   return (
     <div>
       {/* 标题区 */}
-      <h2 className="text-[#2C1F14] text-2xl mb-1" style={{ fontFamily: "Georgia, serif" }}>
-        今天过得怎么样？
+      <h2 className="text-[#2C1F14] text-2xl mb-1 font-serif">
+        How was your day?
       </h2>
-      <p className="text-[#8B6B4A] mb-6" style={{ fontFamily: "cursive" }}>
-        📅 {today} · 草稿自动保存
+      <p className="text-[#8B6B4A] mb-6 font-serif">
+        📅 {today} · Draft autosaves
       </p>
 
-      {/* 麦克风按钮区（T-306 语音输入，暂时只做 UI） */}
+      {/* 麦克风按钮区 */}
       <div className="bg-[#F5EFE4] rounded-2xl p-5 border border-[rgba(139,107,74,0.2)] mb-5 text-center">
-        <button className="w-[68px] h-[68px] rounded-full bg-[#2C1F14] flex items-center justify-center text-3xl mx-auto mb-3 shadow-lg hover:bg-[#4A3728] transition-colors">
+        <button
+          type="button"
+          onClick={micStatus === "recording" ? stopMic : startMic}
+          disabled={!micSupported}
+          className={`w-[68px] h-[68px] rounded-full flex items-center justify-center text-3xl mx-auto mb-3 shadow-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed
+            ${micStatus === "recording"
+              ? "bg-[#C4907A] animate-pulse"
+              : "bg-[#2C1F14] hover:bg-[#4A3728]"
+            }`}
+        >
           🎙
         </button>
-        <p className="text-sm text-[#8B6B4A]">点击录音</p>
-        <p className="text-xs text-[#8B6B4A] opacity-60 mt-1">
-          语音输入将在下个版本开放
-        </p>
+
+        {micStatus === "recording" ? (
+          <>
+            <p className="text-sm text-[#C4907A] font-medium">Recording... tap to stop</p>
+            <p className="text-xs text-[#8B6B4A] opacity-60 mt-1">Speak naturally, words appear below</p>
+          </>
+        ) : micError ? (
+          <p className="text-xs text-[#C4907A] mt-1">{micError}</p>
+        ) : !micSupported ? (
+          <p className="text-xs text-[#8B6B4A] opacity-60 mt-1">Voice not supported — use Chrome</p>
+        ) : (
+          <>
+            <p className="text-sm text-[#8B6B4A]">Tap to record</p>
+            <p className="text-xs text-[#8B6B4A] opacity-60 mt-1">Speak freely, AI will structure it</p>
+          </>
+        )}
       </div>
 
       {/* 文字输入框（T-303） */}
       <textarea
         className="w-full h-[220px] bg-white border border-[rgba(139,107,74,0.2)] rounded-xl p-4 text-sm leading-relaxed text-[#2C1F14] resize-none outline-none focus:border-[#8B6B4A] transition-colors font-serif disabled:opacity-50"
-        placeholder={loading ? "加载草稿中..." : "写写今天发生了什么，不用精简，越真实越好..."}
+        placeholder={loading ? "Loading draft..." : "Write about your day — no need to edit, the messier the better..."}
         value={text}
         onChange={(e) => setText(e.target.value)}
         onBlur={saveNow}
@@ -65,7 +94,7 @@ export default function CaptureForm({ today, dateKey }: CaptureFormProps) {
       {/* 字数统计 + 自动保存状态 */}
       <div className="flex justify-between items-center mt-2 mb-4">
         <span className="text-xs text-[#8B6B4A] opacity-60">
-          已输入 {charCount} 字
+          {charCount} characters
         </span>
         <span className={`text-xs ${status === "error" ? "text-[#C4907A]" : "text-[#7A8C6E]"}`}>
           {saveLabel}
@@ -77,11 +106,11 @@ export default function CaptureForm({ today, dateKey }: CaptureFormProps) {
         className="w-full bg-[#2C1F14] text-[#FAF6F0] rounded-xl py-4 text-base hover:bg-[#4A3728] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         disabled={charCount < 10}
       >
-        ✨ AI 开始整理复盘 →
+        ✨ Generate my review →
       </button>
       {charCount < 10 && charCount > 0 && (
         <p className="text-xs text-[#C4907A] text-center mt-2">
-          再多写一点（至少 10 字）
+          Write a bit more (at least 10 characters)
         </p>
       )}
     </div>

@@ -29,28 +29,17 @@ export default function CapturePage() {
 function CapturePanel() {
   return (
     <div className="space-y-5">
-      {/* 语言切换 */}
-      <div className="bg-[#F5EFE4] rounded-xl p-3 border border-[rgba(139,107,74,0.2)] flex gap-2 items-center">
-        <span className="text-xs text-[#8B6B4A]">语言：</span>
-        <button className="px-3 py-1 rounded-full text-xs bg-[#2C1F14] text-[#FAF6F0]">
-          中文
-        </button>
-        <button className="px-3 py-1 rounded-full text-xs text-[#8B6B4A]">
-          English
-        </button>
-      </div>
-
       {/* 输入提示 */}
       <div className="bg-[#F5EFE4] rounded-xl p-5 border border-[rgba(139,107,74,0.2)]">
-        <h4 className="text-[#8B6B4A] mb-3 text-base" style={{ fontFamily: "cursive" }}>
-          💡 输入小贴士
+        <h4 className="text-[#8B6B4A] mb-3 text-base font-serif">
+          💡 Writing tips
         </h4>
         <ul className="space-y-2">
           {[
-            "说人名，AI 会自动更新你的人物卡",
-            "提到孩子的成长，会自动记录月龄",
-            "提到身体不适，会记录到健康日志",
-            "不需要精简，越真实越好 🌱",
+            "Mention people by name — AI will note them",
+            "Talk about parenting moments — milestones get recorded",
+            "Mention health symptoms — logged automatically",
+            "No need to edit — the messier the better 🌱",
           ].map((tip) => (
             <li key={tip} className="text-xs text-[#8B6B4A] leading-relaxed pl-3 relative before:content-['·'] before:absolute before:left-0 before:text-[#C4907A]">
               {tip}
@@ -59,19 +48,19 @@ function CapturePanel() {
         </ul>
       </div>
 
-      {/* 近期草稿 */}
+      {/* Recent drafts */}
       <div className="bg-white rounded-xl p-5 border border-[rgba(139,107,74,0.2)] shadow-sm">
-        <div className="text-[#8B6B4A] mb-3 text-base" style={{ fontFamily: "cursive" }}>
-          📂 近期草稿
+        <div className="text-[#8B6B4A] mb-3 text-base font-serif">
+          📂 Recent drafts
         </div>
         <div className="text-xs text-[#2C1F14] py-2 border-b border-[rgba(139,107,74,0.1)]">
-          昨天 · 已提交 ✓
+          Yesterday · Submitted ✓
         </div>
         <div className="text-xs text-[#2C1F14] py-2 border-b border-[rgba(139,107,74,0.1)]">
-          前天 · 已提交 ✓
+          2 days ago · Submitted ✓
         </div>
         <div className="text-xs text-[#C4907A] py-2">
-          三天前 · 草稿未完成
+          3 days ago · Draft unfinished
         </div>
       </div>
     </div>

@@ -59,6 +59,7 @@ export function useAutosave({ content, date, delay = 3000 }: UseAutosaveOptions)
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content, date, delay]);
 
   // 失焦时立即保存（不等 3 秒）
