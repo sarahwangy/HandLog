@@ -164,3 +164,19 @@
   - `DCard` 组件的 `col-span-2` 需要在 `grid-cols-2` 父容器里才生效
 
 - **一句话总结：** 用 Recharts 把 Notion 日记数据可视化为折线图 + 饼图 + 统计卡片，开发环境用 mock 数据让图表始终可以预览。
+
+---
+
+### E7-fix — Dashboard 真实数据对接
+
+- **学到的核心概念：**
+  - 环境变量改了之后 Next.js dev server 必须完全重启才能读到新值（`pkill -9 -f next`）
+  - Notion Internal Integration token 格式是 `ntn_xxx`（新版），旧版是 `secret_xxx`，两者都有效
+  - 字段名里的空格也是字段名的一部分——`label 标签` 和 `label标签` 是两个不同的字段
+
+- **容易踩的坑：**
+  - `.env.local` 里变量名或值前后有空格会导致读不到（`NOTION_TOKEN =xxx` 读出来 key 是 `"NOTION_TOKEN "`）
+  - `transformNotionPages` 里 `if (!score) continue` 会过滤掉所有 score=0 的条目，Notion 里没填分数的也会被跳过
+  - 用 `created_time` 做日期不靠谱，批量导入或补填的记录创建时间都一样，要从标题解析真实日期
+
+- **一句话总结：** 对接真实 Notion 数据时，字段名、字段类型、日期来源都要和数据库实际结构一一核对，不能假设。
