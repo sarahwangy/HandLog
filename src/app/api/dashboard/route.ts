@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
 import { getNotionTokenInternal, getNotionDatabaseId } from "@/lib/auth";
-import { kv } from "@/lib/kv";
 import { queryDatabase } from "@/lib/notion";
 import { DEFAULT_FIELD_MAPPING } from "@/lib/notion-schema";
 import { transformNotionPages } from "@/lib/dashboard";
-
-const CACHE_TTL = 60 * 5; // 5 分钟缓存
 
 // GET /api/dashboard
 // 返回 DashboardData JSON，供前端图表使用
@@ -17,23 +14,14 @@ export async function GET() {
   }
 
   try {
-    // Internal Integration：从环境变量读 token 和 database ID
     const token = getNotionTokenInternal();
     const databaseId = getNotionDatabaseId();
 
-    // 有 KV 环境变量才启用缓存，没有则跳过（不报错）
-    const useKv = !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
-    if (useKv) {
-      const cacheKey = "dashboard:default";
-      const cached = await kv.get(cacheKey);
-      if (cached) return NextResponse.json(cached);
-    }
-
-    // 拉取最近 90 条记录
+    // 拉取全部周记录（最多 100 条，约 2 年数据）
     const response = await queryDatabase(token, {
       database_id: databaseId,
       sorts: [{ timestamp: "created_time", direction: "descending" }],
-      page_size: 90,
+      page_size: 100,
     });
 
     const data = transformNotionPages(response.results, {
@@ -43,9 +31,6 @@ export async function GET() {
       insight: DEFAULT_FIELD_MAPPING.insight,
     });
 
-    if (useKv) {
-      await kv.set("dashboard:default", data, { ex: CACHE_TTL }).catch(() => {});
-    }
     return NextResponse.json(data);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
