@@ -38,7 +38,7 @@ export interface NotionUserSchema {
 export const DEFAULT_FIELD_MAPPING: JournalFieldMapping = {
   name: "Name",
   dailySummary: "简短日常",
-  labels: "label 标签",
+  labels: "label标签",
   score: "打分",
   insight: "一句话感悟",
   review: "复盘",

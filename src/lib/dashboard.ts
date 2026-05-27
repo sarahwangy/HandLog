@@ -46,8 +46,10 @@ export function transformNotionPages(pages: any[], fieldMapping: {
     const insightArr = props[fieldMapping.insight]?.rich_text ?? [];
     const insight: string = insightArr[0]?.plain_text ?? "";
 
-    // 从 page.created_time 或 rawName 解析日期
-    const date = page.created_time?.slice(0, 10) ?? rawName;
+    // 从标题解析日期，格式如 "5-4-10" → 2026-05-04
+    // 标题不符合格式（如"4月"月复盘页）直接跳过
+    const date = parseTitleDate(rawName);
+    if (!date) continue;
 
     entries.push({ date, score, labels, insight });
   }
@@ -88,19 +90,31 @@ export function transformNotionPages(pages: any[], fieldMapping: {
   };
 }
 
-// 计算连续写日记天数（从今天往前数）
+// 从标题解析周开始日期
+// "5-4-10" → "2026-05-04"，"4-28-5-4" → "2026-04-28"
+function parseTitleDate(title: string): string | null {
+  const parts = title.trim().split("-");
+  if (parts.length < 2) return null;
+  const month = parseInt(parts[0]);
+  const day = parseInt(parts[1]);
+  if (isNaN(month) || isNaN(day)) return null;
+  return `2026-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+// 计算连续写日记的周数（每条记录代表一周，按7天间隔往前数）
 function calcStreak(dates: string[]): number {
-  const dateSet = new Set(dates);
-  let streak = 0;
-  const today = new Date();
-  for (let i = 0; i < 365; i++) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - i);
-    const key = d.toISOString().slice(0, 10);
-    if (dateSet.has(key)) {
+  if (!dates.length) return 0;
+  const sorted = [...dates].sort((a, b) => b.localeCompare(a)); // 降序
+  let streak = 1;
+  for (let i = 1; i < sorted.length; i++) {
+    const prev = new Date(sorted[i - 1]);
+    const curr = new Date(sorted[i]);
+    const diffDays = Math.round((prev.getTime() - curr.getTime()) / (1000 * 60 * 60 * 24));
+    // 两条记录间隔在 5-9 天内，认为是连续的两周
+    if (diffDays >= 5 && diffDays <= 9) {
       streak++;
-    } else if (i > 0) {
-      break; // 中断就停
+    } else {
+      break;
     }
   }
   return streak;
