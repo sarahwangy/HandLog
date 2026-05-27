@@ -21,8 +21,8 @@ export async function GET() {
     const token = getNotionTokenInternal();
     const databaseId = getNotionDatabaseId();
 
-    // 生产环境查 KV 缓存；本地开发没有 KV 直接跳过
-    const useKv = process.env.NODE_ENV !== "development";
+    // 有 KV 环境变量才启用缓存，没有则跳过（不报错）
+    const useKv = !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
     if (useKv) {
       const cacheKey = "dashboard:default";
       const cached = await kv.get(cacheKey);
@@ -44,7 +44,7 @@ export async function GET() {
     });
 
     if (useKv) {
-      await kv.set("dashboard:default", data, { ex: CACHE_TTL });
+      await kv.set("dashboard:default", data, { ex: CACHE_TTL }).catch(() => {});
     }
     return NextResponse.json(data);
   } catch (err) {

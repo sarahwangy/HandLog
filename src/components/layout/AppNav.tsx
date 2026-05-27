@@ -16,6 +16,7 @@ export default function AppNav() {
   const navItems = [
     { label: "Capture",   href: `/${locale}/capture` },
     { label: "Review",    href: `/${locale}/review` },
+    { label: "Timeline",  href: `/${locale}/timeline` },
     { label: "Dashboard", href: `/${locale}/dashboard` },
   ];
 
