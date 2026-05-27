@@ -1,43 +1,74 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAuthSession } from "@/lib/auth";
-import { renderHandLog } from "@/lib/handlog/render";
-import type { HandLogStyle } from "@/lib/handlog/templates";
+import OpenAI from "openai";
+import { getNotionTokenInternal } from "@/lib/auth";
+import { appendImageBlock } from "@/lib/notion";
 import type { DailyReview } from "@/lib/claude";
 
 // POST /api/handlog/generate
-// Body: { review: DailyReview, style: "minimal" | "cute" | "vintage" }
-// Returns: PNG image (image/png)
+// Body: { review: DailyReview, calloutId?: string }
+// Returns: { imageUrl: string }
+// 日复盘图存入当天 Toggle 的 Callout 里（block 形式）
 export async function POST(req: NextRequest) {
-  // 开发环境跳过鉴权，方便本地测试
-  if (process.env.NODE_ENV !== "development") {
-    const session = await getAuthSession();
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-  }
-
-  const body = await req.json() as { review: DailyReview; style?: HandLogStyle };
+  const body = await req.json() as { review: DailyReview; calloutId?: string };
   if (!body.review) {
     return NextResponse.json({ error: "Missing review data" }, { status: 400 });
   }
 
-  const style: HandLogStyle = body.style ?? "minimal";
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    return NextResponse.json({ error: "OPENAI_API_KEY not set" }, { status: 500 });
+  }
+
+  const openai = new OpenAI({ apiKey });
+  const { review, calloutId } = body;
 
   try {
-    const png = await renderHandLog(body.review, style);
-
-    // 返回 PNG 二进制，前端可以直接用 URL.createObjectURL 显示
-    return new NextResponse(png.buffer as ArrayBuffer, {
-      status: 200,
-      headers: {
-        "Content-Type": "image/png",
-        "Content-Length": String(png.length),
-        // 不缓存，每次都是新图片
-        "Cache-Control": "no-store",
-      },
+    const res = await openai.images.generate({
+      model: "gpt-image-1",
+      prompt: buildPrompt(review),
+      n: 1,
+      size: "1024x1024",
     });
+
+    const imageUrl = res.data?.[0]?.url;
+    if (!imageUrl) throw new Error("No image URL returned");
+
+    // 把图片追加到当天 Toggle 的 Callout 里
+    if (calloutId) {
+      try {
+        const token = getNotionTokenInternal();
+        await appendImageBlock(token, calloutId, imageUrl);
+      } catch (notionErr) {
+        console.error("Failed to save image to Notion:", notionErr);
+      }
+    }
+
+    return NextResponse.json({ imageUrl });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Render failed";
+    const message = err instanceof Error ? err.message : "Generation failed";
     return NextResponse.json({ error: message }, { status: 500 });
   }
+}
+
+function buildPrompt(review: DailyReview): string {
+  const parts: string[] = [
+    "A beautiful Japanese hobonichi techo journal spread illustration.",
+    "Warm autumn palette: amber, cream, terracotta, soft brown.",
+    "Handwritten-style doodles, washi tape, stamps, dried flowers.",
+    "Soft watercolor textures. Cozy personal diary aesthetic.",
+  ];
+
+  if (review.oneLineInsight) {
+    parts.push(`Central theme: "${review.oneLineInsight}"`);
+  }
+  if (review.places?.length) {
+    parts.push(`Places visited: ${review.places.slice(0, 2).join(", ")}.`);
+  }
+  if (review.score) {
+    const mood = review.score >= 8 ? "joyful and bright" : review.score >= 6 ? "calm and reflective" : "gentle and introspective";
+    parts.push(`Overall mood: ${mood}.`);
+  }
+
+  parts.push("No text or words in the image. Illustration only.");
+  return parts.join(" ");
 }

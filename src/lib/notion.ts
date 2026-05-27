@@ -458,6 +458,26 @@ export async function createJournalEntry(
   );
 }
 
+// 把 DALL-E 3 生成的图片 URL 追加到指定 block（callout）里
+export async function appendImageBlock(
+  accessToken: string,
+  blockId: string,
+  imageUrl: string
+): Promise<void> {
+  const notion = createNotionClient(accessToken);
+  await withAuthCheck(() =>
+    notion.blocks.children.append({
+      block_id: blockId,
+      children: [
+        {
+          type: "image",
+          image: { type: "external", external: { url: imageUrl } },
+        } as AppendBlockChildrenParameters["children"][0],
+      ],
+    })
+  );
+}
+
 // 追加内容到页面（用于给人物卡的"关键信息"字段追加新事件）
 export async function appendBlocks(
   accessToken: string,

@@ -41,18 +41,19 @@ export async function POST(req: NextRequest) {
     const review = await generateDailyReview(journal, date);
 
     // 写入 Notion：找到/创建本周页面，追加简短日常 + 复盘 Toggle
+    let calloutId: string | undefined;
     try {
       const token = getNotionTokenInternal();
       const databaseId = getNotionDatabaseId();
       const pageId = await findOrCreateWeekPage(token, databaseId, date);
       await appendDailySummary(token, pageId, date, journal);
-      // 传入完整 review，所有非空 section 都会写入 Notion
-      await appendReviewBlocks(token, pageId, date, review);
+      // appendReviewBlocks 返回 calloutId，供后续把日复盘图存入同一个 Toggle
+      calloutId = await appendReviewBlocks(token, pageId, date, review);
     } catch (notionErr) {
       console.error("Notion write failed:", notionErr);
     }
 
-    return NextResponse.json(review);
+    return NextResponse.json({ ...review, calloutId });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json({ error: message }, { status: 500 });

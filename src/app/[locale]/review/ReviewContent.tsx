@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import type { DailyReview } from "@/lib/claude";
-import type { HandLogStyle } from "@/lib/handlog/templates";
 
 interface ReviewContentProps {
   dateKey: string;
@@ -10,9 +9,9 @@ interface ReviewContentProps {
 
 export default function ReviewContent({ dateKey }: ReviewContentProps) {
   const [review, setReview] = useState<DailyReview | null>(null);
+  const [calloutId, setCalloutId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [imgStyle, setImgStyle] = useState<HandLogStyle>("minimal");
   const [imgUrl, setImgUrl] = useState<string | null>(null);
   const [imgLoading, setImgLoading] = useState(false);
 
@@ -20,7 +19,9 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
   useEffect(() => {
     const pending = sessionStorage.getItem("pendingReview");
     if (pending) {
-      setReview(JSON.parse(pending));
+      const parsed = JSON.parse(pending);
+      setReview(parsed);
+      if (parsed.calloutId) setCalloutId(parsed.calloutId);
       sessionStorage.removeItem("pendingReview");
     }
   }, []);
@@ -198,7 +199,7 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
           <Label en="🖼 HandLog Image" zh="手账图" />
           <HandLogSection
             review={review}
-            style={imgStyle} setStyle={setImgStyle}
+            calloutId={calloutId}
             imgUrl={imgUrl} setImgUrl={setImgUrl}
             loading={imgLoading} setLoading={setImgLoading}
           />
@@ -257,74 +258,51 @@ function TagList({ items }: { items: string[] }) {
 
 interface HandLogSectionProps {
   review: DailyReview;
-  style: HandLogStyle; setStyle: (s: HandLogStyle) => void;
+  calloutId: string | null;
   imgUrl: string | null; setImgUrl: (u: string | null) => void;
   loading: boolean; setLoading: (v: boolean) => void;
 }
 
-function HandLogSection({ review, style, setStyle, imgUrl, setImgUrl, loading, setLoading }: HandLogSectionProps) {
+function HandLogSection({ review, calloutId, imgUrl, setImgUrl, loading, setLoading }: HandLogSectionProps) {
   const [error, setError] = useState<string | null>(null);
 
-  const STYLES: { value: HandLogStyle; label: string; emoji: string }[] = [
-    { value: "minimal", label: "Minimal", emoji: "🪶" },
-    { value: "cute",    label: "Cute",    emoji: "🌸" },
-    { value: "vintage", label: "Vintage", emoji: "📜" },
-  ];
-
-  const generate = async (s: HandLogStyle) => {
-    setLoading(true); setError(null);
-    if (imgUrl) URL.revokeObjectURL(imgUrl);
-    setImgUrl(null);
+  const generate = async () => {
+    setLoading(true); setError(null); setImgUrl(null);
     try {
       const res = await fetch("/api/handlog/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ review, style: s }),
+        body: JSON.stringify({ review, calloutId }),
       });
       if (!res.ok) { const d = await res.json(); throw new Error(d.error ?? "Generation failed"); }
-      setImgUrl(URL.createObjectURL(await res.blob()));
+      const data = await res.json();
+      setImgUrl(data.imageUrl);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally { setLoading(false); }
   };
 
-  const handleStyleChange = (s: HandLogStyle) => {
-    setStyle(s);
-    if (imgUrl || loading) generate(s);
-  };
-
   return (
     <div>
-      {/* Style tabs */}
-      <div className="flex gap-2 mb-4">
-        {STYLES.map((s) => (
-          <button key={s.value} type="button" onClick={() => handleStyleChange(s.value)}
-            className={`flex-1 h-[40px] rounded-[8px] text-[13px] font-medium transition-colors border
-              ${style === s.value ? "bg-[#2C1F14] text-white border-[#2C1F14]" : "bg-white text-[#8B6B4A] border-[#E4D4C0] hover:border-[#C4A98A] hover:text-[#2C1F14]"}`}>
-            {s.emoji} {s.label}
-          </button>
-        ))}
-      </div>
-
       {imgUrl ? (
         <div className="space-y-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={imgUrl} alt="HandLog" className="w-full rounded-[14px] border border-[#E4D4C0]" />
           <div className="flex gap-2">
-            <button type="button" onClick={() => { const a = document.createElement("a"); a.href = imgUrl; a.download = `handlog-${review.date}.png`; a.click(); }}
+            <button type="button" onClick={() => window.open(imgUrl, "_blank")}
               className="flex-1 h-[44px] bg-white text-[#2C1F14] border border-[#C4A98A] rounded-[8px] text-[14px] font-medium hover:bg-[#FAF5EE] transition-colors">
-              ⬇ Download PNG
+              ⬇ Open full size
             </button>
-            <button type="button" onClick={() => generate(style)} disabled={loading}
+            <button type="button" onClick={generate} disabled={loading}
               className="flex-1 h-[44px] bg-[#C4783A] text-white rounded-[8px] text-[14px] font-medium hover:bg-[#A85E28] transition-colors disabled:opacity-50">
               {loading ? "Generating..." : "↺ Regenerate"}
             </button>
           </div>
         </div>
       ) : (
-        <button type="button" onClick={() => generate(style)} disabled={loading}
+        <button type="button" onClick={generate} disabled={loading}
           className="w-full h-[48px] bg-[#C4783A] text-white rounded-[8px] text-[15px] font-medium hover:bg-[#A85E28] transition-colors disabled:bg-[#EDD4BC] disabled:cursor-not-allowed">
-          {loading ? "Generating..." : "✨ Generate HandLog image →"}
+          {loading ? "Generating... (this takes ~20s)" : "✨ Generate HandLog image →"}
         </button>
       )}
       {error && <p className="text-[#C4783A] mt-3 text-[13px]">{error}</p>}

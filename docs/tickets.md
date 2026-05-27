@@ -88,30 +88,43 @@
 
 ---
 
-## E12 — AI 生成手账图（DALL-E 3）
+## ✅ E12 — AI 生成日复盘手账图（已完成）
 
-**目标：** 用 OpenAI DALL-E 3 根据复盘内容生成手账风格图片，存入 Notion 页面。
+**模型：** `gpt-image-1`（OpenAI 最新图像模型）
 
-**费用：** ~$0.04/张，你已有 OpenAI API key。
+### 图片存储规则（三层结构）
 
-### 实现思路
-
-1. Review 页点击「生成手账图」→ 调用 `/api/handlog/generate`
-2. 用复盘内容构建 prompt（秋天暖色调、手账本风格、日文文字感）
-3. 调用 `openai.images.generate({ model: "dall-e-3", ... })` 得到图片 URL
-4. 把图片 URL 追加到 Notion 本周页面的对应 Toggle 里（image block）
-5. Review 页显示生成的图片
-
-### 涉及文件
-
-- `src/app/api/handlog/generate/route.ts` — 改为调用 DALL-E 3
-- `src/lib/notion.ts` — 加 `appendImageBlock()` 函数
+| 复盘类型 | 图片存在哪里 | 形式 |
+|---------|------------|------|
+| **日复盘图** | 当天 Toggle 的 Callout 里 | image block |
+| **周复盘图** | 那一周行的「手绘复盘图」属性 | Files & media 属性 |
+| **月复盘图** | 「复盘-汇总」行的页面 body 里 | Toggle（标题写"X月X日-X月X日复盘"） |
 
 ---
 
-## 待做顺序建议
+## E13 — 周复盘
 
-1. **E9** — 部署 Vercel（先上线）
-2. **E11** — 时间轴（核心体验）
-3. **E10** — Dashboard 词云
-4. **E12** — AI 手账图
+**目标：** 每周结束时，汇总本周7天内容，生成周复盘 + AI 图片。
+
+### 存储
+- 复盘文字：写入本周 Notion 页面 body（Toggle 形式，标题"本周复盘"）
+- 复盘图片：更新本周行的「手绘复盘图」属性（Files & media）
+
+---
+
+## E14 — 月复盘
+
+**目标：** 每月结束时，汇总本月所有周记录，生成月复盘 + AI 图片。
+
+### 存储
+- 在 Notion 数据库里找到「复盘-汇总」那一行
+- 在该页面 body 里追加一个 Toggle，标题格式：`5月1日-5月31日复盘`
+- Toggle 里写入月复盘内容 + AI 生成图片（image block）
+
+---
+
+## 待做顺序
+
+1. **E10** — Dashboard 词云
+2. **E13** — 周复盘
+3. **E14** — 月复盘
