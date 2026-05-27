@@ -105,8 +105,23 @@ export async function getAuthSession() {
 }
 
 // ── 工具函数：从 KV 获取用户的 Notion access token（解密后返回明文）──
+// OAuth 多用户模式下使用
 export async function getNotionToken(userId: string): Promise<string | null> {
   const encrypted = await kv.get<string>(`notion_token:${userId}`);
   if (!encrypted) return null;
-  return decrypt(encrypted); // 读出来后解密，返回可直接使用的明文 token
+  return decrypt(encrypted);
+}
+
+// ── Internal Integration 模式：直接从环境变量读 token ──
+// 个人使用时用这个，不需要 OAuth 和 KV
+export function getNotionTokenInternal(): string {
+  const token = process.env.NOTION_TOKEN;
+  if (!token) throw new Error("NOTION_TOKEN is not set in environment variables");
+  return token;
+}
+
+export function getNotionDatabaseId(): string {
+  const id = process.env.NOTION_DATABASE_ID;
+  if (!id) throw new Error("NOTION_DATABASE_ID is not set in environment variables");
+  return id;
 }

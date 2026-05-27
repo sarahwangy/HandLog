@@ -140,3 +140,27 @@
   - `NextResponse` 接受 `ArrayBuffer` 不接受 `Buffer`，需要转换
 
 - 一句话总结：用 Satori 把 React 组件渲染成 PNG，关键是字体必须是 TTF，native 包要排除出 webpack。
+
+---
+
+### E7 — Dashboard 数据可视化
+
+- **学到的核心概念：**
+  - **Recharts**：React 图表库，基于 SVG，通过 JSX 组合 `LineChart`、`PieChart`、`XAxis`、`YAxis` 等组件来构建图表——行业里非常常用的选择
+  - **ResponsiveContainer**：包裹 Recharts 图表，让图表自适应父容器宽度，不需要写死 `width`
+  - **数据转换层**（`src/lib/dashboard.ts`）：把 Notion 原始页面数组转成前端图表需要的结构（scoreTrend、labelFrequency 等）——这是行业常见的"适配器模式"
+  - **Vercel KV 缓存**：`kv.set(key, data, { ex: 300 })` 缓存 5 分钟，减少对 Notion API 的请求频率
+  - **开发环境 mock 数据**：`NODE_ENV === "development"` 时返回伪造数据，让 UI 可以在没有 Notion 连接的情况下正常渲染
+
+- **用到的关键 API/函数：**
+  - `<LineChart data={...}>` + `<Line dataKey="score">` 渲染折线图
+  - `<PieChart>` + `<Pie dataKey="count" innerRadius={40}>` 渲染甜甜圈图
+  - `<Tooltip formatter={(v) => ...} labelFormatter={(d) => ...}` 自定义 tooltip 格式
+  - `kv.get(key)` / `kv.set(key, value, { ex: ttl })` — Vercel KV 读写
+
+- **容易踩的坑：**
+  - Recharts Tooltip 的 `formatter` 和 `labelFormatter` prop 的 TypeScript 类型较复杂，需要用 `any` 绕过，否则 `undefined` 不能赋给 `number`
+  - `kv.get()` 在没有 `KV_REST_API_URL` 环境变量时会直接抛错，必须在代码里先判断 `NODE_ENV === "development"` 再调用 KV，不能在 KV 调用之后才 return mock 数据
+  - `DCard` 组件的 `col-span-2` 需要在 `grid-cols-2` 父容器里才生效
+
+- **一句话总结：** 用 Recharts 把 Notion 日记数据可视化为折线图 + 饼图 + 统计卡片，开发环境用 mock 数据让图表始终可以预览。
