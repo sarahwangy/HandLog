@@ -35,12 +35,37 @@ export default function CaptureForm({ today, dateKey }: CaptureFormProps) {
       .finally(() => setLoading(false));
   }, [dateKey]);
 
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const charCount = text.length;
 
+  async function handleGenerate() {
+    if (charCount < 10 || submitting) return;
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      const res = await fetch("/api/process", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date: dateKey, journal: text }),
+      });
+      const review = await res.json();
+      if (!res.ok) throw new Error(review.error ?? "Unknown error");
+      // 把复盘结果存到 sessionStorage，Review 页面从这里读
+      sessionStorage.setItem("pendingReview", JSON.stringify(review));
+      router.push(`/${locale}/review`);
+    } catch (e) {
+      setSubmitError(e instanceof Error ? e.message : "Failed to generate review");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  // KV 不可用时（本地开发）不显示 Save failed，避免误导用户
   const saveLabel =
     status === "saving" ? "Saving..." :
     status === "saved"  ? "✓ Draft saved" :
-    status === "error"  ? "Save failed" :
+    status === "error"  ? "" :
     charCount > 0       ? "Waiting to save..." : "";
 
   return (
@@ -111,17 +136,30 @@ export default function CaptureForm({ today, dateKey }: CaptureFormProps) {
       {/* 提交按钮 */}
       <button
         type="button"
-        onClick={() => { saveNow(); router.push(`/${locale}/review`); }}
+        onClick={handleGenerate}
         className="w-full h-[48px] bg-[#C4783A] text-white rounded-[8px] text-[15px] font-medium hover:bg-[#A85E28] transition-colors disabled:bg-[#EDD4BC] disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        disabled={charCount < 10}
+        disabled={charCount < 10 || submitting}
       >
-        ✨ Generate my review →
+        {submitting ? (
+          <span className="flex items-center gap-3">
+            <span className="animate-star text-[18px]">⭐</span>
+            <span className="flex gap-[2px]">
+              <span className="animate-dino-1 text-[18px]">🦕</span>
+              <span className="animate-dino-2 text-[18px]">🦕</span>
+              <span className="animate-dino-3 text-[18px]">🦕</span>
+            </span>
+            <span className="text-[15px]">Generating...</span>
+          </span>
+        ) : "✨ Generate my review →"}
       </button>
 
       {charCount < 10 && charCount > 0 && (
         <p className="text-[13px] text-[#C4783A] text-center mt-2">
           Write a bit more (at least 10 characters)
         </p>
+      )}
+      {submitError && (
+        <p className="text-[13px] text-[#C4783A] text-center mt-2">{submitError}</p>
       )}
     </div>
   );

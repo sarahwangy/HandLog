@@ -10,8 +10,9 @@ const CACHE_TTL = 60 * 5; // 5 分钟缓存
 // GET /api/dashboard
 // 返回 DashboardData JSON，供前端图表使用
 export async function GET() {
-  // 开发环境直接返回 mock 数据（没有 KV / Notion）
-  if (process.env.NODE_ENV === "development") {
+  // 开发环境默认返回 mock 数据
+  // 设置 NOTION_REAL_DATA=true 可强制读取真实 Notion 数据
+  if (process.env.NODE_ENV === "development" && process.env.NOTION_REAL_DATA !== "true") {
     return NextResponse.json(buildMockData());
   }
 
@@ -20,10 +21,13 @@ export async function GET() {
     const token = getNotionTokenInternal();
     const databaseId = getNotionDatabaseId();
 
-    // 先查 KV 缓存，减少对 Notion API 的请求次数
-    const cacheKey = "dashboard:default";
-    const cached = await kv.get(cacheKey);
-    if (cached) return NextResponse.json(cached);
+    // 生产环境查 KV 缓存；本地开发没有 KV 直接跳过
+    const useKv = process.env.NODE_ENV !== "development";
+    if (useKv) {
+      const cacheKey = "dashboard:default";
+      const cached = await kv.get(cacheKey);
+      if (cached) return NextResponse.json(cached);
+    }
 
     // 拉取最近 90 条记录
     const response = await queryDatabase(token, {
@@ -39,7 +43,9 @@ export async function GET() {
       insight: DEFAULT_FIELD_MAPPING.insight,
     });
 
-    await kv.set(cacheKey, data, { ex: CACHE_TTL });
+    if (useKv) {
+      await kv.set("dashboard:default", data, { ex: CACHE_TTL });
+    }
     return NextResponse.json(data);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";

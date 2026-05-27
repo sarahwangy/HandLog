@@ -33,7 +33,7 @@ function ScoreDots({ score }: { score: number }) {
 export function MinimalTemplate({ review }: { review: DailyReview }) {
   const topKeywords = [
     ...review.people.slice(0, 2),
-    ...review.events.slice(0, 2),
+    ...review.events.flatMap(g => g.items).slice(0, 2),
     ...review.learning.slice(0, 1),
   ].slice(0, 4);
 

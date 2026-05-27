@@ -6,9 +6,10 @@ import { join } from "path";
 export interface DailyReview {
   date: string;
   oneLineInsight: string;
+  oneLineInsightZh: string;
   people: string[];
   places: string[];
-  events: string[];
+  events: { category: string; items: string[] }[];
   books: string[];
   mediaConsumed: string[];
   moviesTV: string[];
@@ -53,7 +54,7 @@ export async function generateDailyReview(
 
   const message = await client.messages.create({
     model: "claude-sonnet-4-6",
-    max_tokens: 2048,
+    max_tokens: 4096,
     messages: [{ role: "user", content: prompt }],
   });
 
@@ -69,6 +70,6 @@ export async function generateDailyReview(
   try {
     return JSON.parse(raw) as DailyReview;
   } catch {
-    throw new Error(`Failed to parse Claude response as JSON: ${raw.slice(0, 200)}`);
+    throw new Error(`Failed to parse Claude response as JSON: ${raw.slice(0, 500)}`);
   }
 }

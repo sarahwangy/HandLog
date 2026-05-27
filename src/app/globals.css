@@ -73,3 +73,26 @@ body {
     text-wrap: balance;
   }
 }
+
+/* ⭐ 星星跳动 */
+@keyframes star-jump {
+  0%, 100% { transform: translateY(0) scale(1); }
+  40%       { transform: translateY(-14px) scale(1.2); }
+  70%       { transform: translateY(-6px) scale(0.95); }
+}
+
+/* 🦕 恐龙奔跑追星 */
+@keyframes dino-run {
+  0%, 100% { transform: translateY(0) scaleX(1); }
+  30%       { transform: translateY(-6px) scaleX(1.05); }
+  60%       { transform: translateY(-2px) scaleX(0.97); }
+}
+
+.animate-star {
+  display: inline-block;
+  animation: star-jump 0.6s ease-in-out infinite;
+}
+
+.animate-dino-1 { display: inline-block; animation: dino-run 0.6s ease-in-out infinite; animation-delay: 0.08s; }
+.animate-dino-2 { display: inline-block; animation: dino-run 0.6s ease-in-out infinite; animation-delay: 0.18s; }
+.animate-dino-3 { display: inline-block; animation: dino-run 0.6s ease-in-out infinite; animation-delay: 0.28s; }

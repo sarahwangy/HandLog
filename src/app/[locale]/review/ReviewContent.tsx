@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { DailyReview } from "@/lib/claude";
 import type { HandLogStyle } from "@/lib/handlog/templates";
 
@@ -15,6 +15,15 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
   const [imgStyle, setImgStyle] = useState<HandLogStyle>("minimal");
   const [imgUrl, setImgUrl] = useState<string | null>(null);
   const [imgLoading, setImgLoading] = useState(false);
+
+  // 页面加载时先检查 sessionStorage 里有没有从 Capture 页传来的复盘结果
+  useEffect(() => {
+    const pending = sessionStorage.getItem("pendingReview");
+    if (pending) {
+      setReview(JSON.parse(pending));
+      sessionStorage.removeItem("pendingReview");
+    }
+  }, []);
 
   const generate = async () => {
     setLoading(true);
@@ -66,29 +75,48 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
 
         {/* One-line insight — full width, warm bg */}
         <RCard full warm>
-          <Label>💡 One-line insight</Label>
+          <Label en="💡 One-line insight" zh="一句话感悟" />
           <p className="text-[20px] font-semibold text-[#2C1F14] italic leading-relaxed">
             &ldquo;{review.oneLineInsight}&rdquo;
           </p>
+          {review.oneLineInsightZh && (
+            <p className="text-[14px] text-[#A88060] mt-2 leading-relaxed">「{review.oneLineInsightZh}」</p>
+          )}
         </RCard>
 
         {/* Dynamic tag sections */}
-        {review.people.length > 0 && <RCard><Label>👥 People</Label><TagList items={review.people} /></RCard>}
-        {review.emotions.length > 0 && <RCard><Label>🌊 Emotions</Label><TagList items={review.emotions} /></RCard>}
-        {review.events.length > 0 && <RCard><Label>📅 Events</Label><TagList items={review.events} /></RCard>}
-        {review.learning.length > 0 && <RCard><Label>🧠 Learning</Label><TagList items={review.learning} /></RCard>}
-        {review.health.length > 0 && <RCard><Label>💪 Health & Body</Label><TagList items={review.health} /></RCard>}
-        {review.places.length > 0 && <RCard><Label>📍 Places</Label><TagList items={review.places} /></RCard>}
-        {review.books.length > 0 && <RCard><Label>📚 Books</Label><TagList items={review.books} /></RCard>}
-        {review.mediaConsumed.length > 0 && <RCard><Label>🎙 Podcasts & Articles</Label><TagList items={review.mediaConsumed} /></RCard>}
-        {review.moviesTV.length > 0 && <RCard><Label>🎬 Movies & TV</Label><TagList items={review.moviesTV} /></RCard>}
-        {review.parenting.length > 0 && <RCard><Label>👶 Parenting</Label><TagList items={review.parenting} /></RCard>}
-        {review.finance.length > 0 && <RCard><Label>💰 Finance</Label><TagList items={review.finance} /></RCard>}
-        {review.creativeOutput.length > 0 && <RCard><Label>✍️ Creative Output</Label><TagList items={review.creativeOutput} /></RCard>}
+        {review.people.length > 0 && <RCard><Label en="👥 People" zh="人物" /><TagList items={review.people} /></RCard>}
+        {review.emotions.length > 0 && <RCard><Label en="🌊 Emotions" zh="情绪 · 标签" /><TagList items={review.emotions} /></RCard>}
+        {review.events.length > 0 && (
+          <RCard>
+            <Label en="📅 Events" zh="今日事件" />
+            <div className="space-y-3">
+              {review.events.map((group, i) => (
+                <div key={i}>
+                  <p className="text-[11px] font-semibold text-[#C4783A] uppercase tracking-[0.4px] mb-[6px]">{group.category}</p>
+                  <div className="flex flex-wrap gap-[6px]">
+                    {group.items.map((item, j) => (
+                      <span key={j} className="bg-[#FDF0E6] border border-[#E4D4C0] rounded-full px-3 py-1 text-[13px] text-[#4A3324]">{item}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </RCard>
+        )}
+        {review.learning.length > 0 && <RCard><Label en="🧠 Learning" zh="学到的" /><TagList items={review.learning} /></RCard>}
+        {review.health.length > 0 && <RCard><Label en="💪 Health & Body" zh="健康 · 身体" /><TagList items={review.health} /></RCard>}
+        {review.places.length > 0 && <RCard><Label en="📍 Places" zh="去了哪里" /><TagList items={review.places} /></RCard>}
+        {review.books.length > 0 && <RCard><Label en="📚 Books" zh="在读的书" /><TagList items={review.books} /></RCard>}
+        {review.mediaConsumed.length > 0 && <RCard><Label en="🎙 Podcasts & Articles" zh="播客 · 文章" /><TagList items={review.mediaConsumed} /></RCard>}
+        {review.moviesTV.length > 0 && <RCard><Label en="🎬 Movies & TV" zh="影视" /><TagList items={review.moviesTV} /></RCard>}
+        {review.parenting.length > 0 && <RCard><Label en="👶 Parenting" zh="育儿" /><TagList items={review.parenting} /></RCard>}
+        {review.finance.length > 0 && <RCard><Label en="💰 Finance" zh="理财 · 消费" /><TagList items={review.finance} /></RCard>}
+        {review.creativeOutput.length > 0 && <RCard><Label en="✍️ Creative Output" zh="创作输出" /><TagList items={review.creativeOutput} /></RCard>}
 
         {/* Score */}
         <RCard>
-          <Label>⭐ Score</Label>
+          <Label en="⭐ Score" zh="今日评分" />
           <div className="text-[52px] font-bold text-[#2C1F14] leading-none">{review.score}</div>
           <div className="text-[13px] text-[#8B6B4A] mt-1">/10 · {review.scoreReason}</div>
           <div className="flex gap-[5px] mt-3">
@@ -101,7 +129,7 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
         {/* Energy distribution */}
         {Object.keys(review.energyDistribution).length > 0 && (
           <RCard>
-            <Label>⚡ Energy distribution</Label>
+            <Label en="⚡ Energy distribution" zh="精力分布" />
             <div className="space-y-[10px]">
               {Object.entries(review.energyDistribution).map(([label, pct]) => (
                 <div key={label}>
@@ -121,7 +149,7 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
         {/* Progress zones */}
         {(review.progressZones.breakthrough || review.progressZones.inPractice || review.progressZones.plantedSeed) && (
           <RCard>
-            <Label>🌱 Progress zones</Label>
+            <Label en="🌱 Progress zones" zh="成长区域" />
             <div className="space-y-[10px]">
               {review.progressZones.breakthrough && (
                 <p className="text-[14px] text-[#4A3324]">🟢 <strong className="text-[#2C1F14]">Breakthrough:</strong> {review.progressZones.breakthrough}</p>
@@ -139,7 +167,7 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
         {/* Next steps — full width */}
         {review.nextSteps.length > 0 && (
           <RCard full>
-            <Label>🎯 Next steps</Label>
+            <Label en="🎯 Next steps" zh="下一步行动" />
             <div className="divide-y divide-[#EDE3D8]">
               {review.nextSteps.map((step, i) => (
                 <div key={i} className="flex items-start gap-3 py-[9px]">
@@ -153,21 +181,21 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
 
         {/* Review paragraph — full width */}
         <RCard full>
-          <Label>🪞 Today&apos;s reflection</Label>
+          <Label en="🪞 Today's reflection" zh="复盘" />
           <p className="text-[15px] text-[#4A3324] leading-[1.8]">{review.reviewParagraph}</p>
         </RCard>
 
         {/* Psych note — full width, warm bg */}
         {review.psychNote && (
           <RCard full warm>
-            <Label>🧘 A note for you</Label>
+            <Label en="🧘 A note for you" zh="心理学正能量话" />
             <p className="text-[14px] text-[#8B6B4A] leading-[1.8] italic">{review.psychNote}</p>
           </RCard>
         )}
 
         {/* HandLog image — full width */}
         <RCard full>
-          <Label>🖼 HandLog Image</Label>
+          <Label en="🖼 HandLog Image" zh="手账图" />
           <HandLogSection
             review={review}
             style={imgStyle} setStyle={setImgStyle}
@@ -194,11 +222,12 @@ function RCard({ children, full, warm }: { children: React.ReactNode; full?: boo
   );
 }
 
-function Label({ children }: { children: React.ReactNode }) {
+function Label({ en, zh }: { en: string; zh: string }) {
   return (
-    <p className="text-[11px] font-bold text-[#8B6B4A] uppercase tracking-[0.6px] mb-[10px]">
-      {children}
-    </p>
+    <div className="mb-[10px]">
+      <p className="text-[11px] font-bold text-[#8B6B4A] uppercase tracking-[0.6px]">{en}</p>
+      <p className="text-[10px] text-[#C4A98A] mt-[1px]">{zh}</p>
+    </div>
   );
 }
 

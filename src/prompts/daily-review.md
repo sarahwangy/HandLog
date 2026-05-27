@@ -11,10 +11,16 @@ Return ONLY valid JSON, no markdown, no explanation. Schema:
 ```json
 {
   "date": "2026-05-26",
-  "oneLineInsight": "string — ≤30 words, first-person, captures the emotional core of the day",
+  "oneLineInsight": "string — ≤30 words, first-person English, captures the emotional core of the day",
+  "oneLineInsightZh": "string — 同上，中文版本，≤20字，第一人称，口语化",
   "people": ["string — name: what happened / was discussed"],
   "places": ["string — place: brief description"],
-  "events": ["string — what happened"],
+  "events": [
+    {
+      "category": "string — 分类名称（如：育儿陪伴、AI技术、学习阅读、社交探索、健康运动、家务生活等，根据内容自动判断）",
+      "items": ["string — 该分类下的具体事件"]
+    }
+  ],
   "books": ["string — title: key idea or chapter"],
   "mediaConsumed": ["string — type (podcast/article/blog): title or topic"],
   "moviesTV": ["string — title: brief note"],
