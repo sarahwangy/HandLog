@@ -3,6 +3,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 全局字体：Inter，与 mockup 一致 */
+body {
+  font-family: var(--font-inter), -apple-system, system-ui, sans-serif;
+}
+
 /* shadcn/ui CSS 변수 — 라이트/다크 테마 색상 정의 */
 /* 이 변수들을 button.tsx, card.tsx 등 컴포넌트에서 사용함 */
 @layer base {

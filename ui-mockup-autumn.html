@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HandLog — Autumn Journal Design</title>
+<style>
+/* ── Autumn Journal Tokens ────────────────────────────────────────── */
+:root {
+  /* Brand */
+  --primary:          #C4783A;   /* 秋日琥珀橙 — CTA、active */
+  --primary-active:   #A85E28;
+  --primary-disabled: #EDD4BC;
+  --primary-light:    #FDF0E6;   /* 极淡橙，tag 背景 */
+
+  /* Surface */
+  --canvas:           #FDFAF6;   /* 羊皮纸白 */
+  --surface-soft:     #FAF5EE;   /* 卡片内部区域 */
+  --surface-warm:     #F5EDE0;   /* 语音录音区背景 */
+
+  /* Text */
+  --ink:              #2C1F14;   /* 深棕，标题 */
+  --body:             #4A3324;   /* 正文棕 */
+  --muted:            #8B6B4A;   /* 次要文字 */
+  --muted-soft:       #B89A7A;   /* placeholder */
+
+  /* Borders */
+  --hairline:         #E4D4C0;
+  --hairline-soft:    #EDE3D8;
+  --border-strong:    #C4A98A;
+
+  /* Semantic */
+  --success:          #6B8F5E;   /* 已保存绿 */
+  --score-dot:        #C4783A;   /* 分数点 */
+
+  /* Radius (same as Airbnb) */
+  --r-xs:   4px;
+  --r-sm:   8px;
+  --r-md:   14px;
+  --r-lg:   20px;
+  --r-xl:   32px;
+  --r-full: 9999px;
+
+  /* Shadow */
+  --shadow-card: rgba(80,40,10,.03) 0 0 0 1px, rgba(80,40,10,.05) 0 2px 6px, rgba(80,40,10,.08) 0 4px 12px;
+
+  font-family: -apple-system, 'Inter', system-ui, 'Helvetica Neue', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--canvas); color: var(--ink); }
+
+/* ── Nav ──────────────────────────────────────────────────────────── */
+.nav {
+  background: var(--canvas);
+  border-bottom: 1px solid var(--hairline);
+  height: 72px;
+  display: flex; align-items: center; padding: 0 32px;
+  position: sticky; top: 0; z-index: 50;
+}
+.nav-logo {
+  font-size: 20px; font-weight: 700;
+  color: var(--primary); text-decoration: none;
+  letter-spacing: -0.3px; flex-shrink: 0;
+}
+.nav-links { display: flex; gap: 32px; margin: 0 auto; }
+.nav-link {
+  font-size: 15px; font-weight: 600;
+  color: var(--muted); text-decoration: none;
+  padding-bottom: 4px; cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color .15s;
+}
+.nav-link:hover { color: var(--ink); }
+.nav-link.active { color: var(--ink); border-bottom-color: var(--primary); }
+.nav-avatar {
+  width: 32px; height: 32px; border-radius: var(--r-full);
+  background: var(--primary); color: #fff;
+  font-size: 13px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ── Layout ───────────────────────────────────────────────────────── */
+.page { max-width: 1080px; margin: 0 auto; padding: 48px 32px; }
+.page-2col { display: grid; grid-template-columns: 1fr 340px; gap: 40px; align-items: start; }
+.page-section { display: none; }
+.page-section.visible { display: block; }
+
+/* ── Capture ──────────────────────────────────────────────────────── */
+.page-title { font-size: 26px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+.page-sub   { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+
+.voice-card {
+  background: var(--surface-warm);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  padding: 28px 24px;
+  text-align: center; margin-bottom: 14px;
+}
+.voice-btn {
+  width: 68px; height: 68px; border-radius: var(--r-full);
+  background: var(--primary); border: none; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 26px; box-shadow: var(--shadow-card); margin-bottom: 14px;
+  transition: background .15s;
+}
+.voice-btn:hover { background: var(--primary-active); }
+.voice-label { font-size: 15px; font-weight: 600; color: var(--ink); }
+.voice-sub   { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+.journal-textarea {
+  width: 100%; height: 200px;
+  border: 1px solid var(--hairline); border-radius: var(--r-md);
+  padding: 16px; font-size: 15px; line-height: 1.7;
+  color: var(--ink); resize: none; outline: none; font-family: inherit;
+  background: var(--canvas); transition: border .15s;
+}
+.journal-textarea:focus { border-color: var(--border-strong); border-width: 2px; }
+.journal-textarea::placeholder { color: var(--muted-soft); }
+
+.char-row {
+  display: flex; justify-content: space-between;
+  font-size: 13px; color: var(--muted); margin: 8px 0 20px;
+}
+.save-ok { color: var(--success); }
+
+.btn-primary {
+  width: 100%; height: 48px;
+  background: var(--primary); color: #fff; border: none;
+  border-radius: var(--r-sm); font-size: 15px; font-weight: 500;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: background .15s;
+}
+.btn-primary:hover   { background: var(--primary-active); }
+.btn-primary:disabled { background: var(--primary-disabled); cursor: not-allowed; }
+
+.btn-secondary {
+  flex: 1; height: 44px;
+  background: var(--canvas); color: var(--ink);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm); font-size: 14px; font-weight: 500;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: background .15s;
+}
+.btn-secondary:hover { background: var(--surface-soft); }
+
+/* Sidebar */
+.sidebar-card {
+  background: var(--canvas);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md); padding: 20px; margin-bottom: 14px;
+  box-shadow: var(--shadow-card);
+}
+.sidebar-title { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 12px; }
+.tip-item {
+  font-size: 13px; color: var(--body); padding: 7px 0;
+  border-bottom: 1px solid var(--hairline-soft);
+  display: flex; gap: 8px; align-items: flex-start;
+}
+.tip-item:last-child { border-bottom: none; }
+.tip-dot { color: var(--primary); flex-shrink: 0; }
+.draft-item { padding: 10px 0; border-bottom: 1px solid var(--hairline-soft); }
+.draft-item:last-child { border-bottom: none; }
+.draft-date { font-size: 14px; font-weight: 500; color: var(--ink); }
+.draft-status { font-size: 13px; color: var(--muted); }
+.draft-status.done    { color: var(--success); }
+.draft-status.pending { color: var(--primary); }
+
+/* ── Review ───────────────────────────────────────────────────────── */
+.review-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.r-card {
+  background: var(--canvas);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md); padding: 20px;
+  box-shadow: var(--shadow-card);
+}
+.r-card-full  { grid-column: 1 / -1; }
+.r-card-warm  { background: var(--surface-warm); }
+
+.r-label {
+  font-size: 11px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px;
+}
+.r-insight {
+  font-size: 20px; font-weight: 600; color: var(--ink);
+  line-height: 1.5; font-style: italic;
+}
+
+.tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag {
+  background: var(--primary-light);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-full);
+  padding: 4px 12px; font-size: 13px; color: var(--body);
+}
+
+/* Score */
+.score-big  { font-size: 52px; font-weight: 700; color: var(--ink); line-height: 1; }
+.score-sub  { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.score-dots { display: flex; gap: 5px; margin-top: 12px; }
+.dot { width: 10px; height: 10px; border-radius: var(--r-full); }
+.dot.on  { background: var(--score-dot); }
+.dot.off { background: var(--hairline); }
+
+/* Energy */
+.energy-row { margin-bottom: 10px; }
+.e-label-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-bottom: 5px; }
+.e-bar-bg   { height: 6px; background: var(--surface-warm); border-radius: var(--r-full); }
+.e-bar-fill { height: 6px; background: var(--primary); border-radius: var(--r-full); }
+
+/* Progress */
+.p-item { margin-bottom: 10px; font-size: 14px; color: var(--body); line-height: 1.5; }
+.p-item strong { color: var(--ink); }
+
+/* Next steps */
+.step-item {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 9px 0; border-bottom: 1px solid var(--hairline-soft);
+  font-size: 14px; color: var(--body);
+}
+.step-item:last-child { border-bottom: none; }
+.checkbox {
+  width: 18px; height: 18px; border: 1.5px solid var(--border-strong);
+  border-radius: var(--r-xs); flex-shrink: 0; margin-top: 1px;
+}
+
+/* HandLog image section */
+.style-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+.s-tab {
+  flex: 1; height: 40px; border: 1px solid var(--hairline);
+  border-radius: var(--r-sm); background: var(--canvas);
+  font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer;
+  transition: all .15s;
+}
+.s-tab:hover { border-color: var(--border-strong); color: var(--ink); }
+.s-tab.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+.img-preview {
+  background: var(--surface-warm);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--r-md); height: 200px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; color: var(--muted-soft); font-style: italic;
+  margin-bottom: 12px;
+}
+.btn-row { display: flex; gap: 8px; }
+
+/* ── Demo switcher ────────────────────────────────────────────────── */
+.demo-switcher {
+  position: fixed; bottom: 24px; right: 24px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.demo-btn {
+  background: var(--ink); color: #fff; border: none;
+  border-radius: var(--r-sm); padding: 8px 16px;
+  font-size: 13px; font-weight: 500; cursor: pointer; transition: background .15s;
+}
+.demo-btn:hover  { background: var(--body); }
+.demo-btn.active { background: var(--primary); }
+</style>
+</head>
+<body>
+
+<!-- ── Nav ──────────────────────────────────────────────────────── -->
+<nav class="nav">
+  <a href="#" class="nav-logo">✍ HandLog</a>
+  <div class="nav-links">
+    <a class="nav-link active" id="nl-capture" onclick="show('capture')">Capture</a>
+    <a class="nav-link"        id="nl-review"  onclick="show('review')">Review</a>
+    <a class="nav-link"        id="nl-dash"    onclick="show('dash')">Dashboard</a>
+  </div>
+  <div class="nav-avatar">J</div>
+</nav>
+
+<!-- ══ CAPTURE ═══════════════════════════════════════════════════ -->
+<div class="page-section visible" id="page-capture">
+<div class="page">
+  <div class="page-2col">
+    <div>
+      <h1 class="page-title">How was your day?</h1>
+      <p class="page-sub">📅 Wednesday, May 27 · Draft autosaves every 3 seconds</p>
+
+      <div class="voice-card">
+        <button class="voice-btn">🎙</button>
+        <div class="voice-label">Tap to record</div>
+        <div class="voice-sub">Powered by Whisper — punctuation included</div>
+      </div>
+
+      <textarea class="journal-textarea" placeholder="Write about your day — no need to edit, the messier the better..."></textarea>
+      <div class="char-row">
+        <span>0 characters</span>
+        <span class="save-ok">✓ Draft saved</span>
+      </div>
+      <button class="btn-primary">✨ Generate my review →</button>
+    </div>
+
+    <div>
+      <div class="sidebar-card">
+        <div class="sidebar-title">💡 Writing tips</div>
+        <div class="tip-item"><span class="tip-dot">·</span> Mention people by name — AI will note them</div>
+        <div class="tip-item"><span class="tip-dot">·</span> Talk about parenting moments — milestones get recorded</div>
+        <div class="tip-item"><span class="tip-dot">·</span> Mention health symptoms — logged automatically</div>
+        <div class="tip-item"><span class="tip-dot">·</span> No need to edit — the messier the better 🌿</div>
+      </div>
+      <div class="sidebar-card">
+        <div class="sidebar-title">📄 Recent drafts</div>
+        <div class="draft-item">
+          <div class="draft-date">Yesterday</div>
+          <div class="draft-status done">Submitted ✓</div>
+        </div>
+        <div class="draft-item">
+          <div class="draft-date">2 days ago</div>
+          <div class="draft-status done">Submitted ✓</div>
+        </div>
+        <div class="draft-item">
+          <div class="draft-date">3 days ago</div>
+          <div class="draft-status pending">Draft unfinished</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ REVIEW ════════════════════════════════════════════════════ -->
+<div class="page-section" id="page-review">
+<div class="page">
+  <h1 class="page-title">Today's Review</h1>
+  <p class="page-sub">Wednesday, May 27, 2026</p>
+
+  <div class="review-grid">
+
+    <!-- One-line insight -->
+    <div class="r-card r-card-full r-card-warm">
+      <div class="r-label">💡 One-line insight</div>
+      <div class="r-insight">"A productive day of building and reflecting — code shipped, mind cleared."</div>
+    </div>
+
+    <!-- People -->
+    <div class="r-card">
+      <div class="r-label">👥 People</div>
+      <div class="tag-list">
+        <span class="tag">Alice — deep work session</span>
+        <span class="tag">Bob — quick sync</span>
+      </div>
+    </div>
+
+    <!-- Emotions -->
+    <div class="r-card">
+      <div class="r-label">🌊 Emotions</div>
+      <div class="tag-list">
+        <span class="tag">Focused in morning</span>
+        <span class="tag">Calm after walk</span>
+        <span class="tag">Satisfied at EOD</span>
+      </div>
+    </div>
+
+    <!-- Learning -->
+    <div class="r-card">
+      <div class="r-label">🧠 Learning</div>
+      <div class="tag-list">
+        <span class="tag">Satori rendering pipeline</span>
+        <span class="tag">Buffer vs ArrayBuffer</span>
+      </div>
+    </div>
+
+    <!-- Health -->
+    <div class="r-card">
+      <div class="r-label">💪 Health & Body</div>
+      <div class="tag-list">
+        <span class="tag">Morning run 5km</span>
+        <span class="tag">Good sleep 7.5h</span>
+      </div>
+    </div>
+
+    <!-- Score -->
+    <div class="r-card">
+      <div class="r-label">⭐ Score</div>
+      <div class="score-big">8</div>
+      <div class="score-sub">/10 · Calm and consistently productive</div>
+      <div class="score-dots">
+        <div class="dot on"></div><div class="dot on"></div><div class="dot on"></div>
+        <div class="dot on"></div><div class="dot on"></div><div class="dot on"></div>
+        <div class="dot on"></div><div class="dot on"></div>
+        <div class="dot off"></div><div class="dot off"></div>
+      </div>
+    </div>
+
+    <!-- Energy -->
+    <div class="r-card">
+      <div class="r-label">⚡ Energy distribution</div>
+      <div class="energy-row">
+        <div class="e-label-row"><span>Deep work</span><span>55%</span></div>
+        <div class="e-bar-bg"><div class="e-bar-fill" style="width:55%"></div></div>
+      </div>
+      <div class="energy-row">
+        <div class="e-label-row"><span>Personal</span><span>30%</span></div>
+        <div class="e-bar-bg"><div class="e-bar-fill" style="width:30%"></div></div>
+      </div>
+      <div class="energy-row">
+        <div class="e-label-row"><span>Health</span><span>15%</span></div>
+        <div class="e-bar-bg"><div class="e-bar-fill" style="width:15%"></div></div>
+      </div>
+    </div>
+
+    <!-- Progress zones -->
+    <div class="r-card">
+      <div class="r-label">🌱 Progress zones</div>
+      <div class="p-item">🟢 <strong>Breakthrough:</strong> Understood Satori's font loading pipeline</div>
+      <div class="p-item">🟡 <strong>In practice:</strong> Daily journaling streak — 12 days</div>
+      <div class="p-item">🔵 <strong>Planted seed:</strong> Exploring dashboard data viz options</div>
+    </div>
+
+    <!-- Next steps -->
+    <div class="r-card r-card-full">
+      <div class="r-label">🎯 Next steps</div>
+      <div class="step-item"><div class="checkbox"></div>Review PR #42 and leave feedback</div>
+      <div class="step-item"><div class="checkbox"></div>Write tests for handlog generate route</div>
+      <div class="step-item"><div class="checkbox"></div>Start Dashboard data layer</div>
+    </div>
+
+    <!-- Review paragraph -->
+    <div class="r-card r-card-full">
+      <div class="r-label">🪞 Today's reflection</div>
+      <p style="font-size:15px; color:var(--body); line-height:1.8;">
+        Today felt unusually focused. The morning run set a clear tone — no phone, just movement — and that carried into a long uninterrupted coding session. The image rendering problem that had been blocked yesterday resolved itself once I stopped overthinking the font format. Sometimes the fix is obvious only after rest. The conversation with Alice in the afternoon reinforced a principle I keep rediscovering: the clearest thinking happens when you explain your problem out loud to someone else. Tomorrow should build on today's momentum.
+      </p>
+    </div>
+
+    <!-- Psych note -->
+    <div class="r-card r-card-full r-card-warm">
+      <div class="r-label">🧘 A note for you</div>
+      <p style="font-size:14px; color:var(--muted); line-height:1.8; font-style:italic;">
+        <strong style="color:var(--ink)">Flow state</strong> — when a task's difficulty matches your skill level exactly, the brain stops monitoring itself and enters effortless concentration. Your morning session today is a textbook example. Protect that first hour tomorrow.
+      </p>
+    </div>
+
+    <!-- HandLog image -->
+    <div class="r-card r-card-full">
+      <div class="r-label">🖼 HandLog Image</div>
+      <div class="style-tabs">
+        <button class="s-tab active">🪶 Minimal</button>
+        <button class="s-tab">🌸 Cute</button>
+        <button class="s-tab">📜 Vintage</button>
+      </div>
+      <div class="img-preview">Image preview will appear here after generation</div>
+      <div class="btn-row">
+        <button class="btn-secondary">⬇ Download PNG</button>
+        <button class="btn-primary" style="flex:1; height:44px; font-size:14px;">✨ Generate HandLog →</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- ══ DASHBOARD ══════════════════════════════════════════════════ -->
+<div class="page-section" id="page-dash">
+<div class="page">
+  <h1 class="page-title">Dashboard</h1>
+  <p class="page-sub">Your journal patterns at a glance</p>
+  <div style="margin-top:64px; text-align:center; color:var(--muted); font-size:15px;">
+    Charts and trends — coming soon in E7
+  </div>
+</div>
+</div>
+
+<!-- ── Demo switcher ─────────────────────────────────────────────── -->
+<div class="demo-switcher">
+  <button class="demo-btn active" onclick="show('capture')">📝 Capture</button>
+  <button class="demo-btn"        onclick="show('review')">🪞 Review</button>
+  <button class="demo-btn"        onclick="show('dash')">📊 Dashboard</button>
+</div>
+
+<script>
+const pages = ['capture','review','dash'];
+function show(name) {
+  pages.forEach(p => {
+    document.getElementById('page-' + p).classList.toggle('visible', p === name);
+    document.getElementById('nl-' + p).classList.toggle('active', p === name);
+    document.querySelectorAll('.demo-btn')[pages.indexOf(p)].classList.toggle('active', p === name);
+  });
+}
+</script>
+</body>
+</html>

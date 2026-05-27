@@ -12,7 +12,6 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
   const [review, setReview] = useState<DailyReview | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // HandLog 图片相关状态
   const [imgStyle, setImgStyle] = useState<HandLogStyle>("minimal");
   const [imgUrl, setImgUrl] = useState<string | null>(null);
   const [imgLoading, setImgLoading] = useState(false);
@@ -38,175 +37,190 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
 
   if (!review) {
     return (
-      <div className="text-center py-20">
-        <h2 className="text-2xl text-[#2C1F14] font-serif mb-3">Ready to reflect?</h2>
-        <p className="text-[#8B6B4A] mb-8 text-sm">AI will structure today&apos;s journal into a rich review.</p>
+      <div className="text-center py-24">
+        <h2 className="text-[26px] font-semibold text-[#2C1F14] mb-2 tracking-tight">Ready to reflect?</h2>
+        <p className="text-[#8B6B4A] mb-8 text-[14px]">AI will structure today&apos;s journal into a rich review.</p>
         <button
           type="button"
           onClick={generate}
           disabled={loading}
-          className="bg-[#2C1F14] text-[#FAF6F0] px-8 py-3 rounded-xl hover:bg-[#4A3728] transition-colors disabled:opacity-50"
+          className="h-[48px] px-8 bg-[#C4783A] text-white rounded-[8px] text-[15px] font-medium hover:bg-[#A85E28] transition-colors disabled:bg-[#EDD4BC] disabled:cursor-not-allowed"
         >
           {loading ? "Generating..." : "✨ Generate my review"}
         </button>
-        {/* eslint-disable-next-line react/no-unescaped-entities */}
-        {error && <p className="text-[#C4907A] mt-4 text-sm">{error}</p>}
+        {error && <p className="text-[#C4783A] mt-4 text-[13px]">{error}</p>}
       </div>
     );
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3">
       {/* Header */}
-      <div className="mb-6">
-        <h2 className="text-2xl text-[#2C1F14] font-serif mb-1">Today&apos;s Review</h2>
-        <p className="text-[#8B6B4A] text-sm">{dateKey}</p>
+      <div className="mb-5">
+        <h2 className="text-[26px] font-semibold text-[#2C1F14] tracking-tight">Today&apos;s Review</h2>
+        <p className="text-[14px] text-[#8B6B4A] mt-1 mb-7">{dateKey}</p>
       </div>
 
-      {/* One-line insight */}
-      <Card emoji="💡" title="One-line insight">
-        <p className="text-[#2C1F14] italic font-serif text-lg leading-relaxed">
-          &ldquo;{review.oneLineInsight}&rdquo;
-        </p>
-      </Card>
+      {/* Grid layout — 2 columns */}
+      <div className="grid grid-cols-2 gap-3">
 
-      {/* Dynamic sections — only show if content exists */}
-      {review.people.length > 0 && <ListCard emoji="👥" title="People" items={review.people} />}
-      {review.places.length > 0 && <ListCard emoji="📍" title="Places" items={review.places} />}
-      {review.events.length > 0 && <ListCard emoji="📅" title="Events" items={review.events} />}
-      {review.books.length > 0 && <ListCard emoji="📚" title="Books" items={review.books} />}
-      {review.mediaConsumed.length > 0 && <ListCard emoji="🎙" title="Podcasts & Articles" items={review.mediaConsumed} />}
-      {review.moviesTV.length > 0 && <ListCard emoji="🎬" title="Movies & TV" items={review.moviesTV} />}
-      {review.parenting.length > 0 && <ListCard emoji="👶" title="Parenting" items={review.parenting} />}
-      {review.health.length > 0 && <ListCard emoji="💪" title="Health & Body" items={review.health} />}
-      {review.finance.length > 0 && <ListCard emoji="💰" title="Finance" items={review.finance} />}
-      {review.learning.length > 0 && <ListCard emoji="🧠" title="Learning" items={review.learning} />}
-      {review.creativeOutput.length > 0 && <ListCard emoji="✍️" title="Creative Output" items={review.creativeOutput} />}
-      {review.emotions.length > 0 && <ListCard emoji="🌊" title="Emotions" items={review.emotions} />}
+        {/* One-line insight — full width, warm bg */}
+        <RCard full warm>
+          <Label>💡 One-line insight</Label>
+          <p className="text-[20px] font-semibold text-[#2C1F14] italic leading-relaxed">
+            &ldquo;{review.oneLineInsight}&rdquo;
+          </p>
+        </RCard>
 
-      {/* Review paragraph */}
-      <Card emoji="🪞" title="Today's reflection">
-        <p className="text-[#2C1F14] text-sm leading-relaxed">{review.reviewParagraph}</p>
-      </Card>
+        {/* Dynamic tag sections */}
+        {review.people.length > 0 && <RCard><Label>👥 People</Label><TagList items={review.people} /></RCard>}
+        {review.emotions.length > 0 && <RCard><Label>🌊 Emotions</Label><TagList items={review.emotions} /></RCard>}
+        {review.events.length > 0 && <RCard><Label>📅 Events</Label><TagList items={review.events} /></RCard>}
+        {review.learning.length > 0 && <RCard><Label>🧠 Learning</Label><TagList items={review.learning} /></RCard>}
+        {review.health.length > 0 && <RCard><Label>💪 Health & Body</Label><TagList items={review.health} /></RCard>}
+        {review.places.length > 0 && <RCard><Label>📍 Places</Label><TagList items={review.places} /></RCard>}
+        {review.books.length > 0 && <RCard><Label>📚 Books</Label><TagList items={review.books} /></RCard>}
+        {review.mediaConsumed.length > 0 && <RCard><Label>🎙 Podcasts & Articles</Label><TagList items={review.mediaConsumed} /></RCard>}
+        {review.moviesTV.length > 0 && <RCard><Label>🎬 Movies & TV</Label><TagList items={review.moviesTV} /></RCard>}
+        {review.parenting.length > 0 && <RCard><Label>👶 Parenting</Label><TagList items={review.parenting} /></RCard>}
+        {review.finance.length > 0 && <RCard><Label>💰 Finance</Label><TagList items={review.finance} /></RCard>}
+        {review.creativeOutput.length > 0 && <RCard><Label>✍️ Creative Output</Label><TagList items={review.creativeOutput} /></RCard>}
 
-      {/* Next steps */}
-      {review.nextSteps.length > 0 && (
-        <Card emoji="🎯" title="Next steps">
-          <ul className="space-y-2">
-            {review.nextSteps.map((step, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-[#2C1F14]">
-                <span className="mt-0.5 w-4 h-4 border border-[#8B6B4A] rounded flex-shrink-0" />
-                {step}
-              </li>
-            ))}
-          </ul>
-        </Card>
-      )}
-
-      {/* Energy distribution */}
-      {Object.keys(review.energyDistribution).length > 0 && (
-        <Card emoji="⚡" title="Energy distribution">
-          <div className="space-y-2">
-            {Object.entries(review.energyDistribution).map(([label, pct]) => (
-              <div key={label}>
-                <div className="flex justify-between text-xs text-[#8B6B4A] mb-1">
-                  <span>{label}</span>
-                  <span>{pct}%</span>
-                </div>
-                <div className="h-1.5 bg-[#E8D9C4] rounded-full">
-                  <div
-                    className="h-1.5 bg-[#8B6B4A] rounded-full"
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-              </div>
+        {/* Score */}
+        <RCard>
+          <Label>⭐ Score</Label>
+          <div className="text-[52px] font-bold text-[#2C1F14] leading-none">{review.score}</div>
+          <div className="text-[13px] text-[#8B6B4A] mt-1">/10 · {review.scoreReason}</div>
+          <div className="flex gap-[5px] mt-3">
+            {Array.from({ length: 10 }, (_, i) => (
+              <div key={i} className={`w-[10px] h-[10px] rounded-full ${i < review.score ? "bg-[#C4783A]" : "bg-[#E4D4C0]"}`} />
             ))}
           </div>
-        </Card>
-      )}
+        </RCard>
 
-      {/* Progress zones */}
-      {(review.progressZones.breakthrough || review.progressZones.inPractice || review.progressZones.plantedSeed) && (
-        <Card emoji="🌱" title="Progress zones">
-          <div className="space-y-2 text-sm">
-            {review.progressZones.breakthrough && (
-              <p><span className="text-green-600">🟢 Breakthrough:</span> <span className="text-[#2C1F14]">{review.progressZones.breakthrough}</span></p>
-            )}
-            {review.progressZones.inPractice && (
-              <p><span className="text-yellow-600">🟡 In practice:</span> <span className="text-[#2C1F14]">{review.progressZones.inPractice}</span></p>
-            )}
-            {review.progressZones.plantedSeed && (
-              <p><span className="text-blue-500">🔵 Planted seed:</span> <span className="text-[#2C1F14]">{review.progressZones.plantedSeed}</span></p>
-            )}
-          </div>
-        </Card>
-      )}
+        {/* Energy distribution */}
+        {Object.keys(review.energyDistribution).length > 0 && (
+          <RCard>
+            <Label>⚡ Energy distribution</Label>
+            <div className="space-y-[10px]">
+              {Object.entries(review.energyDistribution).map(([label, pct]) => (
+                <div key={label}>
+                  <div className="flex justify-between text-[13px] text-[#8B6B4A] mb-[5px]">
+                    <span>{label}</span><span>{pct}%</span>
+                  </div>
+                  <div className="h-[6px] bg-[#F5EDE0] rounded-full">
+                    {/* eslint-disable-next-line react/forbid-component-props */}
+                    <div className="h-[6px] bg-[#C4783A] rounded-full" style={{ width: `${pct}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </RCard>
+        )}
 
-      {/* Score */}
-      <Card emoji="⭐" title="Today's score">
-        <div className="flex items-center gap-4">
-          <span className="text-4xl font-serif text-[#2C1F14]">{review.score}</span>
-          <span className="text-[#8B6B4A] text-4xl">/10</span>
-          <p className="text-sm text-[#8B6B4A] flex-1">{review.scoreReason}</p>
-        </div>
-        <div className="flex gap-1 mt-3">
-          {Array.from({ length: 10 }, (_, i) => (
-            <div
-              key={i}
-              className={`h-2 flex-1 rounded-full ${i < review.score ? "bg-[#C4A962]" : "bg-[#E8D9C4]"}`}
-            />
-          ))}
-        </div>
-      </Card>
+        {/* Progress zones */}
+        {(review.progressZones.breakthrough || review.progressZones.inPractice || review.progressZones.plantedSeed) && (
+          <RCard>
+            <Label>🌱 Progress zones</Label>
+            <div className="space-y-[10px]">
+              {review.progressZones.breakthrough && (
+                <p className="text-[14px] text-[#4A3324]">🟢 <strong className="text-[#2C1F14]">Breakthrough:</strong> {review.progressZones.breakthrough}</p>
+              )}
+              {review.progressZones.inPractice && (
+                <p className="text-[14px] text-[#4A3324]">🟡 <strong className="text-[#2C1F14]">In practice:</strong> {review.progressZones.inPractice}</p>
+              )}
+              {review.progressZones.plantedSeed && (
+                <p className="text-[14px] text-[#4A3324]">🔵 <strong className="text-[#2C1F14]">Planted seed:</strong> {review.progressZones.plantedSeed}</p>
+              )}
+            </div>
+          </RCard>
+        )}
 
-      {/* Psychology note */}
-      {review.psychNote && (
-        <Card emoji="🧘" title="A note for you">
-          <p className="text-sm text-[#8B6B4A] leading-relaxed italic">{review.psychNote}</p>
-        </Card>
-      )}
+        {/* Next steps — full width */}
+        {review.nextSteps.length > 0 && (
+          <RCard full>
+            <Label>🎯 Next steps</Label>
+            <div className="divide-y divide-[#EDE3D8]">
+              {review.nextSteps.map((step, i) => (
+                <div key={i} className="flex items-start gap-3 py-[9px]">
+                  <div className="w-[18px] h-[18px] border-[1.5px] border-[#C4A98A] rounded-[4px] flex-shrink-0 mt-[1px]" />
+                  <span className="text-[14px] text-[#4A3324]">{step}</span>
+                </div>
+              ))}
+            </div>
+          </RCard>
+        )}
 
-      {/* HandLog 图片生成区 */}
-      <HandLogSection review={review} style={imgStyle} setStyle={setImgStyle} imgUrl={imgUrl} setImgUrl={setImgUrl} loading={imgLoading} setLoading={setImgLoading} />
+        {/* Review paragraph — full width */}
+        <RCard full>
+          <Label>🪞 Today&apos;s reflection</Label>
+          <p className="text-[15px] text-[#4A3324] leading-[1.8]">{review.reviewParagraph}</p>
+        </RCard>
+
+        {/* Psych note — full width, warm bg */}
+        {review.psychNote && (
+          <RCard full warm>
+            <Label>🧘 A note for you</Label>
+            <p className="text-[14px] text-[#8B6B4A] leading-[1.8] italic">{review.psychNote}</p>
+          </RCard>
+        )}
+
+        {/* HandLog image — full width */}
+        <RCard full>
+          <Label>🖼 HandLog Image</Label>
+          <HandLogSection
+            review={review}
+            style={imgStyle} setStyle={setImgStyle}
+            imgUrl={imgUrl} setImgUrl={setImgUrl}
+            loading={imgLoading} setLoading={setImgLoading}
+          />
+        </RCard>
+
+      </div>
     </div>
   );
 }
 
-// ── Shared card components ───────────────────────────────────────────────────
+// ── Shared primitives ─────────────────────────────────────────────────────────
 
-function Card({ emoji, title, children }: { emoji: string; title: string; children: React.ReactNode }) {
+function RCard({ children, full, warm }: { children: React.ReactNode; full?: boolean; warm?: boolean }) {
   return (
-    <div className="bg-white rounded-xl p-5 border border-[rgba(139,107,74,0.2)] shadow-sm">
-      <h3 className="text-[#8B6B4A] text-sm font-medium mb-3">{emoji} {title}</h3>
+    <div className={`rounded-[14px] p-5 border border-[#E4D4C0]
+      shadow-[rgba(80,40,10,0.03)_0_0_0_1px,rgba(80,40,10,0.05)_0_2px_6px,rgba(80,40,10,0.08)_0_4px_12px]
+      ${full ? "col-span-2" : ""}
+      ${warm ? "bg-[#F5EDE0]" : "bg-[#FDFAF6]"}`}>
       {children}
     </div>
   );
 }
 
-function ListCard({ emoji, title, items }: { emoji: string; title: string; items: string[] }) {
+function Label({ children }: { children: React.ReactNode }) {
   return (
-    <Card emoji={emoji} title={title}>
-      <ul className="space-y-1">
-        {items.map((item, i) => (
-          <li key={i} className="text-sm text-[#2C1F14] pl-3 relative before:content-['·'] before:absolute before:left-0 before:text-[#C4907A]">
-            {item}
-          </li>
-        ))}
-      </ul>
-    </Card>
+    <p className="text-[11px] font-bold text-[#8B6B4A] uppercase tracking-[0.6px] mb-[10px]">
+      {children}
+    </p>
   );
 }
 
-// ── HandLog 图片生成区 ────────────────────────────────────────────────────────
+function TagList({ items }: { items: string[] }) {
+  return (
+    <div className="flex flex-wrap gap-[6px]">
+      {items.map((item, i) => (
+        <span key={i} className="bg-[#FDF0E6] border border-[#E4D4C0] rounded-full px-3 py-1 text-[13px] text-[#4A3324]">
+          {item}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+// ── HandLog image section ─────────────────────────────────────────────────────
 
 interface HandLogSectionProps {
   review: DailyReview;
-  style: HandLogStyle;
-  setStyle: (s: HandLogStyle) => void;
-  imgUrl: string | null;
-  setImgUrl: (url: string | null) => void;
-  loading: boolean;
-  setLoading: (v: boolean) => void;
+  style: HandLogStyle; setStyle: (s: HandLogStyle) => void;
+  imgUrl: string | null; setImgUrl: (u: string | null) => void;
+  loading: boolean; setLoading: (v: boolean) => void;
 }
 
 function HandLogSection({ review, style, setStyle, imgUrl, setImgUrl, loading, setLoading }: HandLogSectionProps) {
@@ -218,104 +232,63 @@ function HandLogSection({ review, style, setStyle, imgUrl, setImgUrl, loading, s
     { value: "vintage", label: "Vintage", emoji: "📜" },
   ];
 
-  const generate = async (selectedStyle: HandLogStyle) => {
-    setLoading(true);
-    setError(null);
-    // 每次生成前释放上一张图片的 Object URL，避免内存泄漏
+  const generate = async (s: HandLogStyle) => {
+    setLoading(true); setError(null);
     if (imgUrl) URL.revokeObjectURL(imgUrl);
     setImgUrl(null);
-
     try {
       const res = await fetch("/api/handlog/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ review, style: selectedStyle }),
+        body: JSON.stringify({ review, style: s }),
       });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error ?? "Generation failed");
-      }
-      // 把 PNG Buffer 转成 Blob URL，直接用 <img src> 显示
-      const blob = await res.blob();
-      setImgUrl(URL.createObjectURL(blob));
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error ?? "Generation failed"); }
+      setImgUrl(URL.createObjectURL(await res.blob()));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   const handleStyleChange = (s: HandLogStyle) => {
     setStyle(s);
-    // 切换样式后自动重新生成
     if (imgUrl || loading) generate(s);
   };
 
-  const download = () => {
-    if (!imgUrl) return;
-    const a = document.createElement("a");
-    a.href = imgUrl;
-    a.download = `handlog-${review.date}.png`;
-    a.click();
-  };
-
   return (
-    <div className="bg-white rounded-xl p-5 border border-[rgba(139,107,74,0.2)] shadow-sm mt-4">
-      <h3 className="text-[#8B6B4A] text-sm font-medium mb-4">🖼 HandLog Image</h3>
-
-      {/* 样式切换按钮 */}
+    <div>
+      {/* Style tabs */}
       <div className="flex gap-2 mb-4">
         {STYLES.map((s) => (
-          <button
-            key={s.value}
-            type="button"
-            onClick={() => handleStyleChange(s.value)}
-            className={`flex-1 py-2 rounded-lg text-sm transition-colors ${
-              style === s.value
-                ? "bg-[#2C1F14] text-[#FAF6F0]"
-                : "bg-[#F5EFE4] text-[#8B6B4A] hover:bg-[#EDE0CC]"
-            }`}
-          >
+          <button key={s.value} type="button" onClick={() => handleStyleChange(s.value)}
+            className={`flex-1 h-[40px] rounded-[8px] text-[13px] font-medium transition-colors border
+              ${style === s.value ? "bg-[#2C1F14] text-white border-[#2C1F14]" : "bg-white text-[#8B6B4A] border-[#E4D4C0] hover:border-[#C4A98A] hover:text-[#2C1F14]"}`}>
             {s.emoji} {s.label}
           </button>
         ))}
       </div>
 
-      {/* 预览区 */}
       {imgUrl ? (
         <div className="space-y-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={imgUrl} alt="HandLog" className="w-full rounded-lg border border-[rgba(139,107,74,0.1)]" />
+          <img src={imgUrl} alt="HandLog" className="w-full rounded-[14px] border border-[#E4D4C0]" />
           <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={download}
-              className="flex-1 bg-[#F5EFE4] text-[#2C1F14] rounded-lg py-2.5 text-sm hover:bg-[#EDE0CC] transition-colors"
-            >
+            <button type="button" onClick={() => { const a = document.createElement("a"); a.href = imgUrl; a.download = `handlog-${review.date}.png`; a.click(); }}
+              className="flex-1 h-[44px] bg-white text-[#2C1F14] border border-[#C4A98A] rounded-[8px] text-[14px] font-medium hover:bg-[#FAF5EE] transition-colors">
               ⬇ Download PNG
             </button>
-            <button
-              type="button"
-              onClick={() => generate(style)}
-              disabled={loading}
-              className="flex-1 bg-[#2C1F14] text-[#FAF6F0] rounded-lg py-2.5 text-sm hover:bg-[#4A3728] transition-colors disabled:opacity-50"
-            >
+            <button type="button" onClick={() => generate(style)} disabled={loading}
+              className="flex-1 h-[44px] bg-[#C4783A] text-white rounded-[8px] text-[14px] font-medium hover:bg-[#A85E28] transition-colors disabled:opacity-50">
               {loading ? "Generating..." : "↺ Regenerate"}
             </button>
           </div>
         </div>
       ) : (
-        <button
-          type="button"
-          onClick={() => generate(style)}
-          disabled={loading}
-          className="w-full bg-[#2C1F14] text-[#FAF6F0] rounded-xl py-4 text-base hover:bg-[#4A3728] transition-colors disabled:opacity-50"
-        >
+        <button type="button" onClick={() => generate(style)} disabled={loading}
+          className="w-full h-[48px] bg-[#C4783A] text-white rounded-[8px] text-[15px] font-medium hover:bg-[#A85E28] transition-colors disabled:bg-[#EDD4BC] disabled:cursor-not-allowed">
           {loading ? "Generating..." : "✨ Generate HandLog image →"}
         </button>
       )}
-
-      {error && <p className="text-[#C4907A] mt-3 text-sm">{error}</p>}
+      {error && <p className="text-[#C4783A] mt-3 text-[13px]">{error}</p>}
     </div>
   );
 }

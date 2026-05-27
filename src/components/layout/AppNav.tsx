@@ -14,32 +14,32 @@ export default function AppNav() {
   const isActive = (path: string) => pathname.includes(path);
 
   const navItems = [
-    { label: locale === "zh" ? "记录" : "Capture", href: `/${locale}/capture` },
-    { label: locale === "zh" ? "时间轴" : "Timeline", href: `/${locale}/timeline` },
-    { label: locale === "zh" ? "看板" : "Dashboard", href: `/${locale}/dashboard` },
+    { label: "Capture",   href: `/${locale}/capture` },
+    { label: "Review",    href: `/${locale}/review` },
+    { label: "Dashboard", href: `/${locale}/dashboard` },
   ];
 
   return (
-    <nav className="bg-[#2C1F14] h-[52px] flex items-center px-6 gap-8 sticky top-0 z-50">
+    <nav className="bg-[#FDFAF6] border-b border-[#E4D4C0] h-[72px] flex items-center px-8 sticky top-0 z-50">
       {/* Logo */}
       <Link
         href={`/${locale}/capture`}
-        className="font-['Caveat',cursive] text-[22px] text-[#C4A962] tracking-wide flex-shrink-0"
-        style={{ fontFamily: "cursive" }}
+        className="text-[20px] font-bold text-[#C4783A] flex-shrink-0"
+        style={{ fontFamily: "inherit", letterSpacing: "-0.3px" }}
       >
         ✍ HandLog
       </Link>
 
-      {/* 导航链接 */}
-      <div className="flex gap-6 flex-1">
+      {/* 导航链接居中 */}
+      <div className="flex gap-8 flex-1 justify-center">
         {navItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
-            className={`text-sm transition-colors ${
+            className={`text-[15px] font-semibold transition-colors pb-[3px] ${
               isActive(item.href.split("/").pop() || "")
-                ? "text-[#C4A962] border-b border-[#C4A962] pb-[1px]"
-                : "text-[#E8D5B7] opacity-70 hover:opacity-100"
+                ? "text-[#2C1F14] border-b-2 border-[#C4783A]"
+                : "text-[#8B6B4A] hover:text-[#2C1F14]"
             }`}
           >
             {item.label}
@@ -47,8 +47,8 @@ export default function AppNav() {
         ))}
       </div>
 
-      {/* 用户头像占位 */}
-      <div className="w-[30px] h-[30px] rounded-full bg-[#C4907A] flex items-center justify-center text-white text-sm flex-shrink-0">
+      {/* 用户头像 */}
+      <div className="w-[32px] h-[32px] rounded-full bg-[#C4783A] flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
         J
       </div>
     </nav>

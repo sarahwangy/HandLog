@@ -9,7 +9,7 @@ import { useTaskComplete } from "@/hooks/useTaskComplete";
 
 interface CaptureFormProps {
   today: string;
-  dateKey: string; // "2026-05-26" 格式，用于 KV key
+  dateKey: string;
 }
 
 export default function CaptureForm({ today, dateKey }: CaptureFormProps) {
@@ -28,13 +28,10 @@ export default function CaptureForm({ today, dateKey }: CaptureFormProps) {
       },
     });
 
-  // 页面加载时从 KV 读取今天的草稿（如果有的话）
   useEffect(() => {
     fetch(`/api/draft?date=${dateKey}`)
       .then((r) => r.json())
-      .then((data) => {
-        if (data.content) setText(data.content);
-      })
+      .then((data) => { if (data.content) setText(data.content); })
       .finally(() => setLoading(false));
   }, [dateKey]);
 
@@ -43,31 +40,29 @@ export default function CaptureForm({ today, dateKey }: CaptureFormProps) {
   const saveLabel =
     status === "saving" ? "Saving..." :
     status === "saved"  ? "✓ Draft saved" :
-    status === "error"  ? "Save failed, try again" :
+    status === "error"  ? "Save failed" :
     charCount > 0       ? "Waiting to save..." : "";
 
   return (
     <div>
-      {/* 标题区 */}
-      <h2 className="text-[#2C1F14] text-2xl mb-1 font-serif">
-        How was your day?
-      </h2>
-      <p className="text-[#8B6B4A] mb-6 font-serif">
-        📅 {today} · Draft autosaves
+      <h2 className="text-[26px] font-bold text-[#2C1F14] mb-1">How was your day?</h2>
+      <p className="text-[14px] text-[#8B6B4A] mb-7">
+        📅 {today} · Draft autosaves every 3 seconds
       </p>
 
-      {/* 麦克风按钮区 */}
-      <div className="bg-[#F5EFE4] rounded-2xl p-5 border border-[rgba(139,107,74,0.2)] mb-5 text-center">
+      {/* 语音录音区 */}
+      <div className="bg-[#F5EDE0] rounded-[14px] px-6 py-7 border border-[#E4D4C0] mb-4 text-center">
         <button
           type="button"
           onClick={micStatus === "recording" ? stopMic : startMic}
           disabled={!micSupported || micStatus === "transcribing"}
-          className={`w-[68px] h-[68px] rounded-full flex items-center justify-center text-3xl mx-auto mb-3 shadow-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed
+          className={`w-[68px] h-[68px] rounded-full flex items-center justify-center text-[26px] mx-auto mb-4 transition-colors disabled:opacity-40 disabled:cursor-not-allowed
+            shadow-[rgba(80,40,10,0.03)_0_0_0_1px,rgba(80,40,10,0.08)_0_4px_12px]
             ${micStatus === "recording"
-              ? "bg-[#C4907A] animate-pulse"
+              ? "bg-[#A85E28] animate-pulse"
               : micStatus === "transcribing"
               ? "bg-[#8B6B4A]"
-              : "bg-[#4A3728] hover:bg-[#5C4535]"
+              : "bg-[#C4783A] hover:bg-[#A85E28]"
             }`}
         >
           🎙
@@ -75,29 +70,29 @@ export default function CaptureForm({ today, dateKey }: CaptureFormProps) {
 
         {micStatus === "recording" ? (
           <>
-            <p className="text-sm text-[#C4907A] font-medium">Recording... tap to stop</p>
-            <p className="text-xs text-[#8B6B4A] opacity-60 mt-1">Speak naturally, tap stop when done</p>
+            <p className="text-[15px] font-semibold text-[#A85E28]">Recording... tap to stop</p>
+            <p className="text-[13px] text-[#8B6B4A] mt-1 opacity-70">Speak naturally, tap stop when done</p>
           </>
         ) : micStatus === "transcribing" ? (
           <>
-            <p className="text-sm text-[#8B6B4A] font-medium">Transcribing...</p>
-            <p className="text-xs text-[#8B6B4A] opacity-60 mt-1">Whisper is converting your speech</p>
+            <p className="text-[15px] font-semibold text-[#8B6B4A]">Transcribing...</p>
+            <p className="text-[13px] text-[#8B6B4A] mt-1 opacity-60">Whisper is converting your speech</p>
           </>
         ) : micError ? (
-          <p className="text-xs text-[#C4907A] mt-1">{micError}</p>
+          <p className="text-[13px] text-[#C4783A] mt-1">{micError}</p>
         ) : !micSupported ? (
-          <p className="text-xs text-[#8B6B4A] opacity-60 mt-1">Recording not supported in this browser</p>
+          <p className="text-[13px] text-[#8B6B4A] opacity-60 mt-1">Recording not supported in this browser</p>
         ) : (
           <>
-            <p className="text-sm text-[#8B6B4A]">Tap to record</p>
-            <p className="text-xs text-[#8B6B4A] opacity-60 mt-1">Powered by Whisper — punctuation included</p>
+            <p className="text-[15px] font-bold text-[#2C1F14]">Tap to record</p>
+            <p className="text-[13px] text-[#8B6B4A] mt-1 opacity-70">Powered by Whisper — punctuation included</p>
           </>
         )}
       </div>
 
-      {/* 文字输入框（T-303） */}
+      {/* 文字输入框 */}
       <textarea
-        className="w-full h-[220px] bg-white border border-[rgba(139,107,74,0.2)] rounded-xl p-4 text-sm leading-relaxed text-[#2C1F14] resize-none outline-none focus:border-[#8B6B4A] transition-colors font-serif disabled:opacity-50"
+        className="w-full h-[200px] bg-[#FDFAF6] border border-[#E4D4C0] rounded-[14px] font-[inherit] p-4 text-[15px] leading-relaxed text-[#2C1F14] resize-none outline-none focus:border-[#C4A98A] focus:border-2 transition-colors disabled:opacity-50 placeholder:text-[#B89A7A]"
         placeholder={loading ? "Loading draft..." : "Write about your day — no need to edit, the messier the better..."}
         value={text}
         onChange={(e) => setText(e.target.value)}
@@ -105,12 +100,10 @@ export default function CaptureForm({ today, dateKey }: CaptureFormProps) {
         disabled={loading}
       />
 
-      {/* 字数统计 + 自动保存状态 */}
-      <div className="flex justify-between items-center mt-2 mb-4">
-        <span className="text-xs text-[#8B6B4A] opacity-60">
-          {charCount} characters
-        </span>
-        <span className={`text-xs ${status === "error" ? "text-[#C4907A]" : "text-[#7A8C6E]"}`}>
+      {/* 字数 + 保存状态 */}
+      <div className="flex justify-between items-center mt-2 mb-5">
+        <span className="text-[13px] text-[#8B6B4A]">{charCount} characters</span>
+        <span className={`text-[13px] ${status === "error" ? "text-[#C4783A]" : "text-[#6B8F5E]"}`}>
           {saveLabel}
         </span>
       </div>
@@ -119,13 +112,14 @@ export default function CaptureForm({ today, dateKey }: CaptureFormProps) {
       <button
         type="button"
         onClick={() => { saveNow(); router.push(`/${locale}/review`); }}
-        className="w-full bg-[#2C1F14] text-[#FAF6F0] rounded-xl py-4 text-base hover:bg-[#4A3728] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        className="w-full h-[48px] bg-[#C4783A] text-white rounded-[8px] text-[15px] font-medium hover:bg-[#A85E28] transition-colors disabled:bg-[#EDD4BC] disabled:cursor-not-allowed flex items-center justify-center gap-2"
         disabled={charCount < 10}
       >
         ✨ Generate my review →
       </button>
+
       {charCount < 10 && charCount > 0 && (
-        <p className="text-xs text-[#C4907A] text-center mt-2">
+        <p className="text-[13px] text-[#C4783A] text-center mt-2">
           Write a bit more (at least 10 characters)
         </p>
       )}
