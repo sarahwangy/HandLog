@@ -97,3 +97,46 @@
 - **容易踩的坑：** Hydration 错误——`isSupported` 必须在 `useEffect` 里设置，不能在 render 时直接读 `window`，因为服务端没有 window；OpenAI 初始化不能放模块顶层，会在 build 时报"Missing credentials"
 - **行业常用模式：** "录完再发"（和 Web Speech API 实时出字不同）——用户松开按钮后发一整段音频，1-2 秒后返回完整文字，准确率更高
 - **一句话总结：** 用 MediaRecorder 录音，发给 Whisper API 转文字，自动识别语言无需手动切换
+
+---
+
+### T-401~405 — Claude SDK 集成 + 日复盘 Prompt
+
+- **学到的核心概念：** Prompt 工程——把"要做什么"写成结构化指令，让 AI 输出可预期的 JSON；`{{PLACEHOLDER}}` 模板变量放在 `.md` 文件里，代码里替换，方便迭代不用改代码
+- **用到的关键 API/函数：** `@anthropic-ai/sdk` 的 `client.messages.create()`，`readFileSync` 读 prompt 文件，`JSON.parse` 解析返回值
+- **容易踩的坑：** Claude 有时会在 JSON 外面包 markdown 代码块（\`\`\`json ... \`\`\`），需要用 `.replace()` 先剥掉再 parse；Anthropic client 不能放模块顶层初始化，否则 build 时报 "Missing credentials"
+- **行业常用模式：** prompt 文件单独存放（`/src/prompts/*.md`），和代码分离，团队里 prompt 工程师可以单独迭代 prompt 不碰代码
+- **一句话总结：** 接入 Claude SDK，把日记文本发给 Claude，返回包含 18 个 section 的结构化 JSON 复盘
+
+---
+
+### T-501~506 — Review 页面
+
+- **学到的核心概念：** 数据驱动渲染——Claude 返回 JSON，React 把每个字段渲染成对应 UI；条件渲染（`array.length > 0 && <Component />`）让没有内容的 section 自动消失
+- **用到的关键 API/函数：** `useRouter().push()` 跳转页面，`useLocale()` 获取当前语言前缀，`Object.entries()` 遍历 energyDistribution 对象
+- **容易踩的坑：** JSX 里不能直接写 `'` 和 `"`，要用 `&apos;` `&ldquo;` `&rdquo;` 转义，否则 ESLint 报错
+- **安全检查：** 所有 API key 必须放 `.env.local`，永远不能 hardcode；`.env*.local` 已在 `.gitignore` 保护，从未被 commit 到 GitHub
+- **一句话总结：** Review 页把 Claude JSON 渲染成卡片式界面，动态 section 只在有内容时显示
+
+### T-601~T-606 - HandLog 图片生成（Satori + resvg-js）
+
+- 学到的核心概念：
+  - **Satori**：把 React JSX 转换成 SVG 字符串，支持 inline style + flexbox，不支持所有 CSS 属性
+  - **resvg-js**：把 SVG 字符串转成 PNG Buffer，是 Rust 写的渲染引擎，性能好
+  - **Native .node binary**：某些 npm 包（如 resvg-js）包含平台相关的二进制文件，webpack 无法打包，需要在 next.config.mjs 的 `experimental.serverComponentsExternalPackages` 里排除
+  - **字体格式**：Satori 只支持 TTF/OTF，不支持 WOFF2，否则报 "Unsupported OpenType signature wOF2" 错误
+  - **模块缓存**：把字体数据缓存在 module-level 变量里，避免每次请求都读磁盘（行业常见优化）
+
+- 用到的关键 API/函数：
+  - `satori(element, { width, height, fonts })` → SVG string
+  - `new Resvg(svg, { fitTo })` → `.render().asPng()` → PNG Buffer
+  - `readFileSync(path)` 读取本地字体文件
+  - `URL.createObjectURL(blob)` 在浏览器端把 PNG Buffer 转成可显示的 URL
+
+- 容易踩的坑：
+  - Satori 的 JSX 每个元素必须有 `display: "flex"`，否则布局不生效
+  - 不能用 `position: absolute` 的嵌套方式（Satori 支持有限），用 flexbox 代替
+  - `Buffer.buffer` 返回的是整个 ArrayBuffer，要用 `.slice(byteOffset, byteOffset + byteLength)` 才能正确截取
+  - `NextResponse` 接受 `ArrayBuffer` 不接受 `Buffer`，需要转换
+
+- 一句话总结：用 Satori 把 React 组件渲染成 PNG，关键是字体必须是 TTF，native 包要排除出 webpack。

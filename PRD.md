@@ -147,130 +147,192 @@ Progress zone definitions:
 
 ### 4.2 Weekly review template (auto-generated, written to Notion)
 
+输入来源：本周 7 天每日复盘的字段（people/events/emotions 等去重合并，score 取数组）
+
+**18 个核心 section（跨7天汇总版）+ 4 个额外 section**
+
 ```markdown
 ## 📅 Week Review | YYYY.MM.DD – YYYY.MM.DD
 
-### 🌟 This week's keywords
-{3-5 keywords separated by ·}
+### 💡 One-line insight (week)
+> {one sentence capturing the arc of the whole week}
 
 ---
 
-### ① Emotions & Patterns
-- Main emotional triggers this week (each with underlying logic)
-- Recurring emotional patterns (cross-day comparison)
-- Closing insight: one sentence summarizing the core emotional pattern
+### 👥 People
+All people mentioned across the week (deduplicated)
+
+### 📍 Places
+All places mentioned across the week
+
+### 📅 Events
+All notable events across the week
+
+### 📚 Books
+All books read or mentioned
+
+### 🎙 Podcasts & Articles
+All media consumed
+
+### 🎬 Movies & TV
+All shows / films watched
+
+### 👶 Parenting
+Parenting moments across the week
+
+### 💪 Health & Body
+Health & exercise across the week
+
+### 💰 Finance
+Financial decisions / spending across the week
+
+### 🧠 Learning
+Everything learned this week
+
+### ✍️ Creative Output
+All creative work produced
+
+### 🌊 Emotions
+Emotional states across the week + how they shifted day by day
 
 ---
 
-### ② Growth & Development
+### 🪞 Week's reflection
+{150-250 word narrative of the whole week}
 
-**Work**: breakthroughs, contributions, new approaches
-**Cognition**: how understanding of self or world shifted
-**Behaviour**: new actions or adjustments tried
-
-- This week's keyword (1 word)
-- One sentence: biggest growth this week
-
----
-
-### ③ Core Problem Diagnosis
-- The one issue that drained the most energy this week
-- Analysis from 3 angles: cognition / emotion / relationships
-- Diagnosis: direct, no hedging
-
----
-
-### ④ Action Recommendations
-3 specific, small, executable suggestions for next week:
-- [ ] {action 1 — specific enough to do on Monday}
+### 🎯 Next steps
+- [ ] {action 1}
 - [ ] {action 2}
 - [ ] {action 3}
 
+### ⚡ Energy distribution (weekly average)
+{category}: {%} · {category}: {%} ... (sum = 100%)
+
+### 🌱 Progress zones
+🟢 Breakthrough: {biggest win this week}
+🟡 In practice: {habit or skill being reinforced}
+🔵 Planted seed: {new direction noticed}
+
+### ⭐ Score
+{overall week score} / 10 — {reason}
+
+### 🧘 Psych note
+{one psychology concept that explains a pattern from this week, in plain language}
+
 ---
 
-### ⭐ Scores
-| Dimension | Score |
-|---|---|
-| {dynamic — only dimensions that appeared this week} | X/10 |
-| Overall | X/10 |
+### 📈 Score trend
+Day 1: X · Day 2: X · Day 3: X · Day 4: X · Day 5: X · Day 6: X · Day 7: X
 
----
+### 🔁 Emotion pattern
+{recurring emotional patterns spotted across the 7 days, with underlying logic}
 
-### 💬 Week in one line
-> {first-person, captures the arc of the week}
+### 🔍 Core problem
+{the one issue that drained the most energy this week — direct diagnosis, no hedging}
 
----
-
-### 📦 Bonus: This week's quote
-> {one powerful sentence for year-end review}
+### 🚩 Cross-week flag
+{if a pattern has appeared in multiple previous weeks, call it out explicitly. e.g. "Sleep issues flagged for 3 consecutive weeks."}
 ```
-
-**Dynamic sections**: AI adds a section if a theme appears ≥3 times across different days and doesn't fit existing sections. Max 12 sections total. Examples: 🏃 Body & Health, 💼 Career, 💰 Finance, 👥 Relationships, 🌱 New tries, 🛠️ Project progress, 🎬 Content consumed, 🍳 Life practice, 🌙 Inner experience.
-
-**Cross-week pattern flag**: If a pattern has appeared in multiple previous weeks, AI calls it out explicitly.
 
 ---
 
 ### 4.3 Monthly review template (auto-generated, written to Notion)
 
-Built on top of weekly review framework, adds:
+输入来源：本月所有周复盘的字段汇总
+
+**18 个核心 section（跨月汇总版）+ 6 个额外 section**
 
 ```markdown
 ## 🌿 YYYY Month M — Monthly Review
 
-### ✨ This month's keywords
-{4-6 keywords}
+### 💡 One-line insight (month)
+> {one sentence capturing the arc of the whole month}
 
 ---
 
-### ① Emotions & Patterns (monthly)
-- Emotional curve: which weeks were high/low, why
-- Recurring patterns across weeks
-- Core insight for the month
+### 👥 People
+All people mentioned across the month (deduplicated)
+
+### 📍 Places
+All places mentioned across the month
+
+### 📅 Events
+All notable events across the month
+
+### 📚 Books
+All books read or mentioned
+
+### 🎙 Podcasts & Articles
+All media consumed
+
+### 🎬 Movies & TV
+All shows / films watched
+
+### 👶 Parenting
+Parenting moments across the month
+
+### 💪 Health & Body
+Health & exercise patterns across the month
+
+### 💰 Finance
+Financial decisions / spending across the month
+
+### 🧠 Learning
+Everything learned this month
+
+### ✍️ Creative Output
+All creative work produced
+
+### 🌊 Emotions
+Emotional arc across the month — which weeks were high/low, why
 
 ---
 
-### ② Growth & Development (monthly)
-**Work / **Cognition / **Behaviour** — same structure as weekly but monthly scope
-- This month's keyword (1 word)
-- Biggest growth this month
+### 🪞 Month's reflection
+{200-300 word narrative of the whole month}
 
----
-
-### ③ Core Problem Diagnosis (monthly)
-- The persistent issue across the month
-- Has this appeared in previous months? (cross-month flag)
-- Diagnosis
-
----
-
-### ④ Action Recommendations for Next Month
-3 small, executable actions:
+### 🎯 Next steps (next month)
 - [ ] {action 1}
 - [ ] {action 2}
 - [ ] {action 3}
 
+### ⚡ Energy distribution (monthly average)
+{category}: {%} · {category}: {%} ... (sum = 100%)
+
+### 🌱 Progress zones
+🟢 Breakthrough: {biggest win this month}
+🟡 In practice: {habit or skill being reinforced}
+🔵 Planted seed: {new direction noticed}
+
+### ⭐ Score
+{overall month score} / 10 — {reason}
+
+### 🧘 Psych note
+{one psychology concept that explains a key pattern from this month}
+
 ---
 
-### ⑤ Monthly Pattern Summary
-- Completion rate: how many daily entries were written vs. total days
-- Energy distribution: average breakdown across the month
+### 📈 Score trend
+Week 1: X · Week 2: X · Week 3: X · Week 4: X
+
+### 🔁 Emotion pattern
+{recurring emotional patterns spotted across the month}
+
+### 🔍 Core problem
+{the persistent issue across the month — direct diagnosis}
+
+### 🚩 Cross-month flag
+{if a pattern has appeared in multiple previous months, call it out. e.g. "Finance anxiety flagged for 2 consecutive months."}
+
+### 📊 Monthly pattern summary
+- Entry completion rate: X / {total days} days written
+- Energy distribution: monthly average breakdown
 - Biggest shift vs. last month
 
----
-
-### ⑥ Next Month Direction
-- 1 core theme
-- 3 things to complete
-- 1 thing to let go of
-
----
-
-### 🌟 Month in one line
-> {first-person, captures growth arc}
-
-### 📦 This month's quote
-> {one powerful sentence}
+### 🧭 Next month direction
+- Core theme: {1 word or phrase}
+- 3 things to complete: ...
+- 1 thing to let go of: ...
 ```
 
 ---

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { DailyReview } from "@/lib/claude";
+import type { HandLogStyle } from "@/lib/handlog/templates";
 
 interface ReviewContentProps {
   dateKey: string;
@@ -11,6 +12,10 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
   const [review, setReview] = useState<DailyReview | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // HandLog 图片相关状态
+  const [imgStyle, setImgStyle] = useState<HandLogStyle>("minimal");
+  const [imgUrl, setImgUrl] = useState<string | null>(null);
+  const [imgLoading, setImgLoading] = useState(false);
 
   const generate = async () => {
     setLoading(true);
@@ -161,13 +166,8 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
         </Card>
       )}
 
-      {/* Submit button */}
-      <button
-        type="button"
-        className="w-full bg-[#2C1F14] text-[#FAF6F0] rounded-xl py-4 text-base hover:bg-[#4A3728] transition-colors mt-4"
-      >
-        ✨ Generate HandLog image →
-      </button>
+      {/* HandLog 图片生成区 */}
+      <HandLogSection review={review} style={imgStyle} setStyle={setImgStyle} imgUrl={imgUrl} setImgUrl={setImgUrl} loading={imgLoading} setLoading={setImgLoading} />
     </div>
   );
 }
@@ -194,5 +194,128 @@ function ListCard({ emoji, title, items }: { emoji: string; title: string; items
         ))}
       </ul>
     </Card>
+  );
+}
+
+// ── HandLog 图片生成区 ────────────────────────────────────────────────────────
+
+interface HandLogSectionProps {
+  review: DailyReview;
+  style: HandLogStyle;
+  setStyle: (s: HandLogStyle) => void;
+  imgUrl: string | null;
+  setImgUrl: (url: string | null) => void;
+  loading: boolean;
+  setLoading: (v: boolean) => void;
+}
+
+function HandLogSection({ review, style, setStyle, imgUrl, setImgUrl, loading, setLoading }: HandLogSectionProps) {
+  const [error, setError] = useState<string | null>(null);
+
+  const STYLES: { value: HandLogStyle; label: string; emoji: string }[] = [
+    { value: "minimal", label: "Minimal", emoji: "🪶" },
+    { value: "cute",    label: "Cute",    emoji: "🌸" },
+    { value: "vintage", label: "Vintage", emoji: "📜" },
+  ];
+
+  const generate = async (selectedStyle: HandLogStyle) => {
+    setLoading(true);
+    setError(null);
+    // 每次生成前释放上一张图片的 Object URL，避免内存泄漏
+    if (imgUrl) URL.revokeObjectURL(imgUrl);
+    setImgUrl(null);
+
+    try {
+      const res = await fetch("/api/handlog/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ review, style: selectedStyle }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error ?? "Generation failed");
+      }
+      // 把 PNG Buffer 转成 Blob URL，直接用 <img src> 显示
+      const blob = await res.blob();
+      setImgUrl(URL.createObjectURL(blob));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStyleChange = (s: HandLogStyle) => {
+    setStyle(s);
+    // 切换样式后自动重新生成
+    if (imgUrl || loading) generate(s);
+  };
+
+  const download = () => {
+    if (!imgUrl) return;
+    const a = document.createElement("a");
+    a.href = imgUrl;
+    a.download = `handlog-${review.date}.png`;
+    a.click();
+  };
+
+  return (
+    <div className="bg-white rounded-xl p-5 border border-[rgba(139,107,74,0.2)] shadow-sm mt-4">
+      <h3 className="text-[#8B6B4A] text-sm font-medium mb-4">🖼 HandLog Image</h3>
+
+      {/* 样式切换按钮 */}
+      <div className="flex gap-2 mb-4">
+        {STYLES.map((s) => (
+          <button
+            key={s.value}
+            type="button"
+            onClick={() => handleStyleChange(s.value)}
+            className={`flex-1 py-2 rounded-lg text-sm transition-colors ${
+              style === s.value
+                ? "bg-[#2C1F14] text-[#FAF6F0]"
+                : "bg-[#F5EFE4] text-[#8B6B4A] hover:bg-[#EDE0CC]"
+            }`}
+          >
+            {s.emoji} {s.label}
+          </button>
+        ))}
+      </div>
+
+      {/* 预览区 */}
+      {imgUrl ? (
+        <div className="space-y-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={imgUrl} alt="HandLog" className="w-full rounded-lg border border-[rgba(139,107,74,0.1)]" />
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={download}
+              className="flex-1 bg-[#F5EFE4] text-[#2C1F14] rounded-lg py-2.5 text-sm hover:bg-[#EDE0CC] transition-colors"
+            >
+              ⬇ Download PNG
+            </button>
+            <button
+              type="button"
+              onClick={() => generate(style)}
+              disabled={loading}
+              className="flex-1 bg-[#2C1F14] text-[#FAF6F0] rounded-lg py-2.5 text-sm hover:bg-[#4A3728] transition-colors disabled:opacity-50"
+            >
+              {loading ? "Generating..." : "↺ Regenerate"}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => generate(style)}
+          disabled={loading}
+          className="w-full bg-[#2C1F14] text-[#FAF6F0] rounded-xl py-4 text-base hover:bg-[#4A3728] transition-colors disabled:opacity-50"
+        >
+          {loading ? "Generating..." : "✨ Generate HandLog image →"}
+        </button>
+      )}
+
+      {error && <p className="text-[#C4907A] mt-3 text-sm">{error}</p>}
+    </div>
   );
 }
