@@ -46,13 +46,8 @@ export async function POST(req: NextRequest) {
       const databaseId = getNotionDatabaseId();
       const pageId = await findOrCreateWeekPage(token, databaseId, date);
       await appendDailySummary(token, pageId, date, journal);
-      await appendReviewBlocks(token, pageId, date, {
-        oneLineInsight: review.oneLineInsight ?? "",
-        reviewParagraph: review.reviewParagraph ?? "",
-        nextSteps: review.nextSteps ?? [],
-        psychNote: review.psychNote ?? "",
-        score: review.score ?? 0,
-      });
+      // 传入完整 review，所有非空 section 都会写入 Notion
+      await appendReviewBlocks(token, pageId, date, review);
     } catch (notionErr) {
       console.error("Notion write failed:", notionErr);
     }

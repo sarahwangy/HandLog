@@ -84,10 +84,10 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
           )}
         </RCard>
 
-        {/* Dynamic tag sections */}
-        {review.people.length > 0 && <RCard><Label en="👥 People" zh="人物" /><TagList items={review.people} /></RCard>}
-        {review.emotions.length > 0 && <RCard><Label en="🌊 Emotions" zh="情绪 · 标签" /><TagList items={review.emotions} /></RCard>}
-        {review.events.length > 0 && (
+        {/* Dynamic tag sections — 用 ?. 防止 Claude 没返回某字段时崩溃 */}
+        {review.people?.length > 0 && <RCard><Label en="👥 People" zh="人物" /><TagList items={review.people} /></RCard>}
+        {review.emotions?.length > 0 && <RCard><Label en="🌊 Emotions" zh="情绪 · 标签" /><TagList items={review.emotions} /></RCard>}
+        {review.events?.length > 0 && (
           <RCard>
             <Label en="📅 Events" zh="今日事件" />
             <div className="space-y-3">
@@ -104,15 +104,15 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
             </div>
           </RCard>
         )}
-        {review.learning.length > 0 && <RCard><Label en="🧠 Learning" zh="学到的" /><TagList items={review.learning} /></RCard>}
-        {review.health.length > 0 && <RCard><Label en="💪 Health & Body" zh="健康 · 身体" /><TagList items={review.health} /></RCard>}
-        {review.places.length > 0 && <RCard><Label en="📍 Places" zh="去了哪里" /><TagList items={review.places} /></RCard>}
-        {review.books.length > 0 && <RCard><Label en="📚 Books" zh="在读的书" /><TagList items={review.books} /></RCard>}
-        {review.mediaConsumed.length > 0 && <RCard><Label en="🎙 Podcasts & Articles" zh="播客 · 文章" /><TagList items={review.mediaConsumed} /></RCard>}
-        {review.moviesTV.length > 0 && <RCard><Label en="🎬 Movies & TV" zh="影视" /><TagList items={review.moviesTV} /></RCard>}
-        {review.parenting.length > 0 && <RCard><Label en="👶 Parenting" zh="育儿" /><TagList items={review.parenting} /></RCard>}
-        {review.finance.length > 0 && <RCard><Label en="💰 Finance" zh="理财 · 消费" /><TagList items={review.finance} /></RCard>}
-        {review.creativeOutput.length > 0 && <RCard><Label en="✍️ Creative Output" zh="创作输出" /><TagList items={review.creativeOutput} /></RCard>}
+        {review.learning?.length > 0 && <RCard><Label en="🧠 Learning" zh="学到的" /><TagList items={review.learning} /></RCard>}
+        {review.health?.length > 0 && <RCard><Label en="💪 Health & Body" zh="健康 · 身体" /><TagList items={review.health} /></RCard>}
+        {review.places?.length > 0 && <RCard><Label en="📍 Places" zh="去了哪里" /><TagList items={review.places} /></RCard>}
+        {review.books?.length > 0 && <RCard><Label en="📚 Books" zh="在读的书" /><TagList items={review.books} /></RCard>}
+        {review.mediaConsumed?.length > 0 && <RCard><Label en="🎙 Podcasts & Articles" zh="播客 · 文章" /><TagList items={review.mediaConsumed} /></RCard>}
+        {review.moviesTV?.length > 0 && <RCard><Label en="🎬 Movies & TV" zh="影视" /><TagList items={review.moviesTV} /></RCard>}
+        {review.parenting?.length > 0 && <RCard><Label en="👶 Parenting" zh="育儿" /><TagList items={review.parenting} /></RCard>}
+        {review.finance?.length > 0 && <RCard><Label en="💰 Finance" zh="理财 · 消费" /><TagList items={review.finance} /></RCard>}
+        {review.creativeOutput?.length > 0 && <RCard><Label en="✍️ Creative Output" zh="创作输出" /><TagList items={review.creativeOutput} /></RCard>}
 
         {/* Score */}
         <RCard>
@@ -234,11 +234,21 @@ function Label({ en, zh }: { en: string; zh: string }) {
 function TagList({ items }: { items: string[] }) {
   return (
     <div className="flex flex-wrap gap-[6px]">
-      {items.map((item, i) => (
-        <span key={i} className="bg-[#FDF0E6] border border-[#E4D4C0] rounded-full px-3 py-1 text-[13px] text-[#4A3324]">
-          {item}
-        </span>
-      ))}
+      {items.map((item, i) => {
+        const colonIdx = item.search(/[:：]/);
+        const hasColon = colonIdx > 0;
+        return (
+          <span key={i} className="bg-[#FDF0E6] border border-[#E4D4C0] rounded-full px-3 py-1 text-[13px] text-[#4A3324]">
+            {hasColon ? (
+              <>
+                <span className="font-semibold text-[#2C1F14]">{item.slice(0, colonIdx)}</span>
+                <span className="text-[#8B6B4A]">：</span>
+                {item.slice(colonIdx + 1).trim()}
+              </>
+            ) : item}
+          </span>
+        );
+      })}
     </div>
   );
 }

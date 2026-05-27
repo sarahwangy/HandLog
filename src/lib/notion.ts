@@ -126,7 +126,6 @@ export async function findOrCreateWeekPage(
   }
 
   // 不存在则创建新页面
-  const mon = getWeekMonday(dateStr);
   const page = await withAuthCheck(() =>
     notion.pages.create({
       parent: { database_id: databaseId },
@@ -176,55 +175,75 @@ export async function appendDailySummary(
 
 // 把复盘写入页面 body，结构：Toggle > Callout
 // 中文为主体，英文小字在括号里
+// 辅助：把一个字符串格式化为【标题】内容，冒号前面用【】括起来
+function formatItem(item: string): string {
+  const colonIdx = item.search(/[:：]/);
+  if (colonIdx > 0) {
+    const title = item.slice(0, colonIdx).trim();
+    const body = item.slice(colonIdx + 1).trim();
+    return `【${title}】${body}`;
+  }
+  return item;
+}
+
+// 辅助：把字符串数组转成多个 paragraph 块，每条单独一行，冒号前用【】括起来
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function itemBlocks(items: string[]): any[] {
+  return items.map(item => ({
+    type: "paragraph",
+    paragraph: { rich_text: [{ type: "text", text: { content: formatItem(item) } }] },
+  }));
+}
+
+// 辅助：单条文字的 paragraph 块（用于评分、一句话感悟等单值字段）
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function tagsBlock(items: string[]): any {
+  return { type: "paragraph", paragraph: { rich_text: [{ type: "text", text: { content: items.join("、") } }] } };
+}
+
+// 辅助：生成带颜色的 heading_3 块
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function h3(text: string, color = "default"): any {
+  return { type: "heading_3", heading_3: { rich_text: [{ type: "text", text: { content: text }, annotations: { bold: true, color } }] } };
+}
+
 export async function appendReviewBlocks(
   accessToken: string,
   pageId: string,
   dateStr: string,
   review: {
     oneLineInsight: string;
+    oneLineInsightZh?: string;
     reviewParagraph: string;
     nextSteps: string[];
     psychNote: string;
     score: number;
+    scoreReason?: string;
+    people?: string[];
+    places?: string[];
+    events?: { category: string; items: string[] }[];
+    books?: string[];
+    mediaConsumed?: string[];
+    moviesTV?: string[];
+    parenting?: string[];
+    health?: string[];
+    finance?: string[];
+    learning?: string[];
+    creativeOutput?: string[];
+    emotions?: string[];
+    energyDistribution?: Record<string, number>;
+    progressZones?: { breakthrough: string | null; inPractice: string | null; plantedSeed: string | null };
   }
-): Promise<void> {
+): Promise<string | undefined> {
   const notion = createNotionClient(accessToken);
 
   const d = new Date(dateStr);
   const dayIndex = d.getDay() === 0 ? 6 : d.getDay() - 1;
   const dayChar = CN_DAY[dayIndex];
 
-  // Toggle 内部的 block 列表
+  // Step 1：建 Toggle，Toggle 里包一个空 Callout（作为内容容器）
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const innerBlocks: any[] = [
-    // ⭐ 评分
-    { type: "heading_3", heading_3: { rich_text: [{ type: "text", text: { content: "⭐ 评分" }, annotations: { bold: true, color: "orange" } }] } },
-    { type: "paragraph", paragraph: { rich_text: [{ type: "text", text: { content: `${review.score}/10` } }] } },
-
-    // 💡 一句话感悟
-    { type: "heading_3", heading_3: { rich_text: [{ type: "text", text: { content: "💡 一句话感悟" }, annotations: { bold: true, color: "yellow" } }] } },
-    { type: "paragraph", paragraph: { rich_text: [{ type: "text", text: { content: review.oneLineInsight } }] } },
-
-    // 🪞 复盘
-    { type: "heading_3", heading_3: { rich_text: [{ type: "text", text: { content: "🪞 复盘" }, annotations: { bold: true, color: "brown" } }] } },
-    { type: "paragraph", paragraph: { rich_text: [{ type: "text", text: { content: review.reviewParagraph } }] } },
-  ];
-
-  // 🎯 下一步（todo list）
-  if (review.nextSteps.length > 0) {
-    innerBlocks.push({ type: "heading_3", heading_3: { rich_text: [{ type: "text", text: { content: "🎯 下一步" }, annotations: { bold: true, color: "green" } }] } });
-    for (const step of review.nextSteps) {
-      innerBlocks.push({ type: "to_do", to_do: { rich_text: [{ type: "text", text: { content: step } }], checked: false } });
-    }
-  }
-
-  // 🧘 正能量
-  if (review.psychNote) {
-    innerBlocks.push({ type: "heading_3", heading_3: { rich_text: [{ type: "text", text: { content: "🧘 正能量" }, annotations: { bold: true, color: "purple" } }] } });
-    innerBlocks.push({ type: "paragraph", paragraph: { rich_text: [{ type: "text", text: { content: review.psychNote } }] } });
-  }
-
-  await withAuthCheck(() =>
+  const toggleRes = await withAuthCheck(() =>
     notion.blocks.children.append({
       block_id: pageId,
       children: [
@@ -233,12 +252,164 @@ export async function appendReviewBlocks(
           toggle: {
             rich_text: [{ type: "text", text: { content: `周${dayChar}复盘` }, annotations: { bold: true } }],
             color: "default",
-            children: innerBlocks,
+            children: [
+              {
+                type: "callout",
+                callout: {
+                  rich_text: [],          // 空标题，内容在子块里
+                  icon: { type: "emoji", emoji: "📋" },
+                  color: "blue_background",
+                },
+              } as Parameters<typeof notion.blocks.children.append>[0]["children"][0],
+            ],
           },
         } as Parameters<typeof notion.blocks.children.append>[0]["children"][0],
       ],
     })
+  ) as { results: { id: string; type: string }[] };
+
+  // Step 2：找到刚建的 Toggle 里的 Callout ID
+  const toggleId = toggleRes.results[0]?.id;
+  if (!toggleId) return;
+
+  const toggleChildren = await withAuthCheck(() =>
+    notion.blocks.children.list({ block_id: toggleId })
+  ) as { results: { id: string; type: string }[] };
+
+  const calloutId = toggleChildren.results.find(b => b.type === "callout")?.id;
+  if (!calloutId) return;
+
+  // Step 3：把复盘内容块追加到 Callout 里（有内容才写，空的跳过）
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const contentBlocks: any[] = [];
+
+  // ── 评分 ──────────────────────────────────────────
+  contentBlocks.push(h3("⭐ 评分", "orange"));
+  contentBlocks.push(tagsBlock([`${review.score}/10${review.scoreReason ? `  ${review.scoreReason}` : ""}`]));
+
+  // ── 一句话感悟 ────────────────────────────────────
+  contentBlocks.push(h3("💡 一句话感悟", "yellow"));
+  const insightText = review.oneLineInsightZh
+    ? `${review.oneLineInsight}\n「${review.oneLineInsightZh}」`
+    : review.oneLineInsight;
+  contentBlocks.push(tagsBlock([insightText]));
+
+  // ── 人物 ─────────────────────────────────────────
+  if (review.people?.length) {
+    contentBlocks.push(h3("👥 人物", "blue"));
+    contentBlocks.push(...itemBlocks(review.people));
+  }
+
+  // ── 情绪 ─────────────────────────────────────────
+  if (review.emotions?.length) {
+    contentBlocks.push(h3("🌊 情绪", "pink"));
+    contentBlocks.push(...itemBlocks(review.emotions));
+  }
+
+  // ── 事件（按分类，每个分类单独一行） ──────────────────
+  if (review.events?.length) {
+    contentBlocks.push(h3("📅 事件", "default"));
+    for (const group of review.events) {
+      for (const item of group.items) {
+        contentBlocks.push({ type: "paragraph", paragraph: { rich_text: [{ type: "text", text: { content: `【${group.category}】${item}` } }] } });
+      }
+    }
+  }
+
+  // ── 去了哪里 ─────────────────────────────────────
+  if (review.places?.length) {
+    contentBlocks.push(h3("📍 去了哪里", "default"));
+    contentBlocks.push(...itemBlocks(review.places));
+  }
+
+  // ── 学到的 ────────────────────────────────────────
+  if (review.learning?.length) {
+    contentBlocks.push(h3("🧠 学到的", "default"));
+    contentBlocks.push(...itemBlocks(review.learning));
+  }
+
+  // ── 健康 ─────────────────────────────────────────
+  if (review.health?.length) {
+    contentBlocks.push(h3("💪 健康", "green"));
+    contentBlocks.push(...itemBlocks(review.health));
+  }
+
+  // ── 书 ───────────────────────────────────────────
+  if (review.books?.length) {
+    contentBlocks.push(h3("📚 在读的书", "default"));
+    contentBlocks.push(...itemBlocks(review.books));
+  }
+
+  // ── 播客 / 文章 ───────────────────────────────────
+  if (review.mediaConsumed?.length) {
+    contentBlocks.push(h3("🎙 播客 · 文章", "default"));
+    contentBlocks.push(...itemBlocks(review.mediaConsumed));
+  }
+
+  // ── 影视 ─────────────────────────────────────────
+  if (review.moviesTV?.length) {
+    contentBlocks.push(h3("🎬 影视", "default"));
+    contentBlocks.push(...itemBlocks(review.moviesTV));
+  }
+
+  // ── 育儿 ─────────────────────────────────────────
+  if (review.parenting?.length) {
+    contentBlocks.push(h3("👶 育儿", "default"));
+    contentBlocks.push(...itemBlocks(review.parenting));
+  }
+
+  // ── 理财 ─────────────────────────────────────────
+  if (review.finance?.length) {
+    contentBlocks.push(h3("💰 理财", "default"));
+    contentBlocks.push(...itemBlocks(review.finance));
+  }
+
+  // ── 创作输出 ──────────────────────────────────────
+  if (review.creativeOutput?.length) {
+    contentBlocks.push(h3("✍️ 创作输出", "default"));
+    contentBlocks.push(...itemBlocks(review.creativeOutput));
+  }
+
+  // ── 精力分布 ──────────────────────────────────────
+  if (review.energyDistribution && Object.keys(review.energyDistribution).length > 0) {
+    contentBlocks.push(h3("⚡ 精力分布", "default"));
+    const energyText = Object.entries(review.energyDistribution).map(([k, v]) => `${k} ${v}%`).join("、");
+    contentBlocks.push(tagsBlock([energyText]));
+  }
+
+  // ── 成长区域 ──────────────────────────────────────
+  const pz = review.progressZones;
+  if (pz && (pz.breakthrough || pz.inPractice || pz.plantedSeed)) {
+    contentBlocks.push(h3("🌱 成长区域", "default"));
+    if (pz.breakthrough) contentBlocks.push(tagsBlock([`🟢 突破：${pz.breakthrough}`]));
+    if (pz.inPractice)   contentBlocks.push(tagsBlock([`🟡 练习中：${pz.inPractice}`]));
+    if (pz.plantedSeed)  contentBlocks.push(tagsBlock([`🔵 种下的种子：${pz.plantedSeed}`]));
+  }
+
+  // ── 复盘 ─────────────────────────────────────────
+  contentBlocks.push(h3("🪞 复盘", "brown"));
+  contentBlocks.push(tagsBlock([review.reviewParagraph]));
+
+  // ── 下一步（checkbox） ────────────────────────────
+  if (review.nextSteps.length > 0) {
+    contentBlocks.push(h3("🎯 下一步", "green"));
+    for (const step of review.nextSteps) {
+      contentBlocks.push({ type: "to_do", to_do: { rich_text: [{ type: "text", text: { content: step } }], checked: false } });
+    }
+  }
+
+  // ── 正能量 ────────────────────────────────────────
+  if (review.psychNote) {
+    contentBlocks.push(h3("🧘 正能量", "purple"));
+    contentBlocks.push(tagsBlock([review.psychNote]));
+  }
+
+  await withAuthCheck(() =>
+    notion.blocks.children.append({ block_id: calloutId, children: contentBlocks })
   );
+
+  // 返回 calloutId，方便后续追加手账图
+  return calloutId;
 }
 
 // 把一次日记提交写入 Notion 数据库

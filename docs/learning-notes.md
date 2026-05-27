@@ -180,3 +180,25 @@
   - 用 `created_time` 做日期不靠谱，批量导入或补填的记录创建时间都一样，要从标题解析真实日期
 
 - **一句话总结：** 对接真实 Notion 数据时，字段名、字段类型、日期来源都要和数据库实际结构一一核对，不能假设。
+
+---
+
+### E8 — Capture 写入 Notion（完整版）
+
+- **学到的核心概念：**
+  - Notion API 不支持在一次调用里创建三层嵌套（Toggle > Callout > blocks），必须分三步：①创建 Toggle+Callout，②查询 Toggle 拿到 Callout ID，③把内容块 append 到 Callout
+  - `max_tokens` 是 API 请求的输出上限，不是固定消耗量；Claude 写完就停，不会凑满上限；Sonnet 4.6 硬上限是 8192
+  - TypeScript 里函数返回类型必须和函数体里的 `return` 语句一致——`Promise<void>` 不能 return 字符串
+
+- **用到的关键 API/函数：**
+  - `notion.blocks.children.append()` — 追加子块
+  - `notion.blocks.children.list()` — 列出子块（用来拿 Callout ID）
+  - `?.length`（optional chaining）— 防止外部 API 返回数据缺字段时崩溃
+  - `item.search(/[:：]/)` — 同时匹配英文冒号和中文冒号
+
+- **容易踩的坑：**
+  - Claude 返回的 JSON 字段不保证每次都完整（没提到影视就不会有 `moviesTV`），前端用 `.length` 直接崩；要用 `?.length`
+  - JSON 被截断（Failed to parse）的根本原因是输出太长超过 `max_tokens`，解法是让 prompt 要求更简洁，不是一味调高上限
+
+- **一句话总结：** 写入 Notion 的核心是"有内容才写、空的跳过"，多层嵌套要分多次 API 调用，前端处理 AI 返回数据要用 optional chaining 防崩。
+

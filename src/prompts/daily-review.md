@@ -30,7 +30,7 @@ Return ONLY valid JSON, no markdown, no explanation. Schema:
   "learning": ["string — what was learned or understood"],
   "creativeOutput": ["string — what was created or shared"],
   "emotions": ["string — emotion and context"],
-  "reviewParagraph": "string — 100-200 words, reflective, warm tone, first-person",
+  "reviewParagraph": "string — 60-80 words, reflective, warm tone, first-person",
   "nextSteps": ["string — specific actionable item"],
   "energyDistribution": {
     "label1": percentage_as_integer,
@@ -43,7 +43,7 @@ Return ONLY valid JSON, no markdown, no explanation. Schema:
   },
   "score": number_1_to_10,
   "scoreReason": "string — one sentence explaining the score",
-  "psychNote": "string — 60-100 words, warm encouragement using one psychology concept explained in plain language. No lecturing, no 'you should', no 'remember to'. Max 1 gentle emoji (💛 🌱 ☁️)."
+  "psychNote": "string — 40-60 words, warm encouragement using one psychology concept in plain language. No lecturing. Max 1 gentle emoji (💛 🌱 ☁️)."
 }
 ```
 
@@ -55,6 +55,7 @@ Return ONLY valid JSON, no markdown, no explanation. Schema:
 - `score`: 1-10. Base it on the emotional tone and sense of fulfilment in the entry, not productivity.
 - `psychNote`: pick one concept from: self-compassion, emotional granularity, selective attention, effort attribution, flow, secure base, autonomy need, mutual recognition, psychological flexibility, ACT (acceptance and commitment).
 - Arrays: if no content found, return empty array [].
+- **Conciseness (critical):** Array items must be ≤20 words each. `reviewParagraph` ≤80 words. `psychNote` ≤60 words. `scoreReason` ≤15 words. The entire JSON must fit within 4000 tokens — be ruthlessly brief.
 - Do not add commentary outside the JSON.
 
 ## Today's date
