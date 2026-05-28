@@ -80,6 +80,14 @@ export interface MonthlyReview extends WeeklyReview {
   nextMonthDirection: string[];
 }
 
+// 从 Claude 的响应里提取 JSON 对象，忽略前后多余的文字或 markdown 代码块
+function extractJson(text: string): string {
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start === -1 || end === -1) throw new Error("No JSON object found in response");
+  return text.slice(start, end + 1);
+}
+
 // Load prompt template from file and substitute placeholders
 function buildPrompt(journal: string, date: string): string {
   const templatePath = join(process.cwd(), "src/prompts/daily-review.md");
@@ -112,13 +120,10 @@ export async function generateDailyReview(
     throw new Error("Unexpected response type from Claude");
   }
 
-  // Strip markdown code fences if Claude wrapped the JSON
-  const raw = content.text.replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim();
-
   try {
-    return JSON.parse(raw) as DailyReview;
+    return JSON.parse(extractJson(content.text)) as DailyReview;
   } catch {
-    throw new Error(`Failed to parse Claude response as JSON: ${raw.slice(0, 500)}`);
+    throw new Error(`Failed to parse Claude response as JSON: ${content.text.slice(0, 500)}`);
   }
 }
 
@@ -146,11 +151,10 @@ export async function generateWeeklyReview(
   const content = message.content[0];
   if (content.type !== "text") throw new Error("Unexpected response type from Claude");
 
-  const raw = content.text.replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim();
   try {
-    return JSON.parse(raw) as WeeklyReview;
+    return JSON.parse(extractJson(content.text)) as WeeklyReview;
   } catch {
-    throw new Error(`Failed to parse weekly review JSON: ${raw.slice(0, 500)}`);
+    throw new Error(`Failed to parse weekly review JSON: ${content.text.slice(0, 500)}`);
   }
 }
 
@@ -180,10 +184,9 @@ export async function generateMonthlyReview(
   const content = message.content[0];
   if (content.type !== "text") throw new Error("Unexpected response type from Claude");
 
-  const raw = content.text.replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim();
   try {
-    return JSON.parse(raw) as MonthlyReview;
+    return JSON.parse(extractJson(content.text)) as MonthlyReview;
   } catch {
-    throw new Error(`Failed to parse monthly review JSON: ${raw.slice(0, 500)}`);
+    throw new Error(`Failed to parse monthly review JSON: ${content.text.slice(0, 500)}`);
   }
 }
