@@ -2,6 +2,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+import AuthProvider from "@/components/layout/AuthProvider";
 
 // 这个 layout 包住所有带语言前缀的页面（/zh/...、/en/...）
 // 作用：把当前语言的翻译文字注入给所有子页面
@@ -23,8 +24,10 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <NextIntlClientProvider messages={messages}>
-      {children}
-    </NextIntlClientProvider>
+    <AuthProvider>
+      <NextIntlClientProvider messages={messages}>
+        {children}
+      </NextIntlClientProvider>
+    </AuthProvider>
   );
 }
