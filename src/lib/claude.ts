@@ -139,7 +139,7 @@ export async function generateWeeklyReview(
 
   const message = await client.messages.create({
     model: "claude-sonnet-4-6",
-    max_tokens: 8192,
+    max_tokens: 12000,
     messages: [{ role: "user", content: prompt }],
   });
 
@@ -173,7 +173,7 @@ export async function generateMonthlyReview(
 
   const message = await client.messages.create({
     model: "claude-sonnet-4-6",
-    max_tokens: 8192,
+    max_tokens: 16000,
     messages: [{ role: "user", content: prompt }],
   });
 
