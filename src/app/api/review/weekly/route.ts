@@ -60,6 +60,7 @@ export async function POST(req: NextRequest) {
       creativeOutput: [], emotions: [], nextSteps: [], psychNote: "",
       energyDistribution: {},
       progressZones: { breakthrough: null, inPractice: null, plantedSeed: null },
+      dueDates: [],
     }];
 
     // 4. Claude 生成周复盘

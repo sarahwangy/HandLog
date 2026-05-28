@@ -40,12 +40,20 @@ Return ONLY valid JSON, no markdown, no explanation. Schema:
   "scoreTrend": [number],
   "emotionPattern": "string — ≤30 words, what emotional patterns repeated this week",
   "coreProblem": "string — ≤30 words, the most energy-draining challenge this week",
-  "crossWeekFlag": "string or null — only if a theme has appeared 3+ weeks in a row"
+  "crossWeekFlag": "string or null — only if a theme has appeared 3+ weeks in a row",
+  "dueDates": [
+    {
+      "date": "2026-06-01",
+      "title": "string — event or appointment name",
+      "note": "string or null — optional location or extra detail"
+    }
+  ]
 }
 
 ## Rules
 - Synthesize across all 7 days — don't just list day-by-day
 - scoreTrend: array of daily scores in order (Monday to Sunday), use null for missing days
+- dueDates: collect all upcoming events/appointments/deadlines with specific dates from any daily entry. Deduplicate. Date format: YYYY-MM-DD. Return [] if none.
 - Arrays: return [] if nothing found
 - Conciseness: array items ≤20 words, reviewParagraph ≤100 words, entire JSON ≤5000 tokens
 - Do not add commentary outside the JSON

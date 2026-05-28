@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { DailyReview, WeeklyReview, MonthlyReview } from "@/lib/claude";
+import type { DailyReview, WeeklyReview, MonthlyReview, DueDate } from "@/lib/claude";
 
 interface ReviewContentProps {
   dateKey: string;
@@ -262,6 +262,14 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
               </RCard>
             )}
 
+            {/* Due dates — full width */}
+            {review!.dueDates?.length > 0 && (
+              <RCard full>
+                <Label en="📌 Upcoming due dates" zh="待办日期" />
+                <DueDatesList items={review!.dueDates} />
+              </RCard>
+            )}
+
             {/* Next steps — full width */}
             {review!.nextSteps.length > 0 && (
               <RCard full>
@@ -352,6 +360,12 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
                   <p className="text-[14px] text-[#2C1F14]">{weekReview.crossWeekFlag}</p>
                 </RCard>
               )}
+              {weekReview.dueDates?.length > 0 && (
+                <RCard full>
+                  <Label en="📌 Upcoming due dates" zh="待办日期" />
+                  <DueDatesList items={weekReview.dueDates} />
+                </RCard>
+              )}
               <RCard full>
                 <Label en="🪞 Review" zh="周复盘" />
                 <p className="text-[14px] text-[#2C1F14] leading-relaxed">{weekReview.reviewParagraph}</p>
@@ -412,6 +426,12 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
                 <Label en="🔍 Core challenge" zh="核心困境" />
                 <p className="text-[14px] text-[#2C1F14]">{monthReview.coreProblem}</p>
               </RCard>
+              {monthReview.dueDates?.length > 0 && (
+                <RCard full>
+                  <Label en="📌 Upcoming due dates" zh="待办日期" />
+                  <DueDatesList items={monthReview.dueDates} />
+                </RCard>
+              )}
               <RCard full>
                 <Label en="🪞 Review" zh="月复盘" />
                 <p className="text-[14px] text-[#2C1F14] leading-relaxed">{monthReview.reviewParagraph}</p>
@@ -474,6 +494,58 @@ function TagList({ items }: { items: string[] }) {
               </>
             ) : item}
           </span>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Due dates section ─────────────────────────────────────────────────────────
+
+function DueDatesList({ items }: { items: DueDate[] }) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // 根据距今天数返回颜色样式
+  function colorClass(dateStr: string): { dot: string; badge: string; text: string } {
+    const d = new Date(dateStr);
+    d.setHours(0, 0, 0, 0);
+    const diff = Math.round((d.getTime() - today.getTime()) / 86400000);
+    if (diff < 0)   return { dot: "bg-[#D94F4F]", badge: "bg-[#FEE2E2] border-[#F9BDBD]", text: "text-[#B91C1C]" }; // 已过期 red
+    if (diff <= 3)  return { dot: "bg-[#E27726]", badge: "bg-[#FEF0E0] border-[#F6CFA0]", text: "text-[#C2521B]" }; // 3天内 orange
+    if (diff <= 7)  return { dot: "bg-[#D4A017]", badge: "bg-[#FEFCE8] border-[#F9E4A0]", text: "text-[#A16207]" }; // 7天内 yellow
+    return           { dot: "bg-[#3B8C5A]", badge: "bg-[#DCFCE7] border-[#A7F3C0]", text: "text-[#166534]" };      // 更远 green
+  }
+
+  function urgencyLabel(dateStr: string): string {
+    const d = new Date(dateStr);
+    d.setHours(0, 0, 0, 0);
+    const diff = Math.round((d.getTime() - today.getTime()) / 86400000);
+    if (diff < 0)  return `${Math.abs(diff)}天前`;
+    if (diff === 0) return "今天";
+    if (diff === 1) return "明天";
+    return `${diff}天后`;
+  }
+
+  // 按日期升序排列
+  const sorted = [...items].sort((a, b) => a.date.localeCompare(b.date));
+
+  return (
+    <div className="space-y-[8px]">
+      {sorted.map((item, i) => {
+        const c = colorClass(item.date);
+        return (
+          <div key={i} className={`flex items-start gap-3 px-4 py-3 rounded-[10px] border ${c.badge}`}>
+            <div className={`w-[8px] h-[8px] rounded-full mt-[5px] flex-shrink-0 ${c.dot}`} />
+            <div className="flex-1 min-w-0">
+              <p className={`text-[14px] font-semibold ${c.text}`}>{item.title}</p>
+              {item.note && <p className="text-[12px] text-[#8B6B4A] mt-[2px]">{item.note}</p>}
+            </div>
+            <div className="flex-shrink-0 text-right">
+              <p className={`text-[12px] font-medium ${c.text}`}>{item.date}</p>
+              <p className={`text-[11px] ${c.text} opacity-70`}>{urgencyLabel(item.date)}</p>
+            </div>
+          </div>
         );
       })}
     </div>

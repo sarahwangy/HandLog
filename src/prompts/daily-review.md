@@ -43,7 +43,14 @@ Return ONLY valid JSON, no markdown, no explanation. Schema:
   },
   "score": number_1_to_10,
   "scoreReason": "string — one sentence explaining the score",
-  "psychNote": "string — 40-60 words, warm encouragement using one psychology concept in plain language. No lecturing. Max 1 gentle emoji (💛 🌱 ☁️)."
+  "psychNote": "string — 40-60 words, warm encouragement using one psychology concept in plain language. No lecturing. Max 1 gentle emoji (💛 🌱 ☁️).",
+  "dueDates": [
+    {
+      "date": "2026-06-01",
+      "title": "string — event or appointment name",
+      "note": "string or null — optional location or extra detail"
+    }
+  ]
 }
 ```
 
@@ -54,6 +61,7 @@ Return ONLY valid JSON, no markdown, no explanation. Schema:
 - `progressZones`: set to null if nothing fits that zone — don't force it.
 - `score`: 1-10. Base it on the emotional tone and sense of fulfilment in the entry, not productivity.
 - `psychNote`: pick one concept from: self-compassion, emotional granularity, selective attention, effort attribution, flow, secure base, autonomy need, mutual recognition, psychological flexibility, ACT (acceptance and commitment).
+- `dueDates`: extract any upcoming events, appointments, deadlines, or bookings mentioned in the entry that have a specific date. Return [] if none mentioned. Date format: YYYY-MM-DD.
 - Arrays: if no content found, return empty array [].
 - **Conciseness (critical):** Array items must be ≤20 words each. `reviewParagraph` ≤80 words. `psychNote` ≤60 words. `scoreReason` ≤15 words. The entire JSON must fit within 4000 tokens — be ruthlessly brief.
 - Do not add commentary outside the JSON.

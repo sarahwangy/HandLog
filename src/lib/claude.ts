@@ -2,6 +2,12 @@ import Anthropic from "@anthropic-ai/sdk";
 import { readFileSync } from "fs";
 import { join } from "path";
 
+export interface DueDate {
+  date: string;       // YYYY-MM-DD
+  title: string;
+  note: string | null;
+}
+
 // Daily review JSON structure returned by Claude
 export interface DailyReview {
   date: string;
@@ -30,6 +36,7 @@ export interface DailyReview {
   score: number;
   scoreReason: string;
   psychNote: string;
+  dueDates: DueDate[];
 }
 
 export interface WeeklyReview {
@@ -63,6 +70,7 @@ export interface WeeklyReview {
   emotionPattern: string;
   coreProblem: string;
   crossWeekFlag: string | null;
+  dueDates: DueDate[];
 }
 
 export interface MonthlyReview extends WeeklyReview {

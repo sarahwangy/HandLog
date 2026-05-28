@@ -60,6 +60,7 @@ export async function POST(req: NextRequest) {
         energyDistribution: {}, psychNote: "",
         progressZones: { breakthrough: null, inPractice: null, plantedSeed: null },
         scoreTrend: [], emotionPattern: "", coreProblem: "", crossWeekFlag: null,
+        dueDates: [],
       };
     });
 

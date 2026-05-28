@@ -44,12 +44,20 @@ Return ONLY valid JSON, no markdown, no explanation. Schema:
   "coreProblem": "string — ≤40 words, the persistent challenge this month",
   "crossWeekFlag": "string or null",
   "monthlyPattern": "string — ≤50 words, big-picture theme or pattern across the whole month",
-  "nextMonthDirection": ["string — 1-3 core intentions for next month"]
+  "nextMonthDirection": ["string — 1-3 core intentions for next month"],
+  "dueDates": [
+    {
+      "date": "2026-06-01",
+      "title": "string — event or appointment name",
+      "note": "string or null — optional location or extra detail"
+    }
+  ]
 }
 
 ## Rules
 - Synthesize across all weeks — identify patterns, not just summaries
 - scoreTrend: all daily scores in chronological order across the month
+- dueDates: collect all upcoming events/appointments/deadlines with specific dates from any weekly entry. Deduplicate. Only include dates that are still in the future relative to the month's end. Date format: YYYY-MM-DD. Return [] if none.
 - Arrays: return [] if nothing found
 - Conciseness: array items ≤20 words, reviewParagraph ≤120 words
 - Do not add commentary outside the JSON
