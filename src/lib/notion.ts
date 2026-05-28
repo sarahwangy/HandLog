@@ -489,3 +489,312 @@ export async function appendBlocks(
     notion.blocks.children.append({ block_id: blockId, children })
   );
 }
+
+// 查询指定周内所有日记条目（标题格式 "5-25" 到 "5-31"）
+// 返回每条页面的 properties，供周复盘聚合用
+export async function getWeekDailyEntries(
+  accessToken: string,
+  databaseId: string,
+  weekLabel: string  // e.g. "5-25-31"
+): Promise<Array<{ date: string; score: number | null; insight: string; review: string; dailySummary: string; labels: string[] }>> {
+  const notion = createNotionClient(accessToken);
+
+  // 从 weekLabel "5-25-31" 解析出月份和起止日
+  const parts = weekLabel.split("-");  // ["5", "25", "31"]
+  const month = parseInt(parts[0]);
+  const startDay = parseInt(parts[1]);
+  const endDay = parseInt(parts[2]);
+
+  // 生成这一周所有可能的标题（"5-25", "5-26", ..., "5-31"）
+  const titles: string[] = [];
+  for (let d = startDay; d <= endDay; d++) {
+    titles.push(`${month}-${d}`);
+  }
+
+  // 查询 Notion 数据库，筛选标题在这个列表里的
+  const results = await withAuthCheck(() =>
+    notion.databases.query({
+      database_id: databaseId,
+      filter: {
+        or: titles.map(title => ({
+          property: "Name",
+          title: { equals: title },
+        })),
+      },
+      sorts: [{ property: "Name", direction: "ascending" }],
+    })
+  ) as { results: Array<{ properties: Record<string, unknown> }> };
+
+  return results.results.map(page => {
+    const props = page.properties as Record<string, {
+      title?: { plain_text: string }[];
+      number?: number | null;
+      rich_text?: { plain_text: string }[];
+      multi_select?: { name: string }[];
+    }>;
+
+    return {
+      date: props["Name"]?.title?.[0]?.plain_text ?? "",
+      score: props["打分"]?.number ?? null,
+      insight: props["一句话感悟"]?.rich_text?.[0]?.plain_text ?? "",
+      review: props["复盘"]?.rich_text?.[0]?.plain_text ?? "",
+      dailySummary: props["简短日常"]?.rich_text?.[0]?.plain_text ?? "",
+      labels: props["label标签"]?.multi_select?.map((s) => s.name) ?? [],
+    };
+  });
+}
+
+export async function appendWeeklyReviewBlocks(
+  accessToken: string,
+  weekPageId: string,
+  review: import("@/lib/claude").WeeklyReview
+): Promise<string | undefined> {
+  const notion = createNotionClient(accessToken);
+
+  const toggleRes = await withAuthCheck(() =>
+    notion.blocks.children.append({
+      block_id: weekPageId,
+      children: [
+        {
+          type: "toggle",
+          toggle: {
+            rich_text: [{ type: "text", text: { content: "本周复盘" }, annotations: { bold: true } }],
+            color: "default",
+            children: [
+              {
+                type: "callout",
+                callout: {
+                  rich_text: [],
+                  icon: { type: "emoji", emoji: "📆" },
+                  color: "purple_background",
+                },
+              } as Parameters<typeof notion.blocks.children.append>[0]["children"][0],
+            ],
+          },
+        } as Parameters<typeof notion.blocks.children.append>[0]["children"][0],
+      ],
+    })
+  ) as { results: { id: string; type: string }[] };
+
+  const toggleId = toggleRes.results[0]?.id;
+  if (!toggleId) return;
+
+  const toggleChildren = await withAuthCheck(() =>
+    notion.blocks.children.list({ block_id: toggleId })
+  ) as { results: { id: string; type: string }[] };
+
+  const calloutId = toggleChildren.results.find(b => b.type === "callout")?.id;
+  if (!calloutId) return;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const blocks: any[] = [];
+
+  blocks.push(h3("⭐ 周评分", "orange"));
+  blocks.push(tagsBlock([`${review.score}/10  ${review.scoreReason}`]));
+
+  blocks.push(h3("💡 一句话感悟", "yellow"));
+  const insightText = review.oneLineInsightZh
+    ? `${review.oneLineInsight}\n「${review.oneLineInsightZh}」`
+    : review.oneLineInsight;
+  blocks.push(tagsBlock([insightText]));
+
+  blocks.push(h3("📈 分数趋势", "default"));
+  blocks.push(tagsBlock([review.scoreTrend.map(s => s ?? "-").join(" → ")]));
+
+  blocks.push(h3("🌊 情绪规律", "pink"));
+  blocks.push(tagsBlock([review.emotionPattern]));
+
+  blocks.push(h3("🔍 核心困境", "red"));
+  blocks.push(tagsBlock([review.coreProblem]));
+
+  if (review.crossWeekFlag) {
+    blocks.push(h3("🚩 跨周信号", "red"));
+    blocks.push(tagsBlock([review.crossWeekFlag]));
+  }
+
+  if (review.people?.length) { blocks.push(h3("👥 人物", "blue")); blocks.push(...itemBlocks(review.people)); }
+  if (review.emotions?.length) { blocks.push(h3("🌊 情绪", "pink")); blocks.push(...itemBlocks(review.emotions)); }
+  if (review.events?.length) {
+    blocks.push(h3("📅 事件", "default"));
+    for (const group of review.events) {
+      for (const item of group.items) {
+        blocks.push({ type: "paragraph", paragraph: { rich_text: [{ type: "text", text: { content: `【${group.category}】${item}` } }] } });
+      }
+    }
+  }
+  if (review.learning?.length) { blocks.push(h3("🧠 学到的", "default")); blocks.push(...itemBlocks(review.learning)); }
+  if (review.health?.length) { blocks.push(h3("💪 健康", "green")); blocks.push(...itemBlocks(review.health)); }
+  if (review.books?.length) { blocks.push(h3("📚 在读的书", "default")); blocks.push(...itemBlocks(review.books)); }
+  if (review.energyDistribution && Object.keys(review.energyDistribution).length) {
+    blocks.push(h3("⚡ 精力分布", "default"));
+    blocks.push(tagsBlock([Object.entries(review.energyDistribution).map(([k, v]) => `${k} ${v}%`).join("、")]));
+  }
+  const pz = review.progressZones;
+  if (pz && (pz.breakthrough || pz.inPractice || pz.plantedSeed)) {
+    blocks.push(h3("🌱 成长区域", "default"));
+    if (pz.breakthrough) blocks.push(tagsBlock([`🟢 突破：${pz.breakthrough}`]));
+    if (pz.inPractice)   blocks.push(tagsBlock([`🟡 练习中：${pz.inPractice}`]));
+    if (pz.plantedSeed)  blocks.push(tagsBlock([`🔵 种下的种子：${pz.plantedSeed}`]));
+  }
+
+  blocks.push(h3("🪞 周复盘", "brown"));
+  blocks.push(tagsBlock([review.reviewParagraph]));
+
+  if (review.nextSteps.length > 0) {
+    blocks.push(h3("🎯 下周计划", "green"));
+    for (const step of review.nextSteps) {
+      blocks.push({ type: "to_do", to_do: { rich_text: [{ type: "text", text: { content: step } }], checked: false } });
+    }
+  }
+
+  if (review.psychNote) {
+    blocks.push(h3("🧘 正能量", "purple"));
+    blocks.push(tagsBlock([review.psychNote]));
+  }
+
+  await withAuthCheck(() =>
+    notion.blocks.children.append({ block_id: calloutId, children: blocks })
+  );
+
+  return calloutId;
+}
+
+export async function updateWeekPageImage(
+  accessToken: string,
+  weekPageId: string,
+  imageUrl: string
+): Promise<void> {
+  const notion = createNotionClient(accessToken);
+  await withAuthCheck(() =>
+    notion.pages.update({
+      page_id: weekPageId,
+      properties: {
+        手绘复盘图: {
+          files: [{ name: "weekly-review.png", type: "external", external: { url: imageUrl } }],
+        },
+      } as UpdatePageParameters["properties"],
+    })
+  );
+}
+
+// 找到数据库里标题为"复盘-汇总"的特殊行，返回其 pageId
+export async function findMonthSummaryPage(
+  accessToken: string,
+  databaseId: string
+): Promise<string | null> {
+  const notion = createNotionClient(accessToken);
+  const res = await withAuthCheck(() =>
+    notion.databases.query({
+      database_id: databaseId,
+      filter: { property: "Name", title: { equals: "复盘-汇总" } },
+      page_size: 1,
+    })
+  ) as { results: { id: string }[] };
+
+  return res.results[0]?.id ?? null;
+}
+
+export async function appendMonthlyReviewBlocks(
+  accessToken: string,
+  summaryPageId: string,
+  review: import("@/lib/claude").MonthlyReview
+): Promise<string | undefined> {
+  const notion = createNotionClient(accessToken);
+
+  // Toggle title includes the date range, e.g. "5月1日-5月31日复盘"
+  const toggleTitle = `${review.dateRange}复盘`;
+
+  const toggleRes = await withAuthCheck(() =>
+    notion.blocks.children.append({
+      block_id: summaryPageId,
+      children: [
+        {
+          type: "toggle",
+          toggle: {
+            rich_text: [{ type: "text", text: { content: toggleTitle }, annotations: { bold: true } }],
+            color: "default",
+            children: [
+              {
+                type: "callout",
+                callout: {
+                  rich_text: [],
+                  icon: { type: "emoji", emoji: "🗓" },
+                  color: "green_background",
+                },
+              } as Parameters<typeof notion.blocks.children.append>[0]["children"][0],
+            ],
+          },
+        } as Parameters<typeof notion.blocks.children.append>[0]["children"][0],
+      ],
+    })
+  ) as { results: { id: string; type: string }[] };
+
+  const toggleId = toggleRes.results[0]?.id;
+  if (!toggleId) return;
+
+  const toggleChildren = await withAuthCheck(() =>
+    notion.blocks.children.list({ block_id: toggleId })
+  ) as { results: { id: string; type: string }[] };
+
+  const calloutId = toggleChildren.results.find(b => b.type === "callout")?.id;
+  if (!calloutId) return;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const blocks: any[] = [];
+
+  blocks.push(h3("⭐ 月评分", "orange"));
+  blocks.push(tagsBlock([`${review.score}/10  ${review.scoreReason}`]));
+
+  blocks.push(h3("💡 一句话感悟", "yellow"));
+  const insightText = review.oneLineInsightZh
+    ? `${review.oneLineInsight}\n「${review.oneLineInsightZh}」`
+    : review.oneLineInsight;
+  blocks.push(tagsBlock([insightText]));
+
+  blocks.push(h3("📊 本月规律", "default"));
+  blocks.push(tagsBlock([review.monthlyPattern]));
+
+  blocks.push(h3("🌊 情绪规律", "pink"));
+  blocks.push(tagsBlock([review.emotionPattern]));
+
+  blocks.push(h3("🔍 核心困境", "red"));
+  blocks.push(tagsBlock([review.coreProblem]));
+
+  if (review.crossWeekFlag) {
+    blocks.push(h3("🚩 持续信号", "red"));
+    blocks.push(tagsBlock([review.crossWeekFlag]));
+  }
+
+  if (review.learning?.length) { blocks.push(h3("🧠 学到的", "default")); blocks.push(...itemBlocks(review.learning)); }
+  if (review.health?.length) { blocks.push(h3("💪 健康", "green")); blocks.push(...itemBlocks(review.health)); }
+  if (review.books?.length) { blocks.push(h3("📚 在读的书", "default")); blocks.push(...itemBlocks(review.books)); }
+
+  const pz = review.progressZones;
+  if (pz && (pz.breakthrough || pz.inPractice || pz.plantedSeed)) {
+    blocks.push(h3("🌱 成长区域", "default"));
+    if (pz.breakthrough) blocks.push(tagsBlock([`🟢 突破：${pz.breakthrough}`]));
+    if (pz.inPractice)   blocks.push(tagsBlock([`🟡 练习中：${pz.inPractice}`]));
+    if (pz.plantedSeed)  blocks.push(tagsBlock([`🔵 种下的种子：${pz.plantedSeed}`]));
+  }
+
+  blocks.push(h3("🪞 月复盘", "brown"));
+  blocks.push(tagsBlock([review.reviewParagraph]));
+
+  if (review.nextMonthDirection?.length) {
+    blocks.push(h3("🧭 下月方向", "green"));
+    for (const step of review.nextMonthDirection) {
+      blocks.push({ type: "to_do", to_do: { rich_text: [{ type: "text", text: { content: step } }], checked: false } });
+    }
+  }
+
+  if (review.psychNote) {
+    blocks.push(h3("🧘 正能量", "purple"));
+    blocks.push(tagsBlock([review.psychNote]));
+  }
+
+  await withAuthCheck(() =>
+    notion.blocks.children.append({ block_id: calloutId, children: blocks })
+  );
+
+  return calloutId;
+}
