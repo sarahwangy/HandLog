@@ -1,16 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getNotionTokenInternal, getNotionDatabaseId } from "@/lib/auth";
 import { generateWeeklyReview } from "@/lib/claude";
-import {
-  findOrCreateWeekPage,
-  appendWeeklyReviewBlocks,
-  updateWeekPageImage,
-  getPage,
-} from "@/lib/notion";
+import { findOrCreateWeekPage, getPage } from "@/lib/notion";
 
 // POST /api/review/weekly
 // Body: { weekLabel: "5-25-31" }
-// 直接读取周页面的属性（简短日常、复盘等），生成周复盘，写回 Notion
+// 读取本周页面的原始「简短日常」，生成周复盘 JSON（不自动写入 Notion，由前端 Save 按钮触发保存）
 export async function POST(req: NextRequest) {
   const { weekLabel } = await req.json() as { weekLabel: string };
   if (!weekLabel) {
@@ -26,7 +21,7 @@ export async function POST(req: NextRequest) {
     const dateForLookup = `2026-${parts[0].padStart(2, "0")}-${parts[1].padStart(2, "0")}`;
     const weekPageId = await findOrCreateWeekPage(token, databaseId, dateForLookup);
 
-    // 2. 读取周页面属性：简短日常、一句话感悟、复盘、打分
+    // 2. 读取周页面属性：简短日常（全周 "一. 二. 三." 原始文字）和打分
     const page = await getPage(token, weekPageId) as {
       properties: Record<string, {
         title?: { plain_text: string }[];
@@ -36,62 +31,18 @@ export async function POST(req: NextRequest) {
     };
     const props = page.properties;
     const dailySummary = props["简短日常"]?.rich_text?.[0]?.plain_text ?? "";
-    const insight = props["一句话感悟"]?.rich_text?.[0]?.plain_text ?? "";
-    const reviewText = props["复盘"]?.rich_text?.[0]?.plain_text ?? "";
     const score = props["打分"]?.number ?? null;
 
     if (!dailySummary.trim()) {
       return NextResponse.json({ error: "本周还没有日记内容，请先写日记再生成周复盘" }, { status: 404 });
     }
 
-    // 3. 把周页面内容包装成 generateWeeklyReview 需要的格式
-    // 用一条记录代表整周，dailySummary 作为本周所有日记内容
-    const reviewInputs = [{
-      date: dateForLookup,
-      oneLineInsight: insight,
-      oneLineInsightZh: "",
-      reviewParagraph: reviewText,
-      score: score ?? 5,
-      scoreReason: "",
-      // 把 dailySummary 放进 learning 字段让 Claude 能读到完整内容
-      people: [], places: [], events: [], books: [], mediaConsumed: [],
-      moviesTV: [], parenting: [], health: [], finance: [],
-      learning: [dailySummary],
-      creativeOutput: [], emotions: [], nextSteps: [], psychNote: "",
-      energyDistribution: {},
-      progressZones: { breakthrough: null, inPractice: null, plantedSeed: null },
-      dueDates: [],
-    }];
+    // 3. 把周页面原始简短日常传给 Claude 生成周复盘（完整 22 个 section）
+    const rawEntries = [{ date: weekLabel, dailySummary, score }];
+    const review = await generateWeeklyReview(weekLabel, rawEntries);
 
-    // 4. Claude 生成周复盘
-    const review = await generateWeeklyReview(weekLabel, reviewInputs);
-
-    // 5. 写入 Notion 周页面 body
-    const calloutId = await appendWeeklyReviewBlocks(token, weekPageId, review);
-
-    // 6. 生成 AI 图片并存入「手绘复盘图」属性
-    let imageUrl: string | null = null;
-    try {
-      const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3001";
-      const imgRes = await fetch(`${baseUrl}/api/handlog/generate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          review: { oneLineInsight: review.oneLineInsight, score: review.score, emotions: review.emotions },
-          calloutId: null,
-        }),
-      });
-      if (imgRes.ok) {
-        const imgData = await imgRes.json() as { imageUrl?: string };
-        imageUrl = imgData.imageUrl ?? null;
-      }
-    } catch { /* image failure is non-fatal */ }
-
-    if (imageUrl) {
-      await updateWeekPageImage(token, weekPageId, imageUrl);
-    }
-
-    return NextResponse.json({ ...review, calloutId, imageUrl });
+    // 返回复盘数据 + weekPageId（供 Save 按钮用）
+    return NextResponse.json({ ...review, weekPageId });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json({ error: message }, { status: 500 });

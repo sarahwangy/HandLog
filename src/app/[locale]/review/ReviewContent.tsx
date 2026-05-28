@@ -27,11 +27,16 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
     return `${mon.getMonth() + 1}-${mon.getDate()}-${sun.getDate()}`;
   });
   const [weekReview, setWeekReview] = useState<WeeklyReview | null>(null);
+  const [weekPageId, setWeekPageId] = useState<string | null>(null);
   const [weekLoading, setWeekLoading] = useState(false);
   const [weekError, setWeekError] = useState<string | null>(null);
+  const [weekSaving, setWeekSaving] = useState(false);
+  const [weekSaved, setWeekSaved] = useState(false);
   const [monthReview, setMonthReview] = useState<MonthlyReview | null>(null);
   const [monthLoading, setMonthLoading] = useState(false);
   const [monthError, setMonthError] = useState<string | null>(null);
+  const [monthSaving, setMonthSaving] = useState(false);
+  const [monthSaved, setMonthSaved] = useState(false);
   const [monthYear, setMonthYear] = useState(() => new Date().getFullYear());
   const [monthMonth, setMonthMonth] = useState(() => new Date().getMonth() + 1);
 
@@ -69,14 +74,16 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
     setWeekLoading(true);
     setWeekError(null);
     setWeekReview(null);
+    setWeekSaved(false);
     try {
       const res = await fetch("/api/review/weekly", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ weekLabel }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed");
+      const data = await res.json() as WeeklyReview & { weekPageId?: string };
+      if (!res.ok) throw new Error((data as { error?: string }).error ?? "Failed");
+      setWeekPageId(data.weekPageId ?? null);
       setWeekReview(data);
     } catch (err) {
       setWeekError(err instanceof Error ? err.message : "Something went wrong");
@@ -85,10 +92,31 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
     }
   };
 
+  const saveWeekly = async () => {
+    if (!weekReview || !weekPageId) return;
+    setWeekSaving(true);
+    setWeekError(null);
+    try {
+      const res = await fetch("/api/review/weekly/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ review: weekReview, weekPageId }),
+      });
+      const data = await res.json() as { error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Save failed");
+      setWeekSaved(true);
+    } catch (err) {
+      setWeekError(err instanceof Error ? err.message : "Save failed");
+    } finally {
+      setWeekSaving(false);
+    }
+  };
+
   const generateMonthly = async () => {
     setMonthLoading(true);
     setMonthError(null);
     setMonthReview(null);
+    setMonthSaved(false);
     try {
       const res = await fetch("/api/review/monthly", {
         method: "POST",
@@ -96,12 +124,32 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
         body: JSON.stringify({ year: monthYear, month: monthMonth }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed");
+      if (!res.ok) throw new Error((data as { error?: string }).error ?? "Failed");
       setMonthReview(data);
     } catch (err) {
       setMonthError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setMonthLoading(false);
+    }
+  };
+
+  const saveMonthly = async () => {
+    if (!monthReview) return;
+    setMonthSaving(true);
+    setMonthError(null);
+    try {
+      const res = await fetch("/api/review/monthly/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ review: monthReview }),
+      });
+      const data = await res.json() as { error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Save failed");
+      setMonthSaved(true);
+    } catch (err) {
+      setMonthError(err instanceof Error ? err.message : "Save failed");
+    } finally {
+      setMonthSaving(false);
     }
   };
 
@@ -340,6 +388,16 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
               >
                 {weekLoading ? "Generating..." : "✨ Generate"}
               </button>
+              {weekReview && (
+                <button
+                  type="button"
+                  onClick={saveWeekly}
+                  disabled={weekSaving || weekSaved}
+                  className="h-[34px] px-5 rounded-[8px] text-[13px] font-medium border border-[#C4783A] text-[#C4783A] hover:bg-[#FDF0E6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {weekSaved ? "✓ Saved to Notion" : weekSaving ? "Saving..." : "💾 Save to Notion"}
+                </button>
+              )}
             </div>
             {weekError && <p className="text-[#C4783A] mt-2 text-[13px]">{weekError}</p>}
           </div>
@@ -361,7 +419,7 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
                 <p className="text-[13px] text-[#2C1F14] mt-2">{weekReview.scoreTrend.map(s => s ?? "–").join(" → ")}</p>
               </RCard>
 
-              {weekReview.people?.length > 0 && <RCard><Label en="👥 People" zh="人物" /><TagList items={weekReview.people} /></RCard>}
+              {weekReview.people?.length > 0 && <RCard><Label en="👥 People" zh="人物" /><PeopleList items={weekReview.people} /></RCard>}
               {weekReview.emotions?.length > 0 && <RCard><Label en="🌊 Emotions" zh="情绪" /><TagList items={weekReview.emotions} /></RCard>}
               {weekReview.events?.length > 0 && (
                 <RCard>
@@ -504,6 +562,16 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
               >
                 {monthLoading ? "Generating..." : "✨ Generate"}
               </button>
+              {monthReview && (
+                <button
+                  type="button"
+                  onClick={saveMonthly}
+                  disabled={monthSaving || monthSaved}
+                  className="h-[34px] px-5 rounded-[8px] text-[13px] font-medium border border-[#C4783A] text-[#C4783A] hover:bg-[#FDF0E6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {monthSaved ? "✓ Saved to Notion" : monthSaving ? "Saving..." : "💾 Save to Notion"}
+                </button>
+              )}
             </div>
             {monthError && <p className="text-[#C4783A] mt-2 text-[13px]">{monthError}</p>}
           </div>
@@ -524,7 +592,7 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
                 <div className="text-[13px] text-[#8B6B4A] mt-1">/10 · {monthReview.scoreReason}</div>
               </RCard>
 
-              {monthReview.people?.length > 0 && <RCard><Label en="👥 People" zh="人物" /><TagList items={monthReview.people} /></RCard>}
+              {monthReview.people?.length > 0 && <RCard><Label en="👥 People" zh="人物" /><PeopleList items={monthReview.people} /></RCard>}
               {monthReview.emotions?.length > 0 && <RCard><Label en="🌊 Emotions" zh="情绪" /><TagList items={monthReview.emotions} /></RCard>}
               {monthReview.events?.length > 0 && (
                 <RCard>
@@ -672,6 +740,25 @@ function Label({ en, zh }: { en: string; zh: string }) {
     <div className="mb-[10px]">
       <p className="text-[11px] font-bold text-[#8B6B4A] uppercase tracking-[0.6px]">{zh}</p>
       <p className="text-[10px] text-[#C4A98A] mt-[1px]">{en}</p>
+    </div>
+  );
+}
+
+// 人物专用列表：把 "姓名：描述" 分成名字（粗体）+ 描述（小字），比 tag pill 更易读
+function PeopleList({ items }: { items: string[] }) {
+  return (
+    <div className="flex flex-col gap-[8px]">
+      {items.map((item, i) => {
+        const colonIdx = item.search(/[:：]/);
+        const name = colonIdx > 0 ? item.slice(0, colonIdx).trim() : item;
+        const desc = colonIdx > 0 ? item.slice(colonIdx + 1).trim() : null;
+        return (
+          <div key={i} className="flex items-baseline gap-2">
+            <span className="font-semibold text-[13px] text-[#2C1F14] shrink-0">{name}</span>
+            {desc && <span className="text-[12px] text-[#8B6B4A] leading-relaxed">{desc}</span>}
+          </div>
+        );
+      })}
     </div>
   );
 }
