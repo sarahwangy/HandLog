@@ -452,8 +452,8 @@ function RCard({ children, full, warm }: { children: React.ReactNode; full?: boo
 function Label({ en, zh }: { en: string; zh: string }) {
   return (
     <div className="mb-[10px]">
-      <p className="text-[11px] font-bold text-[#8B6B4A] uppercase tracking-[0.6px]">{en}</p>
-      <p className="text-[10px] text-[#C4A98A] mt-[1px]">{zh}</p>
+      <p className="text-[11px] font-bold text-[#8B6B4A] uppercase tracking-[0.6px]">{zh}</p>
+      <p className="text-[10px] text-[#C4A98A] mt-[1px]">{en}</p>
     </div>
   );
 }

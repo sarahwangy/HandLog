@@ -24,10 +24,11 @@ export async function POST(req: NextRequest) {
 
   try {
     const res = await openai.images.generate({
-      model: "gpt-image-1",
+      model: "dall-e-3",
       prompt: buildPrompt(review),
       n: 1,
       size: "1024x1024",
+      response_format: "url",
     });
 
     const imageUrl = res.data?.[0]?.url;

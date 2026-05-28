@@ -15,8 +15,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "缺少 date 参数" }, { status: 400 });
   }
 
-  const content = await getDraft(session.userId, date);
-  return NextResponse.json({ content: content ?? "" });
+  try {
+    const content = await getDraft(session.userId, date);
+    return NextResponse.json({ content: content ?? "" });
+  } catch {
+    return NextResponse.json({ content: "" });
+  }
 }
 
 // ── POST /api/draft ──────────────────────────────────
@@ -36,10 +40,14 @@ export async function POST(req: NextRequest) {
   }
 
   // content 为空字符串时删除草稿（用户清空了输入框）
-  if (content === "") {
-    await deleteDraft(session.userId, date);
-  } else {
-    await setDraft(session.userId, date, content);
+  try {
+    if (content === "") {
+      await deleteDraft(session.userId, date);
+    } else {
+      await setDraft(session.userId, date, content);
+    }
+  } catch {
+    // KV not available — silently ignore in local dev
   }
 
   return NextResponse.json({ ok: true });
