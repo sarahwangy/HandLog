@@ -32,6 +32,8 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
   const [monthReview, setMonthReview] = useState<MonthlyReview | null>(null);
   const [monthLoading, setMonthLoading] = useState(false);
   const [monthError, setMonthError] = useState<string | null>(null);
+  const [monthYear, setMonthYear] = useState(() => new Date().getFullYear());
+  const [monthMonth, setMonthMonth] = useState(() => new Date().getMonth() + 1);
 
   // 页面加载时先检查 sessionStorage 里有没有从 Capture 页传来的复盘结果
   useEffect(() => {
@@ -66,6 +68,7 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
   const generateWeekly = async () => {
     setWeekLoading(true);
     setWeekError(null);
+    setWeekReview(null);
     try {
       const res = await fetch("/api/review/weekly", {
         method: "POST",
@@ -83,14 +86,14 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
   };
 
   const generateMonthly = async () => {
-    const now = new Date();
     setMonthLoading(true);
     setMonthError(null);
+    setMonthReview(null);
     try {
       const res = await fetch("/api/review/monthly", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ year: now.getFullYear(), month: now.getMonth() + 1 }),
+        body: JSON.stringify({ year: monthYear, month: monthMonth }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed");
@@ -318,34 +321,103 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
       {activeTab === "weekly" && (
         <div className="space-y-4">
           <div className="mb-5">
-            <h2 className="text-[26px] font-semibold text-[#2C1F14] tracking-tight">Weekly Review</h2>
-            <p className="text-[14px] text-[#8B6B4A] mt-1">Week of {weekLabel}</p>
-          </div>
-          {!weekReview ? (
-            <div className="text-center py-16">
-              <p className="text-[#8B6B4A] mb-6 text-[14px]">Generate a summary of your week from all daily entries.</p>
+            <h2 className="text-[26px] font-semibold text-[#2C1F14] tracking-tight">Weekly Review <span className="text-[16px] font-normal text-[#8B6B4A]">每周复盘</span></h2>
+            {/* 周标签输入框：可以手动改成上周，如 "5-18-24" */}
+            <div className="flex items-center gap-3 mt-3">
+              <label className="text-[13px] text-[#8B6B4A]">Week</label>
+              <input
+                type="text"
+                value={weekLabel}
+                onChange={e => { setWeekLabel(e.target.value); setWeekReview(null); }}
+                placeholder="5-25-31"
+                className="w-[120px] h-[34px] px-3 rounded-[8px] border border-[#E4D4C0] text-[13px] text-[#2C1F14] bg-white focus:outline-none focus:border-[#C4A98A]"
+              />
               <button
                 type="button"
                 onClick={generateWeekly}
                 disabled={weekLoading}
-                className="h-[48px] px-8 bg-[#C4783A] text-white rounded-[8px] text-[15px] font-medium hover:bg-[#A85E28] transition-colors disabled:bg-[#EDD4BC] disabled:cursor-not-allowed"
+                className="h-[34px] px-5 bg-[#C4783A] text-white rounded-[8px] text-[13px] font-medium hover:bg-[#A85E28] transition-colors disabled:bg-[#EDD4BC] disabled:cursor-not-allowed"
               >
-                {weekLoading ? "Generating..." : "✨ Generate weekly review"}
+                {weekLoading ? "Generating..." : "✨ Generate"}
               </button>
-              {weekError && <p className="text-[#C4783A] mt-4 text-[13px]">{weekError}</p>}
             </div>
-          ) : (
+            {weekError && <p className="text-[#C4783A] mt-2 text-[13px]">{weekError}</p>}
+          </div>
+
+          {weekReview && (
             <div className="grid grid-cols-2 gap-3">
+              {/* Insight — full width warm */}
               <RCard full warm>
                 <Label en="💡 Weekly insight" zh="本周感悟" />
-                <p className="text-[18px] font-semibold text-[#2C1F14] italic leading-relaxed">{weekReview.oneLineInsight}</p>
-                {weekReview.oneLineInsightZh && <p className="text-[13px] text-[#8B6B4A] mt-1">「{weekReview.oneLineInsightZh}」</p>}
+                <p className="text-[20px] font-semibold text-[#2C1F14] italic leading-relaxed">&ldquo;{weekReview.oneLineInsight}&rdquo;</p>
+                {weekReview.oneLineInsightZh && <p className="text-[14px] text-[#A88060] mt-2 leading-relaxed">「{weekReview.oneLineInsightZh}」</p>}
               </RCard>
+
+              {/* Score trend */}
               <RCard>
-                <Label en="📈 Score trend" zh="分数趋势" />
-                <p className="text-[15px] text-[#2C1F14]">{weekReview.scoreTrend.map(s => s ?? "-").join(" → ")}</p>
-                <p className="text-[13px] text-[#8B6B4A] mt-1">Week avg: {weekReview.score}/10</p>
+                <Label en="📈 Score trend" zh="本周评分" />
+                <div className="text-[42px] font-bold text-[#2C1F14] leading-none">{weekReview.score}</div>
+                <div className="text-[13px] text-[#8B6B4A] mt-1">/10 · {weekReview.scoreReason}</div>
+                <p className="text-[13px] text-[#2C1F14] mt-2">{weekReview.scoreTrend.map(s => s ?? "–").join(" → ")}</p>
               </RCard>
+
+              {weekReview.people?.length > 0 && <RCard><Label en="👥 People" zh="人物" /><TagList items={weekReview.people} /></RCard>}
+              {weekReview.emotions?.length > 0 && <RCard><Label en="🌊 Emotions" zh="情绪" /><TagList items={weekReview.emotions} /></RCard>}
+              {weekReview.events?.length > 0 && (
+                <RCard>
+                  <Label en="📅 Events" zh="本周事件" />
+                  <div className="space-y-3">
+                    {weekReview.events.map((group, i) => (
+                      <div key={i}>
+                        <p className="text-[11px] font-semibold text-[#C4783A] uppercase tracking-[0.4px] mb-[6px]">{group.category}</p>
+                        <div className="flex flex-wrap gap-[6px]">
+                          {group.items.map((item, j) => (
+                            <span key={j} className="bg-[#FDF0E6] border border-[#E4D4C0] rounded-full px-3 py-1 text-[13px] text-[#4A3324]">{item}</span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </RCard>
+              )}
+              {weekReview.learning?.length > 0 && <RCard><Label en="🧠 Learning" zh="学到的" /><TagList items={weekReview.learning} /></RCard>}
+              {weekReview.health?.length > 0 && <RCard><Label en="💪 Health & Body" zh="健康 · 身体" /><TagList items={weekReview.health} /></RCard>}
+              {weekReview.places?.length > 0 && <RCard><Label en="📍 Places" zh="去了哪里" /><TagList items={weekReview.places} /></RCard>}
+              {weekReview.books?.length > 0 && <RCard><Label en="📚 Books" zh="在读的书" /><TagList items={weekReview.books} /></RCard>}
+              {weekReview.mediaConsumed?.length > 0 && <RCard><Label en="🎙 Podcasts & Articles" zh="播客 · 文章" /><TagList items={weekReview.mediaConsumed} /></RCard>}
+              {weekReview.moviesTV?.length > 0 && <RCard><Label en="🎬 Movies & TV" zh="影视" /><TagList items={weekReview.moviesTV} /></RCard>}
+              {weekReview.parenting?.length > 0 && <RCard><Label en="👶 Parenting" zh="育儿" /><TagList items={weekReview.parenting} /></RCard>}
+              {weekReview.finance?.length > 0 && <RCard><Label en="💰 Finance" zh="理财 · 消费" /><TagList items={weekReview.finance} /></RCard>}
+              {weekReview.creativeOutput?.length > 0 && <RCard><Label en="✍️ Creative Output" zh="创作输出" /><TagList items={weekReview.creativeOutput} /></RCard>}
+
+              {Object.keys(weekReview.energyDistribution).length > 0 && (
+                <RCard>
+                  <Label en="⚡ Energy distribution" zh="精力分布" />
+                  <div className="space-y-[10px]">
+                    {Object.entries(weekReview.energyDistribution).map(([label, pct]) => (
+                      <div key={label}>
+                        <div className="flex justify-between text-[13px] text-[#8B6B4A] mb-[5px]"><span>{label}</span><span>{pct}%</span></div>
+                        <div className="h-[6px] bg-[#F5EDE0] rounded-full">
+                          {/* eslint-disable-next-line react/forbid-component-props */}
+                          <div className="h-[6px] bg-[#C4783A] rounded-full" style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </RCard>
+              )}
+
+              {(weekReview.progressZones.breakthrough || weekReview.progressZones.inPractice || weekReview.progressZones.plantedSeed) && (
+                <RCard>
+                  <Label en="🌱 Progress zones" zh="成长区域" />
+                  <div className="space-y-[10px]">
+                    {weekReview.progressZones.breakthrough && <p className="text-[14px] text-[#4A3324]">🟢 <strong className="text-[#2C1F14]">Breakthrough:</strong> {weekReview.progressZones.breakthrough}</p>}
+                    {weekReview.progressZones.inPractice && <p className="text-[14px] text-[#4A3324]">🟡 <strong className="text-[#2C1F14]">In practice:</strong> {weekReview.progressZones.inPractice}</p>}
+                    {weekReview.progressZones.plantedSeed && <p className="text-[14px] text-[#4A3324]">🔵 <strong className="text-[#2C1F14]">Planted seed:</strong> {weekReview.progressZones.plantedSeed}</p>}
+                  </div>
+                </RCard>
+              )}
+
               <RCard>
                 <Label en="🌊 Emotion pattern" zh="情绪规律" />
                 <p className="text-[14px] text-[#2C1F14]">{weekReview.emotionPattern}</p>
@@ -360,26 +432,37 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
                   <p className="text-[14px] text-[#2C1F14]">{weekReview.crossWeekFlag}</p>
                 </RCard>
               )}
+
               {weekReview.dueDates?.length > 0 && (
                 <RCard full>
                   <Label en="📌 Upcoming due dates" zh="待办日期" />
                   <DueDatesList items={weekReview.dueDates} />
                 </RCard>
               )}
-              <RCard full>
-                <Label en="🪞 Review" zh="周复盘" />
-                <p className="text-[14px] text-[#2C1F14] leading-relaxed">{weekReview.reviewParagraph}</p>
-              </RCard>
+
               {weekReview.nextSteps.length > 0 && (
                 <RCard full>
                   <Label en="🎯 Next week" zh="下周计划" />
-                  <ul className="space-y-1 mt-1">
-                    {weekReview.nextSteps.map((s, i) => (
-                      <li key={i} className="text-[13px] text-[#2C1F14] flex gap-2">
-                        <span className="text-[#C4783A]">→</span>{s}
-                      </li>
+                  <div className="divide-y divide-[#EDE3D8]">
+                    {weekReview.nextSteps.map((step, i) => (
+                      <div key={i} className="flex items-start gap-3 py-[9px]">
+                        <div className="w-[18px] h-[18px] border-[1.5px] border-[#C4A98A] rounded-[4px] flex-shrink-0 mt-[1px]" />
+                        <span className="text-[14px] text-[#4A3324]">{step}</span>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
+                </RCard>
+              )}
+
+              <RCard full>
+                <Label en="🪞 Weekly reflection" zh="周复盘" />
+                <p className="text-[15px] text-[#4A3324] leading-[1.8]">{weekReview.reviewParagraph}</p>
+              </RCard>
+
+              {weekReview.psychNote && (
+                <RCard full warm>
+                  <Label en="🧘 A note for you" zh="心理学正能量话" />
+                  <p className="text-[14px] text-[#8B6B4A] leading-[1.8] italic">{weekReview.psychNote}</p>
                 </RCard>
               )}
             </div>
@@ -391,29 +474,113 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
       {activeTab === "monthly" && (
         <div className="space-y-4">
           <div className="mb-5">
-            <h2 className="text-[26px] font-semibold text-[#2C1F14] tracking-tight">Monthly Review</h2>
-            <p className="text-[14px] text-[#8B6B4A] mt-1">{new Date().toLocaleString("en", { month: "long", year: "numeric" })}</p>
-          </div>
-          {!monthReview ? (
-            <div className="text-center py-16">
-              <p className="text-[#8B6B4A] mb-6 text-[14px]">Generate a monthly synthesis from all weekly reviews.</p>
+            <h2 className="text-[26px] font-semibold text-[#2C1F14] tracking-tight">Monthly Review <span className="text-[16px] font-normal text-[#8B6B4A]">每月复盘</span></h2>
+            {/* 年月选择器：可以切换到过去任意月份 */}
+            <div className="flex items-center gap-3 mt-3">
+              <label className="text-[13px] text-[#8B6B4A]">Month</label>
+              <select
+                title="Year"
+                value={monthYear}
+                onChange={e => { setMonthYear(Number(e.target.value)); setMonthReview(null); }}
+                className="h-[34px] px-3 rounded-[8px] border border-[#E4D4C0] text-[13px] text-[#2C1F14] bg-white focus:outline-none focus:border-[#C4A98A]"
+              >
+                {[2024, 2025, 2026].map(y => <option key={y} value={y}>{y}</option>)}
+              </select>
+              <select
+                title="Month"
+                value={monthMonth}
+                onChange={e => { setMonthMonth(Number(e.target.value)); setMonthReview(null); }}
+                className="h-[34px] px-3 rounded-[8px] border border-[#E4D4C0] text-[13px] text-[#2C1F14] bg-white focus:outline-none focus:border-[#C4A98A]"
+              >
+                {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
+                  <option key={m} value={m}>{m}月</option>
+                ))}
+              </select>
               <button
                 type="button"
                 onClick={generateMonthly}
                 disabled={monthLoading}
-                className="h-[48px] px-8 bg-[#C4783A] text-white rounded-[8px] text-[15px] font-medium hover:bg-[#A85E28] transition-colors disabled:bg-[#EDD4BC] disabled:cursor-not-allowed"
+                className="h-[34px] px-5 bg-[#C4783A] text-white rounded-[8px] text-[13px] font-medium hover:bg-[#A85E28] transition-colors disabled:bg-[#EDD4BC] disabled:cursor-not-allowed"
               >
-                {monthLoading ? "Generating..." : "✨ Generate monthly review"}
+                {monthLoading ? "Generating..." : "✨ Generate"}
               </button>
-              {monthError && <p className="text-[#C4783A] mt-4 text-[13px]">{monthError}</p>}
             </div>
-          ) : (
+            {monthError && <p className="text-[#C4783A] mt-2 text-[13px]">{monthError}</p>}
+          </div>
+
+          {monthReview && (
             <div className="grid grid-cols-2 gap-3">
+              {/* Insight — full width warm */}
               <RCard full warm>
                 <Label en="💡 Monthly insight" zh="本月感悟" />
-                <p className="text-[18px] font-semibold text-[#2C1F14] italic leading-relaxed">{monthReview.oneLineInsight}</p>
-                {monthReview.oneLineInsightZh && <p className="text-[13px] text-[#8B6B4A] mt-1">「{monthReview.oneLineInsightZh}」</p>}
+                <p className="text-[20px] font-semibold text-[#2C1F14] italic leading-relaxed">&ldquo;{monthReview.oneLineInsight}&rdquo;</p>
+                {monthReview.oneLineInsightZh && <p className="text-[14px] text-[#A88060] mt-2 leading-relaxed">「{monthReview.oneLineInsightZh}」</p>}
               </RCard>
+
+              {/* Score */}
+              <RCard>
+                <Label en="⭐ Score" zh="本月评分" />
+                <div className="text-[42px] font-bold text-[#2C1F14] leading-none">{monthReview.score}</div>
+                <div className="text-[13px] text-[#8B6B4A] mt-1">/10 · {monthReview.scoreReason}</div>
+              </RCard>
+
+              {monthReview.people?.length > 0 && <RCard><Label en="👥 People" zh="人物" /><TagList items={monthReview.people} /></RCard>}
+              {monthReview.emotions?.length > 0 && <RCard><Label en="🌊 Emotions" zh="情绪" /><TagList items={monthReview.emotions} /></RCard>}
+              {monthReview.events?.length > 0 && (
+                <RCard>
+                  <Label en="📅 Events" zh="本月事件" />
+                  <div className="space-y-3">
+                    {monthReview.events.map((group, i) => (
+                      <div key={i}>
+                        <p className="text-[11px] font-semibold text-[#C4783A] uppercase tracking-[0.4px] mb-[6px]">{group.category}</p>
+                        <div className="flex flex-wrap gap-[6px]">
+                          {group.items.map((item, j) => (
+                            <span key={j} className="bg-[#FDF0E6] border border-[#E4D4C0] rounded-full px-3 py-1 text-[13px] text-[#4A3324]">{item}</span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </RCard>
+              )}
+              {monthReview.learning?.length > 0 && <RCard><Label en="🧠 Learning" zh="学到的" /><TagList items={monthReview.learning} /></RCard>}
+              {monthReview.health?.length > 0 && <RCard><Label en="💪 Health & Body" zh="健康 · 身体" /><TagList items={monthReview.health} /></RCard>}
+              {monthReview.places?.length > 0 && <RCard><Label en="📍 Places" zh="去了哪里" /><TagList items={monthReview.places} /></RCard>}
+              {monthReview.books?.length > 0 && <RCard><Label en="📚 Books" zh="在读的书" /><TagList items={monthReview.books} /></RCard>}
+              {monthReview.mediaConsumed?.length > 0 && <RCard><Label en="🎙 Podcasts & Articles" zh="播客 · 文章" /><TagList items={monthReview.mediaConsumed} /></RCard>}
+              {monthReview.moviesTV?.length > 0 && <RCard><Label en="🎬 Movies & TV" zh="影视" /><TagList items={monthReview.moviesTV} /></RCard>}
+              {monthReview.parenting?.length > 0 && <RCard><Label en="👶 Parenting" zh="育儿" /><TagList items={monthReview.parenting} /></RCard>}
+              {monthReview.finance?.length > 0 && <RCard><Label en="💰 Finance" zh="理财 · 消费" /><TagList items={monthReview.finance} /></RCard>}
+              {monthReview.creativeOutput?.length > 0 && <RCard><Label en="✍️ Creative Output" zh="创作输出" /><TagList items={monthReview.creativeOutput} /></RCard>}
+
+              {Object.keys(monthReview.energyDistribution).length > 0 && (
+                <RCard>
+                  <Label en="⚡ Energy distribution" zh="精力分布" />
+                  <div className="space-y-[10px]">
+                    {Object.entries(monthReview.energyDistribution).map(([label, pct]) => (
+                      <div key={label}>
+                        <div className="flex justify-between text-[13px] text-[#8B6B4A] mb-[5px]"><span>{label}</span><span>{pct}%</span></div>
+                        <div className="h-[6px] bg-[#F5EDE0] rounded-full">
+                          {/* eslint-disable-next-line react/forbid-component-props */}
+                          <div className="h-[6px] bg-[#C4783A] rounded-full" style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </RCard>
+              )}
+
+              {(monthReview.progressZones.breakthrough || monthReview.progressZones.inPractice || monthReview.progressZones.plantedSeed) && (
+                <RCard>
+                  <Label en="🌱 Progress zones" zh="成长区域" />
+                  <div className="space-y-[10px]">
+                    {monthReview.progressZones.breakthrough && <p className="text-[14px] text-[#4A3324]">🟢 <strong className="text-[#2C1F14]">Breakthrough:</strong> {monthReview.progressZones.breakthrough}</p>}
+                    {monthReview.progressZones.inPractice && <p className="text-[14px] text-[#4A3324]">🟡 <strong className="text-[#2C1F14]">In practice:</strong> {monthReview.progressZones.inPractice}</p>}
+                    {monthReview.progressZones.plantedSeed && <p className="text-[14px] text-[#4A3324]">🔵 <strong className="text-[#2C1F14]">Planted seed:</strong> {monthReview.progressZones.plantedSeed}</p>}
+                  </div>
+                </RCard>
+              )}
+
               <RCard>
                 <Label en="📊 Monthly pattern" zh="本月规律" />
                 <p className="text-[14px] text-[#2C1F14]">{monthReview.monthlyPattern}</p>
@@ -426,26 +593,57 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
                 <Label en="🔍 Core challenge" zh="核心困境" />
                 <p className="text-[14px] text-[#2C1F14]">{monthReview.coreProblem}</p>
               </RCard>
+              {monthReview.crossWeekFlag && (
+                <RCard full>
+                  <Label en="🚩 Recurring signal" zh="跨月信号" />
+                  <p className="text-[14px] text-[#2C1F14]">{monthReview.crossWeekFlag}</p>
+                </RCard>
+              )}
+
               {monthReview.dueDates?.length > 0 && (
                 <RCard full>
                   <Label en="📌 Upcoming due dates" zh="待办日期" />
                   <DueDatesList items={monthReview.dueDates} />
                 </RCard>
               )}
+
+              {monthReview.nextSteps.length > 0 && (
+                <RCard full>
+                  <Label en="🎯 Next steps" zh="下一步行动" />
+                  <div className="divide-y divide-[#EDE3D8]">
+                    {monthReview.nextSteps.map((step, i) => (
+                      <div key={i} className="flex items-start gap-3 py-[9px]">
+                        <div className="w-[18px] h-[18px] border-[1.5px] border-[#C4A98A] rounded-[4px] flex-shrink-0 mt-[1px]" />
+                        <span className="text-[14px] text-[#4A3324]">{step}</span>
+                      </div>
+                    ))}
+                  </div>
+                </RCard>
+              )}
+
               <RCard full>
-                <Label en="🪞 Review" zh="月复盘" />
-                <p className="text-[14px] text-[#2C1F14] leading-relaxed">{monthReview.reviewParagraph}</p>
+                <Label en="🪞 Monthly reflection" zh="月复盘" />
+                <p className="text-[15px] text-[#4A3324] leading-[1.8]">{monthReview.reviewParagraph}</p>
               </RCard>
+
               {monthReview.nextMonthDirection?.length > 0 && (
                 <RCard full>
-                  <Label en="🧭 Next month" zh="下月方向" />
-                  <ul className="space-y-1 mt-1">
+                  <Label en="🧭 Next month direction" zh="下月方向" />
+                  <div className="divide-y divide-[#EDE3D8]">
                     {monthReview.nextMonthDirection.map((s, i) => (
-                      <li key={i} className="text-[13px] text-[#2C1F14] flex gap-2">
-                        <span className="text-[#C4783A]">→</span>{s}
-                      </li>
+                      <div key={i} className="flex items-start gap-3 py-[9px]">
+                        <div className="w-[18px] h-[18px] border-[1.5px] border-[#C4A98A] rounded-[4px] flex-shrink-0 mt-[1px]" />
+                        <span className="text-[14px] text-[#4A3324]">{s}</span>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
+                </RCard>
+              )}
+
+              {monthReview.psychNote && (
+                <RCard full warm>
+                  <Label en="🧘 A note for you" zh="心理学正能量话" />
+                  <p className="text-[14px] text-[#8B6B4A] leading-[1.8] italic">{monthReview.psychNote}</p>
                 </RCard>
               )}
             </div>
