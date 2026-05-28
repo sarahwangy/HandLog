@@ -503,51 +503,16 @@ function TagList({ items }: { items: string[] }) {
 // ── Due dates section ─────────────────────────────────────────────────────────
 
 function DueDatesList({ items }: { items: DueDate[] }) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  // 根据距今天数返回颜色样式
-  function colorClass(dateStr: string): { dot: string; badge: string; text: string } {
-    const d = new Date(dateStr);
-    d.setHours(0, 0, 0, 0);
-    const diff = Math.round((d.getTime() - today.getTime()) / 86400000);
-    if (diff < 0)   return { dot: "bg-[#D94F4F]", badge: "bg-[#FEE2E2] border-[#F9BDBD]", text: "text-[#B91C1C]" }; // 已过期 red
-    if (diff <= 3)  return { dot: "bg-[#E27726]", badge: "bg-[#FEF0E0] border-[#F6CFA0]", text: "text-[#C2521B]" }; // 3天内 orange
-    if (diff <= 7)  return { dot: "bg-[#D4A017]", badge: "bg-[#FEFCE8] border-[#F9E4A0]", text: "text-[#A16207]" }; // 7天内 yellow
-    return           { dot: "bg-[#3B8C5A]", badge: "bg-[#DCFCE7] border-[#A7F3C0]", text: "text-[#166534]" };      // 更远 green
-  }
-
-  function urgencyLabel(dateStr: string): string {
-    const d = new Date(dateStr);
-    d.setHours(0, 0, 0, 0);
-    const diff = Math.round((d.getTime() - today.getTime()) / 86400000);
-    if (diff < 0)  return `${Math.abs(diff)}天前`;
-    if (diff === 0) return "今天";
-    if (diff === 1) return "明天";
-    return `${diff}天后`;
-  }
-
-  // 按日期升序排列
   const sorted = [...items].sort((a, b) => a.date.localeCompare(b.date));
-
   return (
-    <div className="space-y-[8px]">
-      {sorted.map((item, i) => {
-        const c = colorClass(item.date);
-        return (
-          <div key={i} className={`flex items-start gap-3 px-4 py-3 rounded-[10px] border ${c.badge}`}>
-            <div className={`w-[8px] h-[8px] rounded-full mt-[5px] flex-shrink-0 ${c.dot}`} />
-            <div className="flex-1 min-w-0">
-              <p className={`text-[14px] font-semibold ${c.text}`}>{item.title}</p>
-              {item.note && <p className="text-[12px] text-[#8B6B4A] mt-[2px]">{item.note}</p>}
-            </div>
-            <div className="flex-shrink-0 text-right">
-              <p className={`text-[12px] font-medium ${c.text}`}>{item.date}</p>
-              <p className={`text-[11px] ${c.text} opacity-70`}>{urgencyLabel(item.date)}</p>
-            </div>
-          </div>
-        );
-      })}
+    <div className="flex flex-wrap gap-[6px]">
+      {sorted.map((item, i) => (
+        <span key={i} className="bg-[#FDF0E6] border border-[#E4D4C0] rounded-full px-3 py-1 text-[13px] text-[#4A3324]">
+          <span className="font-semibold text-[#2C1F14]">{item.date}</span>
+          <span className="text-[#8B6B4A]">：</span>
+          {item.title}{item.note ? ` · ${item.note}` : ""}
+        </span>
+      ))}
     </div>
   );
 }
