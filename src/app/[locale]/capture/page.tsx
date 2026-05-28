@@ -45,22 +45,6 @@ function CapturePanel() {
         </ul>
       </div>
 
-      {/* Recent drafts */}
-      <div className="bg-[#FDFAF6] rounded-[14px] p-5 border border-[#E4D4C0] shadow-[rgba(80,40,10,0.03)_0_0_0_1px,rgba(80,40,10,0.05)_0_2px_6px,rgba(80,40,10,0.08)_0_4px_12px]">
-        <h4 className="text-[15px] font-semibold text-[#2C1F14] mb-3">📄 Recent drafts</h4>
-        <div className="py-[10px] border-b border-[#EDE3D8]">
-          <div className="text-[14px] font-medium text-[#2C1F14]">Yesterday</div>
-          <div className="text-[13px] font-semibold text-[#6B8F5E]">Submitted ✓</div>
-        </div>
-        <div className="py-[10px] border-b border-[#EDE3D8]">
-          <div className="text-[14px] font-medium text-[#2C1F14]">2 days ago</div>
-          <div className="text-[13px] font-semibold text-[#6B8F5E]">Submitted ✓</div>
-        </div>
-        <div className="py-[10px]">
-          <div className="text-[14px] font-medium text-[#2C1F14]">3 days ago</div>
-          <div className="text-[13px] font-semibold text-[#C4783A]">Draft unfinished</div>
-        </div>
-      </div>
     </div>
   );
 }
