@@ -5,6 +5,26 @@
 
 ---
 
+## 工具使用总览
+
+| 时间 | 用了什么 | Skills 相关 | Agents 相关 |
+|------|----------|-------------|-------------|
+| 5/26 周二 | Claude Code CLI、Next.js、Tailwind、Notion SDK、Whisper API | `/frontend-design`、`/brainstorming`、`/writing-plans` | Explore Agent |
+| 5/27 周三 | Recharts、gpt-image-1、Notion API | 无 | Explore Agent |
+| 5/28 周四 | Google OAuth、NextAuth.js、Anthropic SDK | `/debugging` | Explore Agent |
+| 5/29 周五 | Tailwind 响应式 | 无 | 无 |
+
+**各天解决的主要问题：**
+
+| 时间 | 解决的问题 |
+|------|-----------|
+| 5/26 周二 | Capture 页录音和自动保存问题；Notion 连接问题；UI 布局问题 |
+| 5/27 周三 | Dashboard 数据读取问题；Timeline 卡片展示问题；AI 配图 API 接口问题 |
+| 5/28 周四 | 周/月复盘 JSON 解析崩溃问题；Notion 写入超出 100 块限制问题；登录 URL 回调问题 |
+| 5/29 周五 | 手机端布局问题；Timeline 以天展示改为以周展示问题；搜索搜不到内容问题 |
+
+---
+
 ## Day 1 · 2026-05-26 · 项目启动 + 基础搭建
 
 ### 做了什么
