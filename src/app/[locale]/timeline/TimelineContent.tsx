@@ -9,7 +9,7 @@ export default function TimelineContent() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [activeLabel, setActiveLabel] = useState<string | null>(null);
-  const [visibleMonths, setVisibleMonths] = useState(2);
+  const [visibleMonths, setVisibleMonths] = useState(3);
 
   useEffect(() => {
     fetch("/api/timeline")
