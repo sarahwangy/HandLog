@@ -6,7 +6,7 @@ export default function ReviewPage() {
   return (
     <div className="min-h-screen bg-[#FDFAF6]">
       <AppNav />
-      <main className="max-w-[1080px] mx-auto px-8 py-12">
+      <main className="max-w-[1080px] mx-auto px-4 sm:px-8 py-8 sm:py-12">
         <ReviewContent dateKey={dateKey} />
       </main>
     </div>

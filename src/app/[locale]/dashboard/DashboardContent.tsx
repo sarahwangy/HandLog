@@ -56,8 +56,8 @@ export default function DashboardContent() {
   return (
     <div className="space-y-4">
 
-      {/* ── 顶部统计卡片 ── */}
-      <div className="grid grid-cols-3 gap-4">
+      {/* ── 顶部统计卡片（手机 3 列但更紧凑） ── */}
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
         <StatCard label="Total entries" value={String(data.totalEntries)} sub="journal days recorded" />
         <StatCard label="Average score" value={String(data.avgScore)} sub="out of 10" accent />
         <StatCard label="Current streak" value={`${data.currentStreak}d`} sub="consecutive days" />
@@ -107,8 +107,8 @@ export default function DashboardContent() {
         </ResponsiveContainer>
       </DCard>
 
-      {/* ── 标签频率 + 饼图 ── */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* ── 标签频率 + 饼图（手机单列，桌面并排） ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
         <DCard title="🏷 Top labels" subtitle="Most frequent tags">
           <div className="space-y-[10px] mt-2">
@@ -205,7 +205,7 @@ function DCard({ title, subtitle, children, full }: {
   return (
     <div className={`bg-[#FDFAF6] rounded-[14px] p-5 border border-[#E4D4C0]
       shadow-[rgba(80,40,10,0.03)_0_0_0_1px,rgba(80,40,10,0.05)_0_2px_6px,rgba(80,40,10,0.08)_0_4px_12px]
-      ${full ? "col-span-2" : ""}`}>
+      ${full ? "sm:col-span-2" : ""}`}>
       <div className="flex items-baseline gap-2 mb-4">
         <h3 className="text-[15px] font-semibold text-[#2C1F14]">{title}</h3>
         <span className="text-[12px] text-[#8B6B4A]">{subtitle}</span>
@@ -219,13 +219,13 @@ function StatCard({ label, value, sub, accent }: {
   label: string; value: string; sub: string; accent?: boolean;
 }) {
   return (
-    <div className="bg-[#FDFAF6] rounded-[14px] p-5 border border-[#E4D4C0]
+    <div className="bg-[#FDFAF6] rounded-[14px] p-3 sm:p-5 border border-[#E4D4C0]
       shadow-[rgba(80,40,10,0.03)_0_0_0_1px,rgba(80,40,10,0.05)_0_2px_6px,rgba(80,40,10,0.08)_0_4px_12px]">
-      <p className="text-[11px] font-bold text-[#8B6B4A] uppercase tracking-[0.6px] mb-2">{label}</p>
-      <p className={`text-[40px] font-bold leading-none ${accent ? "text-[#C4783A]" : "text-[#2C1F14]"}`}>
+      <p className="text-[10px] sm:text-[11px] font-bold text-[#8B6B4A] uppercase tracking-[0.6px] mb-1 sm:mb-2">{label}</p>
+      <p className={`text-[28px] sm:text-[40px] font-bold leading-none ${accent ? "text-[#C4783A]" : "text-[#2C1F14]"}`}>
         {value}
       </p>
-      <p className="text-[13px] text-[#8B6B4A] mt-1">{sub}</p>
+      <p className="text-[11px] sm:text-[13px] text-[#8B6B4A] mt-1">{sub}</p>
     </div>
   );
 }

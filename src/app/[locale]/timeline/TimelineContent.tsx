@@ -70,7 +70,7 @@ export default function TimelineContent() {
   );
 
   return (
-    <div className="max-w-[960px] mx-auto px-6 py-8">
+    <div className="max-w-[960px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
 
       {/* 页面标题 */}
       <div className="mb-5">
