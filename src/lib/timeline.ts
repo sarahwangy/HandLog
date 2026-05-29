@@ -7,6 +7,7 @@ export interface WeekEntry {
   mondayDate: string;   // "2026-05-25"（用于排序/分组）
   score: number | null;
   insight: string;      // 一句话感悟
+  dailySummary: string; // 简短日常全文（用于搜索）
   labels: string[];
   weekPageId: string;   // Notion 页面 ID
 }
@@ -57,6 +58,7 @@ export function toWeekEntries(pages: PageObjectResponse[]): WeekEntry[] {
 
     const scoreProp = props["打分"] as { number?: number } | undefined;
     const insightProp = props["一句话感悟"] as { rich_text?: { plain_text: string }[] } | undefined;
+    const summaryProp = props["简短日常"] as { rich_text?: { plain_text: string }[] } | undefined;
     const labelProp = props["label标签"] as { multi_select?: { name: string }[] } | undefined;
 
     entries.push({
@@ -65,6 +67,7 @@ export function toWeekEntries(pages: PageObjectResponse[]): WeekEntry[] {
       mondayDate: formatDate(monday),
       score: scoreProp?.number ?? null,
       insight: insightProp?.rich_text?.[0]?.plain_text ?? "",
+      dailySummary: summaryProp?.rich_text?.[0]?.plain_text ?? "",
       labels: labelProp?.multi_select?.map((t) => t.name) ?? [],
       weekPageId: page.id,
     });

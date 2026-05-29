@@ -32,7 +32,7 @@ export default function TimelineContent() {
     const q = search.toLowerCase();
     return entries.filter((e) => {
       const matchLabel = !activeLabel || e.labels.includes(activeLabel);
-      const matchSearch = !q || e.insight.toLowerCase().includes(q) || e.weekLabel.includes(q);
+      const matchSearch = !q || e.insight.toLowerCase().includes(q) || e.dailySummary.toLowerCase().includes(q) || e.weekLabel.includes(q);
       return matchLabel && matchSearch;
     });
   }, [entries, search, activeLabel]);
