@@ -18,6 +18,7 @@ export default function AppNav() {
     { label: "Review",    href: `/${locale}/review`,    icon: "📋" },
     { label: "Timeline",  href: `/${locale}/timeline`,  icon: "🗓" },
     { label: "Dashboard", href: `/${locale}/dashboard`, icon: "📊" },
+    { label: "Chat",      href: `/${locale}/chat`,      icon: "💬" },
   ];
 
   return (
