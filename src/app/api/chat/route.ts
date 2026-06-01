@@ -8,13 +8,22 @@ import { fetchWeekContexts, type WeekContext } from "@/lib/chat-context";
 
 export const dynamic = "force-dynamic";
 
-function buildSystemPrompt(weeks: WeekContext[]): string {
+function buildSystemPrompt(weeks: WeekContext[], mood: string | null): string {
   const entries = weeks
     .map((w) => {
       const labelStr = w.labels.length > 0 ? `标签：${w.labels.join("、")}` : "";
       return `【${w.weekLabel} 这一周】${labelStr}\n${w.dailySummary}`;
     })
     .join("\n\n");
+
+  const moodHints: Record<string, string> = {
+    "😌": "用户当前状态平静，语气平和，娓娓道来即可。",
+    "😊": "用户当前状态开心，语气积极，多看亮点，给予正向回应。",
+    "😔": "用户当前状态低落，语气温柔，多给鼓励和温暖。",
+    "😤": "用户当前状态焦虑，语气稳定，帮她理清思路，不要给太多建议。",
+    "🤔": "用户当前状态困惑，语气清晰，帮她分析情况，条理清楚。",
+  };
+  const moodLine = mood && moodHints[mood] ? `\n当前用户情绪提示：${moodHints[mood]}` : "";
 
   return `你是用户的日记分析助手。以下是她所有周的日记记录：
 
@@ -25,14 +34,16 @@ ${entries}
 - 只分析日记里真实出现的内容，不要编造
 - 回答要温暖、直接、有洞察力
 - 如果用户用中文问，用中文回答；如果用英文问，用英文回答
-- 如果日记里没有相关信息，直接说没有提到`;
+- 如果日记里没有相关信息，直接说没有提到${moodLine}`;
 }
 
 export async function POST(req: NextRequest) {
   let messages: { role: "user" | "assistant"; content: string }[];
+  let mood: string | null = null;
   try {
     const body = await req.json();
     messages = body.messages;
+    mood = body.mood ?? null;
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     return new Response(`请求解析失败：${msg}`, { status: 400 });
@@ -54,7 +65,7 @@ export async function POST(req: NextRequest) {
   }
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  const systemPrompt = buildSystemPrompt(weeks);
+  const systemPrompt = buildSystemPrompt(weeks, mood);
 
   let stream: Awaited<ReturnType<typeof client.messages.stream>>;
   try {

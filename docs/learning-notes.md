@@ -202,3 +202,27 @@
 
 - **一句话总结：** 写入 Notion 的核心是"有内容才写、空的跳过"，多层嵌套要分多次 API 调用，前端处理 AI 返回数据要用 optional chaining 防崩。
 
+
+---
+
+### C1 — Chat 页面增强（localStorage + Stop 按钮 + 开场语 + 情绪标签）
+
+- **学到的核心概念：**
+  - `localStorage` 是浏览器本地存储，关闭页面后数据还在；读取用 `localStorage.getItem(key)`，存储用 `localStorage.setItem(key, JSON.stringify(data))`，适合保存对话历史
+  - `AbortController` 是浏览器原生 API，可以中断 `fetch` 请求；创建 `controller = new AbortController()`，传 `signal: controller.signal` 给 fetch，调用 `controller.abort()` 即可取消；在 React 里用 `useRef` 跨渲染保存引用
+  - 把 Notion 数据从客户端请求体移到服务端拉取，解决了"请求体太大导致 fetch 失败"的问题；服务端的 Claude 系统提示可以被 Anthropic 自动缓存，减少 token 消耗
+  - `mood` 参数通过 fetch body 传给后端，后端根据 emoji 映射不同语气提示，加入 system prompt 末尾
+
+- **用到的关键 API/函数：**
+  - `localStorage.getItem / setItem` — 浏览器本地存储
+  - `AbortController` + `useRef` — 取消 fetch 流式请求
+  - `useEffect(..., [])` — 组件挂载时从 localStorage 恢复历史
+  - `useEffect(..., [messages])` — 消息变化时同步到 localStorage
+
+- **容易踩的坑：**
+  - `AbortController` 要用 `useRef` 保存，不能用 `useState`（useState 触发重渲染会丢失引用）
+  - 流式请求被 abort 后会抛出 `AbortError`，要单独 catch 并静默处理（保留已流入的部分内容，不当作错误）
+  - `fetch` 发出之前必须先创建新的 `AbortController`，因为 abort 过的 controller 不能复用
+  - 服务端 `/api/chat` 路由需要 `export const dynamic = "force-dynamic"`，否则 Next.js 会尝试静态缓存，导致每次请求结果一样
+
+- **一句话总结：** localStorage 持久化 + AbortController 中断流 + 情绪参数传后端，这三个是聊天类应用的标配功能模式，几乎所有 AI Chat 产品都有。

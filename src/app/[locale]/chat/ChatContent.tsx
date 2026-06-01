@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef, Fragment } from "react";
 
-// 把常见 markdown 渲染成 JSX，不引入外部库
-// 把 **粗体** 拆成 inline JSX
+// ── Markdown 渲染 ─────────────────────────────────────────────────────────────
+
 function renderInline(text: string) {
   return text.split(/(\*\*[^*]+\*\*)/g).map((part, pi) => {
     if (part.startsWith("**") && part.endsWith("**")) {
@@ -32,37 +32,30 @@ function renderMarkdown(text: string) {
   }
 
   for (const line of lines) {
-    // --- 分割线
     if (/^[-─]{3,}$/.test(line.trim())) {
-      flushBullets();
-      nodes.push(<hr key={key++} className="my-3 border-[#E4D4C0]" />);
-      continue;
+      flushBullets(); nodes.push(<hr key={key++} className="my-3 border-[#E4D4C0]" />); continue;
     }
-    // ## 大标题
     const h2 = line.match(/^##\s+(.+)/);
     if (h2) { flushBullets(); nodes.push(<p key={key++} className="text-[15px] font-bold text-[#2C1F14] mt-3 mb-1">{h2[1]}</p>); continue; }
-    // ### 小标题
     const h3 = line.match(/^###\s+(.+)/);
     if (h3) { flushBullets(); nodes.push(<p key={key++} className="text-[13px] font-semibold text-[#4A3324] mt-2 mb-0.5">{h3[1]}</p>); continue; }
-    // 1. 编号标题（短行）
     const numbered = line.match(/^(\d+)\.\s+(.+)/);
     if (numbered && line.length <= 80) {
       flushBullets();
       nodes.push(<p key={key++} className="text-[14px] font-semibold text-[#2C1F14] mt-3 mb-0.5">{numbered[1]}. {renderInline(numbered[2])}</p>);
       continue;
     }
-    // - 列表项
     const bullet = line.match(/^[-*]\s+(.+)/);
     if (bullet) { bulletBuffer.push(bullet[1]); continue; }
-    // 空行
     if (!line.trim()) { flushBullets(); nodes.push(<br key={key++} />); continue; }
-    // 普通段落
     flushBullets();
     nodes.push(<span key={key++} className="block leading-relaxed">{renderInline(line)}</span>);
   }
   flushBullets();
   return nodes;
 }
+
+// ── 类型 & 常量 ───────────────────────────────────────────────────────────────
 
 interface Message {
   role: "user" | "assistant";
@@ -77,6 +70,43 @@ const QUICK_PROMPTS = [
   "我有没有在逃避什么？",
 ];
 
+const MOODS = [
+  { emoji: "😌", label: "平静", hint: "语气平和，娓娓道来" },
+  { emoji: "😊", label: "开心", hint: "语气积极，多看亮点" },
+  { emoji: "😔", label: "低落", hint: "语气温柔，多给鼓励" },
+  { emoji: "😤", label: "焦虑", hint: "语气稳定，帮我理清" },
+  { emoji: "🤔", label: "困惑", hint: "语气清晰，帮我分析" },
+];
+
+const STORAGE_KEY = "handlog-chat-messages";
+
+// 多语言问候语列表
+const GREETINGS = [
+  { text: "你好", lang: "中文" },
+  { text: "Hello", lang: "English" },
+  { text: "こんにちは", lang: "日本語" },
+  { text: "안녕하세요", lang: "한국어" },
+  { text: "Bonjour", lang: "Français" },
+  { text: "Hallo", lang: "Deutsch" },
+  { text: "Hola", lang: "Español" },
+  { text: "Ciao", lang: "Italiano" },
+  { text: "Привет", lang: "Русский" },
+  { text: "مرحبا", lang: "العربية" },
+  { text: "नमस्ते", lang: "हिन्दी" },
+];
+
+// 渐变色组，循环切换
+const GRADIENT_COLORS = [
+  "from-[#C4783A] to-[#E8A56A]",
+  "from-[#7B5EA7] to-[#C4783A]",
+  "from-[#3A7BC4] to-[#7B5EA7]",
+  "from-[#C43A7B] to-[#E87B5E]",
+  "from-[#3AC47B] to-[#3A7BC4]",
+  "from-[#E8A56A] to-[#C43A7B]",
+];
+
+// ── 组件 ──────────────────────────────────────────────────────────────────────
+
 export default function ChatContent() {
   const [weekCount, setWeekCount] = useState(0);
   const [loadingCtx, setLoadingCtx] = useState(true);
@@ -85,13 +115,31 @@ export default function ChatContent() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
+  const [mood, setMood] = useState<string | null>(null);
 
   const [saving, setSaving] = useState(false);
   const [savedAll, setSavedAll] = useState(false);
 
-  const bottomRef = useRef<HTMLDivElement>(null);
+  // 多语言问候循环
+  const [greetingIdx, setGreetingIdx] = useState(0);
+  const [greetingVisible, setGreetingVisible] = useState(true);
 
-  // 1. 页面加载时拉取 Notion 背景数据
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
+
+  // 多语言问候循环：每 2s 淡出 → 切换 → 淡入
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setGreetingVisible(false);
+      setTimeout(() => {
+        setGreetingIdx((i) => (i + 1) % GREETINGS.length);
+        setGreetingVisible(true);
+      }, 400);
+    }, 2200);
+    return () => clearInterval(timer);
+  }, []);
+
+  // 1. 拉取 Notion 背景数据
   useEffect(() => {
     fetch("/api/chat/context")
       .then((r) => r.json())
@@ -103,6 +151,21 @@ export default function ChatContent() {
       .finally(() => setLoadingCtx(false));
   }, []);
 
+  // 1b. 从 localStorage 恢复对话历史
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) setMessages(JSON.parse(saved));
+    } catch { /* 忽略解析错误 */ }
+  }, []);
+
+  // 1c. 对话变化时保存到 localStorage
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+    }
+  }, [messages]);
+
   // 2. 自动滚到底部
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -112,21 +175,23 @@ export default function ChatContent() {
   async function sendMessage(text: string) {
     if (!text.trim() || streaming) return;
     setInput("");
-    setSavedAll(false); // 有新消息，重置保存状态
+    setSavedAll(false);
 
     const userMsg: Message = { role: "user", content: text };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
     setStreaming(true);
-
-    // 先加一条空的 assistant 消息，边接收边填充
     setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: newMessages }),
+        body: JSON.stringify({ messages: newMessages, mood }),
+        signal: controller.signal,
       });
 
       if (!res.ok || !res.body) {
@@ -149,38 +214,47 @@ export default function ChatContent() {
         });
       }
     } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") {
+        // 用户手动停止，保留已有内容，不显示错误
+        return;
+      }
       const errMsg = err instanceof Error ? err.message : "未知错误";
       setMessages((prev) => {
         const updated = [...prev];
-        updated[updated.length - 1] = {
-          role: "assistant",
-          content: `⚠️ 出错了：${errMsg}`,
-        };
+        updated[updated.length - 1] = { role: "assistant", content: `⚠️ 出错了：${errMsg}` };
         return updated;
       });
     } finally {
       setStreaming(false);
+      abortRef.current = null;
     }
   }
 
-  // 4. 单条保存/删除
+  // 停止流式输出
+  function stopStreaming() {
+    abortRef.current?.abort();
+  }
+
+  // 清空对话历史
+  function clearHistory() {
+    setMessages([]);
+    localStorage.removeItem(STORAGE_KEY);
+  }
+
+  // 单条保存/删除
   function toggleSaved(index: number) {
-    setMessages((prev) =>
-      prev.map((m, i) => (i === index ? { ...m, saved: !m.saved } : m))
-    );
+    setMessages((prev) => prev.map((m, i) => (i === index ? { ...m, saved: !m.saved } : m)));
   }
   function deleteMsg(index: number) {
     setMessages((prev) => prev.filter((_, i) => i !== index));
   }
 
-  // 取第一条用户消息作为主题关键词（最多 20 字）
   function getTopic(msgs: Message[]) {
     const first = msgs.find((m) => m.role === "user");
     if (!first) return "";
     return first.content.length > 20 ? first.content.slice(0, 20) + "…" : first.content;
   }
 
-  // 5. 保存全部对话到 Notion
   async function saveAll() {
     setSaving(true);
     try {
@@ -199,7 +273,6 @@ export default function ChatContent() {
     }
   }
 
-  // 6. 保存单条消息到 Notion
   async function saveSingle(index: number) {
     const msg = messages[index];
     try {
@@ -214,40 +287,59 @@ export default function ChatContent() {
     }
   }
 
-  if (loadingCtx) {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <p className="text-[#8B6B4A] text-[14px]">正在读取日记数据...</p>
-      </div>
-    );
-  }
+  if (loadingCtx) return (
+    <div className="flex items-center justify-center py-24">
+      <p className="text-[#8B6B4A] text-[14px]">正在读取日记数据...</p>
+    </div>
+  );
 
-  if (ctxError) {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <p className="text-[#C4783A] text-[14px]">{ctxError}</p>
-      </div>
-    );
-  }
+  if (ctxError) return (
+    <div className="flex items-center justify-center py-24">
+      <p className="text-[#C4783A] text-[14px]">{ctxError}</p>
+    </div>
+  );
 
   return (
     <div className="max-w-[720px] mx-auto px-4 sm:px-6 flex flex-col"
       style={{ height: "calc(100vh - 56px - 60px)" }}>
 
       {/* 页面标题 */}
-      <div className="py-4 border-b border-[#E4D4C0]">
-        <h1 className="text-[20px] font-bold text-[#2C1F14]">💬 Deep Chat</h1>
-        <p className="text-[13px] text-[#8B6B4A] mt-1">基于你的日记，深度分析你的想法和模式</p>
-        <div className="inline-flex items-center gap-2 mt-2 bg-[#F5EDE0] border border-[#E4D4C0] rounded-full px-3 py-1 text-[12px] text-[#8B6B4A]">
-          📓 已读取 <span className="text-[#C4783A] font-semibold">{weekCount} 周</span> 日记
+      <div className="py-4 border-b border-[#E4D4C0] flex items-start justify-between">
+        <div>
+          <h1 className="text-[20px] font-bold text-[#2C1F14]">💬 Deep Chat</h1>
+          <p className="text-[13px] text-[#8B6B4A] mt-1">基于你的日记，深度分析你的想法和模式</p>
+          <div className="inline-flex items-center gap-2 mt-2 bg-[#F5EDE0] border border-[#E4D4C0] rounded-full px-3 py-1 text-[12px] text-[#8B6B4A]">
+            📓 已读取 <span className="text-[#C4783A] font-semibold">{weekCount} 周</span> 日记
+          </div>
         </div>
+        {messages.length > 0 && (
+          <button type="button" onClick={clearHistory}
+            className="text-[12px] text-[#B89A7A] hover:text-[#C4783A] mt-1 transition-colors">
+            清空历史
+          </button>
+        )}
       </div>
 
       {/* 消息列表 */}
       <div className="flex-1 overflow-y-auto py-4 flex flex-col gap-4">
+
+        {/* 4. 开场引导语 */}
         {messages.length === 0 && (
-          <div className="text-center text-[#B89A7A] text-[13px] py-8">
-            对话开始 · AI 已读取你的全部日记
+          <div className="flex flex-col items-center gap-3 py-6">
+            {/* 跳动的心形图标 */}
+            <div className="text-[44px] select-none animate-heartbeat">❤️</div>
+
+            {/* 多语言问候渐变文字 */}
+            <div className="h-[32px] flex flex-col items-center justify-center">
+              <span
+                className={`greeting-fade text-[22px] font-bold bg-gradient-to-r ${GRADIENT_COLORS[greetingIdx % GRADIENT_COLORS.length]} bg-clip-text text-transparent ${greetingVisible ? "greeting-visible" : "greeting-hidden"}`}>
+                {GREETINGS[greetingIdx].text}
+              </span>
+            </div>
+
+            <p className="text-[13px] text-[#8B6B4A] text-center max-w-[280px] leading-relaxed">
+              我读完了你的日记。有什么想聊的？可以问我你这段时间的状态、规律，或者任何你好奇的事。
+            </p>
           </div>
         )}
 
@@ -263,9 +355,9 @@ export default function ChatContent() {
                 : streaming && i === messages.length - 1
                   ? (
                     <span className="flex gap-1 items-center py-1">
-                      <span className="w-2 h-2 rounded-full bg-[#C4A98A] animate-bounce" style={{ animationDelay: "0ms" }} />
-                      <span className="w-2 h-2 rounded-full bg-[#C4A98A] animate-bounce" style={{ animationDelay: "150ms" }} />
-                      <span className="w-2 h-2 rounded-full bg-[#C4A98A] animate-bounce" style={{ animationDelay: "300ms" }} />
+                      <span className="w-2 h-2 rounded-full bg-[#C4A98A] animate-bounce bounce-delay-0" />
+                      <span className="w-2 h-2 rounded-full bg-[#C4A98A] animate-bounce bounce-delay-150" />
+                      <span className="w-2 h-2 rounded-full bg-[#C4A98A] animate-bounce bounce-delay-300" />
                     </span>
                   )
                   : null}
@@ -273,22 +365,14 @@ export default function ChatContent() {
 
             {msg.role === "assistant" && !streaming && msg.content && (
               <div className="flex gap-2 pl-1">
-                <button
-                  type="button"
-                  onClick={() => saveSingle(i)}
+                <button type="button" onClick={() => saveSingle(i)}
                   className={`text-[11px] px-3 py-1 rounded-full border transition-colors
-                    ${msg.saved
-                      ? "bg-[#E8F5E8] border-[#8FBC8F] text-[#5A8A5A]"
-                      : "bg-white border-[#E4D4C0] text-[#8B6B4A] hover:border-[#C4783A] hover:text-[#C4783A]"
-                    }`}
-                >
+                    ${msg.saved ? "bg-[#E8F5E8] border-[#8FBC8F] text-[#5A8A5A]"
+                      : "bg-white border-[#E4D4C0] text-[#8B6B4A] hover:border-[#C4783A] hover:text-[#C4783A]"}`}>
                   {msg.saved ? "✓ 已保存" : "💾 保存"}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => deleteMsg(i)}
-                  className="text-[11px] px-3 py-1 rounded-full border border-[#E4D4C0] bg-white text-[#8B6B4A] hover:border-[#C4783A] hover:text-[#C4783A] transition-colors"
-                >
+                <button type="button" onClick={() => deleteMsg(i)}
+                  className="text-[11px] px-3 py-1 rounded-full border border-[#E4D4C0] bg-white text-[#8B6B4A] hover:border-[#C4783A] hover:text-[#C4783A] transition-colors">
                   🗑 删除
                 </button>
               </div>
@@ -301,35 +385,55 @@ export default function ChatContent() {
       {/* 输入区 */}
       <div className="border-t border-[#E4D4C0] py-3 flex flex-col gap-2">
 
-        {/* 快捷提问 */}
+        {/* 快捷提问（无对话时） */}
         {messages.length === 0 && (
           <div className="flex flex-wrap gap-2">
             {QUICK_PROMPTS.map((q) => (
-              <button
-                key={q}
-                type="button"
-                onClick={() => sendMessage(q)}
-                className="text-[12px] px-3 py-1 rounded-full border border-[#E4D4C0] bg-white text-[#8B6B4A] hover:border-[#C4783A] hover:text-[#C4783A] hover:bg-[#FDF5EE] transition-colors"
-              >
+              <button key={q} type="button" onClick={() => sendMessage(q)}
+                className="text-[12px] px-3 py-1 rounded-full border border-[#E4D4C0] bg-white text-[#8B6B4A] hover:border-[#C4783A] hover:text-[#C4783A] hover:bg-[#FDF5EE] transition-colors">
                 {q}
               </button>
             ))}
           </div>
         )}
 
-        {/* 保存全部 */}
-        {messages.length > 0 && (
-          <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={saveAll}
-              disabled={saving || savedAll}
-              className="text-[12px] px-4 py-1 rounded-full border border-[#E4D4C0] bg-white text-[#8B6B4A] hover:border-[#C4783A] hover:text-[#C4783A] transition-colors disabled:opacity-50"
-            >
+        {/* 6. 情绪标签 */}
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] text-[#B89A7A]">现在的状态：</span>
+          <div className="flex gap-1">
+            {MOODS.map((m) => (
+              <button key={m.label} type="button"
+                title={m.hint}
+                onClick={() => setMood(mood === m.label ? null : m.label)}
+                className={`text-[18px] w-[32px] h-[32px] rounded-full flex items-center justify-center transition-all
+                  ${mood === m.label
+                    ? "bg-[#FDDBB0] ring-2 ring-[#C4783A] scale-110"
+                    : "hover:bg-[#FDDBB0] opacity-60 hover:opacity-100"}`}>
+                {m.emoji}
+              </button>
+            ))}
+          </div>
+          {mood && <span className="text-[11px] text-[#C4783A]">{MOODS.find(m => m.label === mood)?.hint}</span>}
+        </div>
+
+        {/* 保存全部 + 停止按钮行 */}
+        <div className="flex justify-between items-center">
+          <div>
+            {/* 2. 停止按钮 */}
+            {streaming && (
+              <button type="button" onClick={stopStreaming}
+                className="text-[12px] px-4 py-1 rounded-full border border-[#E4D4C0] bg-white text-[#8B6B4A] hover:border-[#C4783A] hover:text-[#C4783A] transition-colors">
+                ⏹ 停止
+              </button>
+            )}
+          </div>
+          {messages.length > 0 && (
+            <button type="button" onClick={saveAll} disabled={saving || savedAll}
+              className="text-[12px] px-4 py-1 rounded-full border border-[#E4D4C0] bg-white text-[#8B6B4A] hover:border-[#C4783A] hover:text-[#C4783A] transition-colors disabled:opacity-50">
               {savedAll ? "✓ 已保存到 Notion" : saving ? "保存中..." : "📋 保存全部对话到 Notion"}
             </button>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* 输入框 */}
         <div className="flex gap-2 items-end">
@@ -343,19 +447,13 @@ export default function ChatContent() {
               e.target.style.height = e.target.scrollHeight + "px";
             }}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage(input);
-              }
+              if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(input); }
             }}
             disabled={streaming}
           />
-          <button
-            type="button"
-            onClick={() => sendMessage(input)}
+          <button type="button" onClick={() => sendMessage(input)}
             disabled={!input.trim() || streaming}
-            className="w-[42px] h-[42px] rounded-xl border-none bg-[#C4783A] text-white text-[18px] flex-shrink-0 hover:bg-[#A85E28] disabled:bg-[#EDD4BC] disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-          >
+            className="w-[42px] h-[42px] rounded-xl border-none bg-[#C4783A] text-white text-[18px] flex-shrink-0 hover:bg-[#A85E28] disabled:bg-[#EDD4BC] disabled:cursor-not-allowed transition-colors flex items-center justify-center">
             ↑
           </button>
         </div>

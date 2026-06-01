@@ -96,3 +96,26 @@ body {
 .animate-dino-1 { display: inline-block; animation: dino-run 0.6s ease-in-out infinite; animation-delay: 0.08s; }
 .animate-dino-2 { display: inline-block; animation: dino-run 0.6s ease-in-out infinite; animation-delay: 0.18s; }
 .animate-dino-3 { display: inline-block; animation: dino-run 0.6s ease-in-out infinite; animation-delay: 0.28s; }
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  14% { transform: scale(1.2); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.15); }
+  56% { transform: scale(1); }
+}
+
+.animate-heartbeat {
+  animation: heartbeat 1.2s ease-in-out infinite;
+}
+
+.greeting-fade {
+  transition: opacity 0.4s ease;
+}
+
+.greeting-visible { opacity: 1; }
+.greeting-hidden  { opacity: 0; }
+
+.bounce-delay-0   { animation-delay: 0ms; }
+.bounce-delay-150 { animation-delay: 150ms; }
+.bounce-delay-300 { animation-delay: 300ms; }
