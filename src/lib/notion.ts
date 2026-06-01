@@ -863,3 +863,32 @@ export async function appendMonthlyReviewBlocks(
 
   return calloutId;
 }
+
+// 在主数据库里找到标题为「Deep Chat-相关」的页面，返回其 page ID
+// 如果不存在则抛出错误（需要用户在 Notion 里手动建好这一行）
+export async function findDeepChatPage(
+  token: string,
+  databaseId: string
+): Promise<string> {
+  const { NOTION_PAGE_NAMES } = await import("./notion-schema");
+  const notion = createNotionClient(token);
+
+  const res = await withAuthCheck(() =>
+    notion.databases.query({
+      database_id: databaseId,
+      filter: {
+        property: "Name",
+        title: { equals: NOTION_PAGE_NAMES.deepChat },
+      },
+      page_size: 1,
+    })
+  );
+
+  const page = res.results[0];
+  if (!page) {
+    throw new Error(
+      `Notion 里找不到「${NOTION_PAGE_NAMES.deepChat}」页面，请先在数据库里建好这一行`
+    );
+  }
+  return page.id;
+}
