@@ -83,7 +83,7 @@ export default function ChatContent() {
           return updated;
         });
       }
-    } catch (e) {
+    } catch {
       setMessages((prev) => {
         const updated = [...prev];
         updated[updated.length - 1] = {
