@@ -13,12 +13,12 @@ function renderMarkdown(text: string) {
     // ## 标题
     const h2 = line.match(/^##\s+(.+)/);
     if (h2) {
-      return <p key={li} className="font-semibold mt-2 mb-1">{h2[1]}</p>;
+      return <p key={li} className="text-[15px] font-bold text-[#2C1F14] mt-3 mb-1">{h2[1]}</p>;
     }
     // ### 小标题
     const h3 = line.match(/^###\s+(.+)/);
     if (h3) {
-      return <p key={li} className="font-medium mt-1">{h3[1]}</p>;
+      return <p key={li} className="text-[13px] font-semibold text-[#4A3324] mt-2 mb-0.5">{h3[1]}</p>;
     }
     // 空行
     if (!line.trim()) {

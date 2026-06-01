@@ -6,6 +6,8 @@ import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { fetchWeekContexts, type WeekContext } from "@/lib/chat-context";
 
+export const dynamic = "force-dynamic";
+
 function buildSystemPrompt(weeks: WeekContext[]): string {
   const entries = weeks
     .map((w) => {
@@ -27,13 +29,21 @@ ${entries}
 }
 
 export async function POST(req: NextRequest) {
-  const { messages } = await req.json() as {
-    messages: { role: "user" | "assistant"; content: string }[];
-  };
+  let messages: { role: "user" | "assistant"; content: string }[];
+  try {
+    const body = await req.json();
+    messages = body.messages;
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return new Response(`请求解析失败：${msg}`, { status: 400 });
+  }
 
   if (!messages?.length) {
     return new Response("Missing messages", { status: 400 });
   }
+
+  // 只保留 role 和 content，去掉 saved 等前端字段
+  const cleanMessages = messages.map(({ role, content }) => ({ role, content }));
 
   let weeks: WeekContext[];
   try {
@@ -52,7 +62,7 @@ export async function POST(req: NextRequest) {
       model: "claude-sonnet-4-6",
       max_tokens: 2048,
       system: systemPrompt,
-      messages,
+      messages: cleanMessages,
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
