@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
         type: "toggle",
         toggle: {
           rich_text: [{ type: "text", text: { content: titleText } }],
-          color: "blue_background",
+          color: saveAll ? "red_background" : "blue_background",
           children,
         },
       } as Parameters<typeof notion.blocks.children.append>[0]["children"][number],
