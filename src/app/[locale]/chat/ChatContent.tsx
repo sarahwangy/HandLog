@@ -112,6 +112,7 @@ export default function ChatContent() {
   async function sendMessage(text: string) {
     if (!text.trim() || streaming) return;
     setInput("");
+    setSavedAll(false); // 有新消息，重置保存状态
 
     const userMsg: Message = { role: "user", content: text };
     const newMessages = [...messages, userMsg];
