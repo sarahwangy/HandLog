@@ -43,26 +43,35 @@ export async function POST(req: NextRequest) {
 
   const systemPrompt = buildSystemPrompt(weeks);
 
-  // 创建流式响应
-  const stream = await client.messages.stream({
-    model: "claude-sonnet-4-6",
-    max_tokens: 2048,
-    system: systemPrompt,
-    messages,
-  });
+  let stream: Awaited<ReturnType<typeof client.messages.stream>>;
+  try {
+    stream = await client.messages.stream({
+      model: "claude-sonnet-4-6",
+      max_tokens: 2048,
+      system: systemPrompt,
+      messages,
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return new Response(msg, { status: 500 });
+  }
 
   // 用 ReadableStream 把 Anthropic 的流转成 HTTP stream
   const readable = new ReadableStream({
     async start(controller) {
-      for await (const chunk of stream) {
-        if (
-          chunk.type === "content_block_delta" &&
-          chunk.delta.type === "text_delta"
-        ) {
-          controller.enqueue(new TextEncoder().encode(chunk.delta.text));
+      try {
+        for await (const chunk of stream) {
+          if (
+            chunk.type === "content_block_delta" &&
+            chunk.delta.type === "text_delta"
+          ) {
+            controller.enqueue(new TextEncoder().encode(chunk.delta.text));
+          }
         }
+        controller.close();
+      } catch (err) {
+        controller.error(err);
       }
-      controller.close();
     },
   });
 

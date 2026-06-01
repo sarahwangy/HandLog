@@ -100,7 +100,10 @@ export default function ChatContent() {
         body: JSON.stringify({ messages: newMessages, weeks }),
       });
 
-      if (!res.ok || !res.body) throw new Error("Request failed");
+      if (!res.ok || !res.body) {
+        const errText = await res.text().catch(() => "Request failed");
+        throw new Error(errText || "Request failed");
+      }
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
@@ -116,12 +119,13 @@ export default function ChatContent() {
           return updated;
         });
       }
-    } catch {
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : "未知错误";
       setMessages((prev) => {
         const updated = [...prev];
         updated[updated.length - 1] = {
           role: "assistant",
-          content: "⚠️ 出错了，请重试",
+          content: `⚠️ 出错了：${errMsg}`,
         };
         return updated;
       });
