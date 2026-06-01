@@ -3,16 +3,36 @@
 import { useState, useEffect, useRef, Fragment } from "react";
 import type { WeekContext } from "@/app/api/chat/context/route";
 
-// 把 **粗体** 和换行渲染成 JSX，不引入外部 markdown 库
+// 把常见 markdown 渲染成 JSX，不引入外部库
 function renderMarkdown(text: string) {
-  return text.split("\n").map((line, li) => {
+  const lines = text.split("\n");
+  return lines.map((line, li) => {
+    // --- 分割线
+    if (/^-{3,}$/.test(line.trim())) {
+      return <hr key={li} className="my-2 border-[#E4D4C0]" />;
+    }
+    // ## 标题
+    const h2 = line.match(/^##\s+(.+)/);
+    if (h2) {
+      return <p key={li} className="font-semibold mt-2 mb-1">{h2[1]}</p>;
+    }
+    // ### 小标题
+    const h3 = line.match(/^###\s+(.+)/);
+    if (h3) {
+      return <p key={li} className="font-medium mt-1">{h3[1]}</p>;
+    }
+    // 空行
+    if (!line.trim()) {
+      return <br key={li} />;
+    }
+    // 行内 **粗体**
     const parts = line.split(/(\*\*[^*]+\*\*)/g).map((part, pi) => {
       if (part.startsWith("**") && part.endsWith("**")) {
         return <strong key={pi}>{part.slice(2, -2)}</strong>;
       }
       return <Fragment key={pi}>{part}</Fragment>;
     });
-    return <span key={li}>{parts}{li < text.split("\n").length - 1 && <br />}</span>;
+    return <span key={li} className="block">{parts}</span>;
   });
 }
 
