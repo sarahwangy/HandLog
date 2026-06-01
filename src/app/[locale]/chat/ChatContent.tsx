@@ -6,11 +6,11 @@ import { useState, useEffect, useRef, Fragment } from "react";
 function renderMarkdown(text: string) {
   const lines = text.split("\n");
   return lines.map((line, li) => {
-    // --- 分割线
-    if (/^-{3,}$/.test(line.trim())) {
-      return <hr key={li} className="my-2 border-[#E4D4C0]" />;
+    // --- 分割线（包括 ────── 字符）
+    if (/^[-─]{3,}$/.test(line.trim())) {
+      return <hr key={li} className="my-3 border-[#E4D4C0]" />;
     }
-    // ## 标题
+    // ## 大标题
     const h2 = line.match(/^##\s+(.+)/);
     if (h2) {
       return <p key={li} className="text-[15px] font-bold text-[#2C1F14] mt-3 mb-1">{h2[1]}</p>;
@@ -19,6 +19,15 @@ function renderMarkdown(text: string) {
     const h3 = line.match(/^###\s+(.+)/);
     if (h3) {
       return <p key={li} className="text-[13px] font-semibold text-[#4A3324] mt-2 mb-0.5">{h3[1]}</p>;
+    }
+    // 1. 2. 3. 编号标题：数字开头、行较短（≤80字）、不以 - 开头
+    const numbered = line.match(/^(\d+)\.\s+(.+)/);
+    if (numbered && line.length <= 80) {
+      return (
+        <p key={li} className="text-[14px] font-semibold text-[#2C1F14] mt-3 mb-0.5">
+          {numbered[1]}. {numbered[2].replace(/\*\*(.+?)\*\*/g, "$1")}
+        </p>
+      );
     }
     // 空行
     if (!line.trim()) {
@@ -31,7 +40,7 @@ function renderMarkdown(text: string) {
       }
       return <Fragment key={pi}>{part}</Fragment>;
     });
-    return <span key={li} className="block">{parts}</span>;
+    return <span key={li} className="block leading-relaxed">{parts}</span>;
   });
 }
 
