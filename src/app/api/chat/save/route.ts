@@ -1,5 +1,5 @@
 // POST /api/chat/save
-// Body: { messages: {role, content, saved?: boolean}[], saveAll: boolean }
+// Body: { messages, saveAll, topic }
 // 把对话写入 Notion「Deep Chat-相关」页面，使用 toggle 折叠块
 
 import { NextRequest, NextResponse } from "next/server";
@@ -13,19 +13,65 @@ interface ChatMessage {
   saved?: boolean;
 }
 
-// 去掉 markdown 符号，保留纯文本（Notion 不渲染 markdown）
-function stripMarkdown(text: string): string {
-  return text
-    .replace(/^#{1,3}\s+/gm, "")   // ## 标题
-    .replace(/\*\*(.+?)\*\*/g, "$1") // **粗体**
-    .replace(/^-{3,}$/gm, "──────") // --- 分割线
-    .trim();
+// 把一条消息的文本拆成 Notion blocks（处理 ## 标题、正文段落）
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function messageToBlocks(role: "user" | "assistant", content: string): any[] {
+  const prefix = role === "user" ? "🙋 " : "🤖 ";
+  const lines = content.split("\n");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const blocks: any[] = [];
+
+  let buffer: string[] = [];
+
+  function flushBuffer() {
+    const text = buffer.join("\n").replace(/\*\*(.+?)\*\*/g, "$1").replace(/^-{3,}$/gm, "──────").trim();
+    if (text) {
+      blocks.push({
+        type: "paragraph",
+        paragraph: {
+          rich_text: [{ type: "text", text: { content: text } }],
+          color: role === "user" ? "default" : "gray_background",
+        },
+      });
+    }
+    buffer = [];
+  }
+
+  let isFirst = true;
+  for (const line of lines) {
+    const h2 = line.match(/^##\s+(.+)/);
+    const h3 = line.match(/^###\s+(.+)/);
+
+    if (h2 || h3) {
+      flushBuffer();
+      const headingText = (h2 ? h2[1] : h3![1]).replace(/\*\*(.+?)\*\*/g, "$1");
+      blocks.push({
+        type: h2 ? "heading_2" : "heading_3",
+        [h2 ? "heading_2" : "heading_3"]: {
+          rich_text: [{ type: "text", text: { content: headingText } }],
+          color: "default",
+        },
+      });
+    } else {
+      // 第一行加上角色前缀
+      if (isFirst) {
+        buffer.push(prefix + line);
+        isFirst = false;
+      } else {
+        buffer.push(line);
+      }
+    }
+  }
+  flushBuffer();
+
+  return blocks;
 }
 
 export async function POST(req: NextRequest) {
-  const { messages, saveAll } = await req.json() as {
+  const { messages, saveAll, topic } = await req.json() as {
     messages: ChatMessage[];
     saveAll: boolean;
+    topic?: string;
   };
 
   try {
@@ -42,37 +88,20 @@ export async function POST(req: NextRequest) {
 
     const now = new Date().toLocaleString("zh-CN", { timeZone: "Australia/Melbourne" });
     const label = saveAll ? "全部对话" : "片段对话";
+    const titleText = topic
+      ? `💬 ${label} · ${now} — ${topic}`
+      : `💬 ${label} · ${now}`;
 
-    // 每条消息变成一个 paragraph child（放在 toggle 里）
+    // 所有消息展开成 blocks
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const children: any[] = toSave.map((m) => ({
-      type: "paragraph",
-      paragraph: {
-        rich_text: [
-          {
-            type: "text",
-            text: {
-              content: m.role === "user"
-                ? `🙋 ${stripMarkdown(m.content)}`
-                : `🤖 ${stripMarkdown(m.content)}`,
-            },
-          },
-        ],
-        color: m.role === "user" ? "default" : "gray_background",
-      },
-    }));
+    const children: any[] = toSave.flatMap((m) => messageToBlocks(m.role, m.content));
 
-    // 用一个 toggle block 包裹整段对话，标题注明是全部还是片段
+    // 用 toggle 包裹
     const toggleBlock: Parameters<typeof notion.blocks.children.append>[0]["children"] = [
       {
         type: "toggle",
         toggle: {
-          rich_text: [
-            {
-              type: "text",
-              text: { content: `💬 ${label} · ${now}` },
-            },
-          ],
+          rich_text: [{ type: "text", text: { content: titleText } }],
           color: "default",
           children,
         },

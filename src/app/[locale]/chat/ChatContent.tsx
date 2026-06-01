@@ -140,6 +140,13 @@ export default function ChatContent() {
     setMessages((prev) => prev.filter((_, i) => i !== index));
   }
 
+  // 取第一条用户消息作为主题关键词（最多 20 字）
+  function getTopic(msgs: Message[]) {
+    const first = msgs.find((m) => m.role === "user");
+    if (!first) return "";
+    return first.content.length > 20 ? first.content.slice(0, 20) + "…" : first.content;
+  }
+
   // 5. 保存全部对话到 Notion
   async function saveAll() {
     setSaving(true);
@@ -147,7 +154,7 @@ export default function ChatContent() {
       const res = await fetch("/api/chat/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages, saveAll: true }),
+        body: JSON.stringify({ messages, saveAll: true, topic: getTopic(messages) }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -166,7 +173,7 @@ export default function ChatContent() {
       await fetch("/api/chat/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: [msg], saveAll: true }),
+        body: JSON.stringify({ messages: [msg], saveAll: false, topic: getTopic(messages) }),
       });
       toggleSaved(index);
     } catch {
