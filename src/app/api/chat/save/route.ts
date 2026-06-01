@@ -13,24 +13,69 @@ interface ChatMessage {
   saved?: boolean;
 }
 
-// 把一条消息转成单个 callout block
-// ## 标题转成行内大写文字（callout 不支持嵌套 heading）
+// 用户消息 → 简单 callout
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function messageToCallout(role: "user" | "assistant", content: string): any {
-  const clean = content
-    .replace(/^#{1,3}\s+(.+)/gm, "▌ $1")   // ## 标题 → ▌ 标题
-    .replace(/\*\*(.+?)\*\*/g, "$1")         // **粗体** → 纯文本
-    .replace(/^-{3,}$/gm, "──────")          // --- → 分割线字符
-    .trim();
+function userCallout(content: string): any {
+  return {
+    type: "callout",
+    callout: {
+      rich_text: [{ type: "text", text: { content: content.trim() } }],
+      icon: { type: "emoji", emoji: "🙋" },
+      color: "default",
+    },
+  };
+}
+
+// AI 消息 → callout（空标题）+ children（heading_2/heading_3/paragraph）
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function aiCallout(content: string): any {
+  const lines = content.split("\n");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const children: any[] = [];
+  const buffer: string[] = [];
+
+  function flushBuffer() {
+    const text = buffer
+      .join("\n")
+      .replace(/\*\*(.+?)\*\*/g, "$1")
+      .replace(/^-{3,}$/gm, "──────")
+      .trim();
+    if (text) {
+      children.push({
+        type: "paragraph",
+        paragraph: { rich_text: [{ type: "text", text: { content: text } }] },
+      });
+    }
+    buffer.length = 0;
+  }
+
+  for (const line of lines) {
+    const h2 = line.match(/^##\s+(.+)/);
+    const h3 = line.match(/^###\s+(.+)/);
+    if (h2 || h3) {
+      flushBuffer();
+      const t = (h2 ? h2[1] : h3![1]).replace(/\*\*(.+?)\*\*/g, "$1");
+      const level = h2 ? "heading_2" : "heading_3";
+      children.push({ type: level, [level]: { rich_text: [{ type: "text", text: { content: t } }] } });
+    } else {
+      buffer.push(line);
+    }
+  }
+  flushBuffer();
 
   return {
     type: "callout",
     callout: {
-      rich_text: [{ type: "text", text: { content: clean } }],
-      icon: { type: "emoji", emoji: role === "user" ? "🙋" : "🤖" },
-      color: role === "user" ? "default" : "gray_background",
+      rich_text: [{ type: "text", text: { content: "" } }],
+      icon: { type: "emoji", emoji: "🤖" },
+      color: "gray_background",
+      children,
     },
   };
+}
+
+function messageToCallout(role: "user" | "assistant", content: string) {
+  return role === "user" ? userCallout(content) : aiCallout(content);
 }
 
 export async function POST(req: NextRequest) {
@@ -68,7 +113,7 @@ export async function POST(req: NextRequest) {
         type: "toggle",
         toggle: {
           rich_text: [{ type: "text", text: { content: titleText } }],
-          color: "default",
+          color: "blue_background",
           children,
         },
       } as Parameters<typeof notion.blocks.children.append>[0]["children"][number],
