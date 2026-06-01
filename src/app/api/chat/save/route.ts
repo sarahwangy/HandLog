@@ -13,58 +13,24 @@ interface ChatMessage {
   saved?: boolean;
 }
 
-// 把一条消息的文本拆成 Notion blocks（处理 ## 标题、正文段落）
+// 把一条消息转成单个 callout block
+// ## 标题转成行内大写文字（callout 不支持嵌套 heading）
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function messageToBlocks(role: "user" | "assistant", content: string): any[] {
-  const prefix = role === "user" ? "🙋 " : "🤖 ";
-  const lines = content.split("\n");
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const blocks: any[] = [];
+function messageToCallout(role: "user" | "assistant", content: string): any {
+  const clean = content
+    .replace(/^#{1,3}\s+(.+)/gm, "▌ $1")   // ## 标题 → ▌ 标题
+    .replace(/\*\*(.+?)\*\*/g, "$1")         // **粗体** → 纯文本
+    .replace(/^-{3,}$/gm, "──────")          // --- → 分割线字符
+    .trim();
 
-  let buffer: string[] = [];
-
-  function flushBuffer() {
-    const text = buffer.join("\n").replace(/\*\*(.+?)\*\*/g, "$1").replace(/^-{3,}$/gm, "──────").trim();
-    if (text) {
-      blocks.push({
-        type: "paragraph",
-        paragraph: {
-          rich_text: [{ type: "text", text: { content: text } }],
-          color: role === "user" ? "default" : "gray_background",
-        },
-      });
-    }
-    buffer = [];
-  }
-
-  let isFirst = true;
-  for (const line of lines) {
-    const h2 = line.match(/^##\s+(.+)/);
-    const h3 = line.match(/^###\s+(.+)/);
-
-    if (h2 || h3) {
-      flushBuffer();
-      const headingText = (h2 ? h2[1] : h3![1]).replace(/\*\*(.+?)\*\*/g, "$1");
-      blocks.push({
-        type: h2 ? "heading_2" : "heading_3",
-        [h2 ? "heading_2" : "heading_3"]: {
-          rich_text: [{ type: "text", text: { content: headingText } }],
-          color: "default",
-        },
-      });
-    } else {
-      // 第一行加上角色前缀
-      if (isFirst) {
-        buffer.push(prefix + line);
-        isFirst = false;
-      } else {
-        buffer.push(line);
-      }
-    }
-  }
-  flushBuffer();
-
-  return blocks;
+  return {
+    type: "callout",
+    callout: {
+      rich_text: [{ type: "text", text: { content: clean } }],
+      icon: { type: "emoji", emoji: role === "user" ? "🙋" : "🤖" },
+      color: role === "user" ? "default" : "gray_background",
+    },
+  };
 }
 
 export async function POST(req: NextRequest) {
@@ -92,9 +58,9 @@ export async function POST(req: NextRequest) {
       ? `💬 ${label} · ${now} — ${topic}`
       : `💬 ${label} · ${now}`;
 
-    // 所有消息展开成 blocks
+    // 每条消息 → 一个 callout block
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const children: any[] = toSave.flatMap((m) => messageToBlocks(m.role, m.content));
+    const children: any[] = toSave.map((m) => messageToCallout(m.role, m.content));
 
     // 用 toggle 包裹
     const toggleBlock: Parameters<typeof notion.blocks.children.append>[0]["children"] = [

@@ -1,12 +1,11 @@
 // POST /api/chat
-// Body: { messages: {role, content}[], weeks: WeekContext[] }
-// 返回: text/event-stream 流式响应
+// Body: { messages: {role, content}[] }   ← 不再包含 weeks，服务端自己拉
+// 返回: 流式文本响应
 
 import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import type { WeekContext } from "@/app/api/chat/context/route";
+import { fetchWeekContexts, type WeekContext } from "@/lib/chat-context";
 
-// 把所有周数据拼成系统 prompt
 function buildSystemPrompt(weeks: WeekContext[]): string {
   const entries = weeks
     .map((w) => {
@@ -23,24 +22,28 @@ ${entries}
 规则：
 - 只分析日记里真实出现的内容，不要编造
 - 回答要温暖、直接、有洞察力
-- 中文回答，语气口语化
-- 如果日记里没有相关信息，直接说"你的日记里没有提到这方面"`;
+- 如果用户用中文问，用中文回答；如果用英文问，用英文回答
+- 如果日记里没有相关信息，直接说没有提到`;
 }
 
 export async function POST(req: NextRequest) {
-  const { messages, weeks } = await req.json() as {
+  const { messages } = await req.json() as {
     messages: { role: "user" | "assistant"; content: string }[];
-    weeks: WeekContext[];
   };
 
-  if (!messages?.length || !weeks?.length) {
-    return new Response("Missing messages or weeks", { status: 400 });
+  if (!messages?.length) {
+    return new Response("Missing messages", { status: 400 });
   }
 
-  const client = new Anthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY,
-  });
+  let weeks: WeekContext[];
+  try {
+    weeks = await fetchWeekContexts();
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return new Response(`读取日记数据失败：${msg}`, { status: 500 });
+  }
 
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const systemPrompt = buildSystemPrompt(weeks);
 
   let stream: Awaited<ReturnType<typeof client.messages.stream>>;
@@ -56,7 +59,6 @@ export async function POST(req: NextRequest) {
     return new Response(msg, { status: 500 });
   }
 
-  // 用 ReadableStream 把 Anthropic 的流转成 HTTP stream
   const readable = new ReadableStream({
     async start(controller) {
       try {

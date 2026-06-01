@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef, Fragment } from "react";
-import type { WeekContext } from "@/app/api/chat/context/route";
 
 // 把常见 markdown 渲染成 JSX，不引入外部库
 function renderMarkdown(text: string) {
@@ -50,7 +49,7 @@ const QUICK_PROMPTS = [
 ];
 
 export default function ChatContent() {
-  const [weeks, setWeeks] = useState<WeekContext[]>([]);
+  const [weekCount, setWeekCount] = useState(0);
   const [loadingCtx, setLoadingCtx] = useState(true);
   const [ctxError, setCtxError] = useState<string | null>(null);
 
@@ -69,7 +68,7 @@ export default function ChatContent() {
       .then((r) => r.json())
       .then((d) => {
         if (d.error) throw new Error(d.error);
-        setWeeks(d.weeks);
+        setWeekCount(d.count);
       })
       .catch((e) => setCtxError(e.message))
       .finally(() => setLoadingCtx(false));
@@ -97,7 +96,7 @@ export default function ChatContent() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: newMessages, weeks }),
+        body: JSON.stringify({ messages: newMessages }),
       });
 
       if (!res.ok || !res.body) {
@@ -210,7 +209,7 @@ export default function ChatContent() {
         <h1 className="text-[20px] font-bold text-[#2C1F14]">💬 Deep Chat</h1>
         <p className="text-[13px] text-[#8B6B4A] mt-1">基于你的日记，深度分析你的想法和模式</p>
         <div className="inline-flex items-center gap-2 mt-2 bg-[#F5EDE0] border border-[#E4D4C0] rounded-full px-3 py-1 text-[12px] text-[#8B6B4A]">
-          📓 已读取 <span className="text-[#C4783A] font-semibold">{weeks.length} 周</span> 日记
+          📓 已读取 <span className="text-[#C4783A] font-semibold">{weekCount} 周</span> 日记
         </div>
       </div>
 
