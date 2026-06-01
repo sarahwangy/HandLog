@@ -52,11 +52,24 @@ function aiCallout(content: string): any {
   for (const line of lines) {
     const h2 = line.match(/^##\s+(.+)/);
     const h3 = line.match(/^###\s+(.+)/);
+    // 1. 编号标题（短行）
+    const numbered = line.match(/^(\d+)\.\s+(.+)/);
+    // - 列表项
+    const bullet = line.match(/^[-*]\s+(.+)/);
+
     if (h2 || h3) {
       flushBuffer();
       const t = (h2 ? h2[1] : h3![1]).replace(/\*\*(.+?)\*\*/g, "$1");
       const level = h2 ? "heading_2" : "heading_3";
       children.push({ type: level, [level]: { rich_text: [{ type: "text", text: { content: t } }] } });
+    } else if (numbered && line.length <= 80) {
+      flushBuffer();
+      const t = `${numbered[1]}. ${numbered[2].replace(/\*\*(.+?)\*\*/g, "$1")}`;
+      children.push({ type: "heading_3", heading_3: { rich_text: [{ type: "text", text: { content: t } }] } });
+    } else if (bullet) {
+      flushBuffer();
+      const t = bullet[1].replace(/\*\*(.+?)\*\*/g, "$1");
+      children.push({ type: "bulleted_list_item", bulleted_list_item: { rich_text: [{ type: "text", text: { content: t } }] } });
     } else {
       buffer.push(line);
     }

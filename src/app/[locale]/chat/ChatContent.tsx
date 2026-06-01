@@ -3,45 +3,65 @@
 import { useState, useEffect, useRef, Fragment } from "react";
 
 // 把常见 markdown 渲染成 JSX，不引入外部库
+// 把 **粗体** 拆成 inline JSX
+function renderInline(text: string) {
+  return text.split(/(\*\*[^*]+\*\*)/g).map((part, pi) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={pi}>{part.slice(2, -2)}</strong>;
+    }
+    return <Fragment key={pi}>{part}</Fragment>;
+  });
+}
+
 function renderMarkdown(text: string) {
   const lines = text.split("\n");
-  return lines.map((line, li) => {
-    // --- 分割线（包括 ────── 字符）
+  const nodes: React.ReactNode[] = [];
+  let bulletBuffer: string[] = [];
+  let key = 0;
+
+  function flushBullets() {
+    if (bulletBuffer.length === 0) return;
+    nodes.push(
+      <ul key={key++} className="list-disc list-outside pl-5 my-1 space-y-0.5">
+        {bulletBuffer.map((item, i) => (
+          <li key={i} className="text-[14px] leading-relaxed">{renderInline(item)}</li>
+        ))}
+      </ul>
+    );
+    bulletBuffer = [];
+  }
+
+  for (const line of lines) {
+    // --- 分割线
     if (/^[-─]{3,}$/.test(line.trim())) {
-      return <hr key={li} className="my-3 border-[#E4D4C0]" />;
+      flushBullets();
+      nodes.push(<hr key={key++} className="my-3 border-[#E4D4C0]" />);
+      continue;
     }
     // ## 大标题
     const h2 = line.match(/^##\s+(.+)/);
-    if (h2) {
-      return <p key={li} className="text-[15px] font-bold text-[#2C1F14] mt-3 mb-1">{h2[1]}</p>;
-    }
+    if (h2) { flushBullets(); nodes.push(<p key={key++} className="text-[15px] font-bold text-[#2C1F14] mt-3 mb-1">{h2[1]}</p>); continue; }
     // ### 小标题
     const h3 = line.match(/^###\s+(.+)/);
-    if (h3) {
-      return <p key={li} className="text-[13px] font-semibold text-[#4A3324] mt-2 mb-0.5">{h3[1]}</p>;
-    }
-    // 1. 2. 3. 编号标题：数字开头、行较短（≤80字）、不以 - 开头
+    if (h3) { flushBullets(); nodes.push(<p key={key++} className="text-[13px] font-semibold text-[#4A3324] mt-2 mb-0.5">{h3[1]}</p>); continue; }
+    // 1. 编号标题（短行）
     const numbered = line.match(/^(\d+)\.\s+(.+)/);
     if (numbered && line.length <= 80) {
-      return (
-        <p key={li} className="text-[14px] font-semibold text-[#2C1F14] mt-3 mb-0.5">
-          {numbered[1]}. {numbered[2].replace(/\*\*(.+?)\*\*/g, "$1")}
-        </p>
-      );
+      flushBullets();
+      nodes.push(<p key={key++} className="text-[14px] font-semibold text-[#2C1F14] mt-3 mb-0.5">{numbered[1]}. {renderInline(numbered[2])}</p>);
+      continue;
     }
+    // - 列表项
+    const bullet = line.match(/^[-*]\s+(.+)/);
+    if (bullet) { bulletBuffer.push(bullet[1]); continue; }
     // 空行
-    if (!line.trim()) {
-      return <br key={li} />;
-    }
-    // 行内 **粗体**
-    const parts = line.split(/(\*\*[^*]+\*\*)/g).map((part, pi) => {
-      if (part.startsWith("**") && part.endsWith("**")) {
-        return <strong key={pi}>{part.slice(2, -2)}</strong>;
-      }
-      return <Fragment key={pi}>{part}</Fragment>;
-    });
-    return <span key={li} className="block leading-relaxed">{parts}</span>;
-  });
+    if (!line.trim()) { flushBullets(); nodes.push(<br key={key++} />); continue; }
+    // 普通段落
+    flushBullets();
+    nodes.push(<span key={key++} className="block leading-relaxed">{renderInline(line)}</span>);
+  }
+  flushBullets();
+  return nodes;
 }
 
 interface Message {
