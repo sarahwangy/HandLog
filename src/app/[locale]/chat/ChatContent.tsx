@@ -1,7 +1,20 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Fragment } from "react";
 import type { WeekContext } from "@/app/api/chat/context/route";
+
+// 把 **粗体** 和换行渲染成 JSX，不引入外部 markdown 库
+function renderMarkdown(text: string) {
+  return text.split("\n").map((line, li) => {
+    const parts = line.split(/(\*\*[^*]+\*\*)/g).map((part, pi) => {
+      if (part.startsWith("**") && part.endsWith("**")) {
+        return <strong key={pi}>{part.slice(2, -2)}</strong>;
+      }
+      return <Fragment key={pi}>{part}</Fragment>;
+    });
+    return <span key={li}>{parts}{li < text.split("\n").length - 1 && <br />}</span>;
+  });
+}
 
 interface Message {
   role: "user" | "assistant";
@@ -185,13 +198,17 @@ export default function ChatContent() {
                 ? "bg-[#C4783A] text-white rounded-br-sm"
                 : "bg-white border border-[#E4D4C0] text-[#2C1F14] rounded-bl-sm shadow-sm"
               }`}>
-              {msg.content || (streaming && i === messages.length - 1 ? (
-                <span className="flex gap-1 items-center py-1">
-                  <span className="w-2 h-2 rounded-full bg-[#C4A98A] animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <span className="w-2 h-2 rounded-full bg-[#C4A98A] animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <span className="w-2 h-2 rounded-full bg-[#C4A98A] animate-bounce" style={{ animationDelay: "300ms" }} />
-                </span>
-              ) : "")}
+              {msg.content
+                ? (msg.role === "assistant" ? renderMarkdown(msg.content) : msg.content)
+                : streaming && i === messages.length - 1
+                  ? (
+                    <span className="flex gap-1 items-center py-1">
+                      <span className="w-2 h-2 rounded-full bg-[#C4A98A] animate-bounce" style={{ animationDelay: "0ms" }} />
+                      <span className="w-2 h-2 rounded-full bg-[#C4A98A] animate-bounce" style={{ animationDelay: "150ms" }} />
+                      <span className="w-2 h-2 rounded-full bg-[#C4A98A] animate-bounce" style={{ animationDelay: "300ms" }} />
+                    </span>
+                  )
+                  : null}
             </div>
 
             {msg.role === "assistant" && !streaming && msg.content && (
