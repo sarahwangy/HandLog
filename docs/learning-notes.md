@@ -226,3 +226,27 @@
   - 服务端 `/api/chat` 路由需要 `export const dynamic = "force-dynamic"`，否则 Next.js 会尝试静态缓存，导致每次请求结果一样
 
 - **一句话总结：** localStorage 持久化 + AbortController 中断流 + 情绪参数传后端，这三个是聊天类应用的标配功能模式，几乎所有 AI Chat 产品都有。
+
+---
+
+### T-Generate-Table — 生成 Table 功能
+
+- **学到的核心概念：**
+  - Notion block 嵌套结构：Toggle > Callout > Paragraph 三层。必须先 append toggle，再读取 toggle 的 children 拿到 callout ID，再往 callout 里 append 内容——不能一次性嵌套三层
+  - Notion rich_text 有 2000 字符限制，所以把 markdown 每行存为独立 paragraph block，而不是一整段文字
+  - Claude 批量调用：把所有天的日记一次性传给 Claude，比逐天调用省 token，也减少 API 次数
+  - `extractJson` 只处理 `{` 开头的对象；Claude 返回数组 `[...]` 时要用 `indexOf("[")` + `lastIndexOf("]")` 提取
+
+- **用到的关键 API/函数：**
+  - `notion.blocks.children.append` + `notion.blocks.children.list`（读取刚建 block 的子 block ID）
+  - `generateTableBullets`（新增）— 批量提取日记要点，返回 `DayBullets[]`
+  - `getMonthDailyEntries`（新增）— 用 `starts_with` 过滤 + 两段标题筛选，只取日页面
+  - `appendTableToggle`（新增）— Toggle+Callout 写入逻辑
+  - `findOrCreateMonthlyTablePage`（新增）— 查找或新建"月度-table"行
+
+- **容易踩的坑：**
+  - 周复盘的"简短日常"存在**周页面**（如 "5-25-31"）上；月度 table 需要读的是**每日页面**（如 "6-2"）的简短日常，来源不同
+  - `getWeekDailyEntries` 查的是日页面；`getMonthDailyEntries` 也查日页面，但是通过 `starts_with` + 段数过滤，而不是枚举所有日期标题
+  - 切换 weekLabel 时需要同步清空 weekTable 状态，否则旧数据还在显示
+
+- **一句话总结：** 用 Claude 批量提取要点 + Notion Toggle/Callout block 嵌套存储，是这个项目"生成 → 预览 → 保存"流程的标准延伸，关键在于理解 Notion block ID 的获取时机。
