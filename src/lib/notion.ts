@@ -1051,9 +1051,8 @@ export async function getMonthDailyEntries(
     .filter(e => e.date.split("-").length === 2 && e.dailySummary.trim());
 }
 
-// 在页面 body 里追加一个 Toggle，Toggle 内包含真正的 Notion 表格（不是 markdown 文字）
-// 分三步：① 建 Toggle ② 在 Toggle 内建空 table ③ 往 table 里 append rows
-// Notion SDK 不支持在一次调用里创建带 children 的 table，所以必须分步
+// 在页面 body 里追加一个 Toggle，Toggle 内把 markdown 表格每行存为 paragraph block
+// 前端的 TablePreview 组件负责把 markdown 渲染成 HTML 表格，Notion 侧只存原始文字
 export async function appendTableToggle(
   accessToken: string,
   pageId: string,
@@ -1062,21 +1061,7 @@ export async function appendTableToggle(
 ): Promise<void> {
   const notion = createNotionClient(accessToken);
 
-  // 解析 markdown 表格：跳过分隔线（含 ---）
-  const allRows = markdownTable
-    .split("\n")
-    .filter(line => line.trim().startsWith("|") && !line.includes("---"))
-    .map(line => line.split("|").slice(1, -1).map(cell => cell.trim()));
-
-  if (allRows.length === 0) return;
-  const tableWidth = allRows[0].length;
-
-  // 事项列：把 "• item1  • item2" 转成 "• item1\n• item2"（换行更易读）
-  const processedRows = allRows.map(row =>
-    row.map(cell => cell.replace(/\s{2,}•/g, "\n•"))
-  );
-
-  // Step 1：创建 Toggle 块
+  // Step 1：建 Toggle
   const toggleRes = await withAuthCheck(() =>
     notion.blocks.children.append({
       block_id: pageId,
@@ -1095,35 +1080,17 @@ export async function appendTableToggle(
   const toggleId = toggleRes.results[0]?.id;
   if (!toggleId) return;
 
-  // Step 2：在 Toggle 内建空的 table block（不含 rows，分步创建更稳定）
-  const tableRes = await withAuthCheck(() =>
-    notion.blocks.children.append({
-      block_id: toggleId,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      children: [{
-        type: "table",
-        table: {
-          table_width: tableWidth,
-          has_column_header: true,
-          has_row_header: false,
-        },
-      }] as any,
-    })
-  ) as { results: { id: string }[] };
-
-  const tableId = tableRes.results[0]?.id;
-  if (!tableId) return;
-
-  // Step 3：把每一行作为 table_row block append 到 table 里
+  // Step 2：每行 markdown 存为一个 paragraph block（每行不超过 2000 字符限制）
+  const lines = markdownTable.split("\n").filter(Boolean);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const tableRows: any[] = processedRows.map(row => ({
-    type: "table_row",
-    table_row: {
-      cells: row.map(cell => [{ type: "text", text: { content: cell.slice(0, 2000) } }]),
+  const blocks: any[] = lines.map(line => ({
+    type: "paragraph",
+    paragraph: {
+      rich_text: [{ type: "text", text: { content: line.slice(0, 2000) } }],
     },
   }));
 
-  await batchAppend(notion, tableId, tableRows);
+  await batchAppend(notion, toggleId, blocks);
 }
 
 // 在主数据库中查找或创建标题为 "YYYY-MM-月度-table" 的页面
