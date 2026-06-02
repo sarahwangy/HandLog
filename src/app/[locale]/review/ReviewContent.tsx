@@ -737,11 +737,7 @@ ${parts.filter(Boolean).join("")}
           )}
 
           {/* ── Weekly Table Preview ─────────────────────────────── */}
-          {weekTable && (
-            <div className="mt-4 bg-white border border-[#E4D4C0] rounded-[12px] p-4 overflow-x-auto">
-              <pre className="text-[13px] text-[#4A3324] whitespace-pre font-mono leading-relaxed">{weekTable}</pre>
-            </div>
-          )}
+          {weekTable && <TablePreview markdown={weekTable} />}
         </div>
       )}
 
@@ -963,11 +959,7 @@ ${parts.filter(Boolean).join("")}
           )}
 
           {/* ── Monthly Table Preview ────────────────────────────── */}
-          {monthTable && (
-            <div className="mt-4 bg-white border border-[#E4D4C0] rounded-[12px] p-4 overflow-x-auto">
-              <pre className="text-[13px] text-[#4A3324] whitespace-pre font-mono leading-relaxed">{monthTable}</pre>
-            </div>
-          )}
+          {monthTable && <TablePreview markdown={monthTable} />}
         </div>
       )}
     </div>
@@ -975,6 +967,61 @@ ${parts.filter(Boolean).join("")}
 }
 
 // ── Shared primitives ─────────────────────────────────────────────────────────
+
+// 把 markdown 表格字符串渲染成 HTML 表格
+// 格式：第一行是 header，第二行是分隔线（跳过），其余是数据行
+// 每个单元格里用 "  •" 分隔的 bullet points 会换行显示
+function TablePreview({ markdown }: { markdown: string }) {
+  const rows = markdown
+    .split("\n")
+    .filter(line => line.trim().startsWith("|"))
+    .map(line =>
+      line.split("|").slice(1, -1).map(cell => cell.trim())
+    );
+
+  const [header, , ...dataRows] = rows; // 跳过第二行（分隔线 |---|---|）
+  if (!header) return null;
+
+  return (
+    <div className="overflow-x-auto mt-4 rounded-[12px] border border-[#E4D4C0]">
+      <table className="w-full text-[13px] border-collapse">
+        <thead>
+          <tr className="bg-[#F5EDE0]">
+            {header.map((h, i) => (
+              <th key={i} className="text-left px-4 py-[10px] text-[#8B6B4A] font-semibold border-b border-[#E4D4C0] whitespace-nowrap">
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {dataRows.map((row, ri) => (
+            <tr key={ri} className={ri % 2 === 0 ? "bg-white" : "bg-[#FDFAF6]"}>
+              {row.map((cell, ci) => (
+                <td key={ci} className="px-4 py-[10px] text-[#4A3324] border-b border-[#F0E8DC] align-top">
+                  {ci === 0 ? (
+                    // 日期列：不拆分
+                    <span className="font-medium text-[#2C1F14] whitespace-nowrap">{cell}</span>
+                  ) : (
+                    // 事项列：按 bullet 拆成多行
+                    <ul className="space-y-[4px]">
+                      {cell.split("•").filter(s => s.trim()).map((item, ii) => (
+                        <li key={ii} className="flex items-start gap-1">
+                          <span className="text-[#C4783A] mt-[2px] flex-shrink-0">•</span>
+                          <span>{item.trim()}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 function RCard({ children, full, warm }: { children: React.ReactNode; full?: boolean; warm?: boolean }) {
   return (

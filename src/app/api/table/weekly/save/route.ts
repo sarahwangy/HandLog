@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const token = getNotionTokenInternal();
-    await appendTableToggle(token, weekPageId, markdownTable, "📅 一周大事记");
+    await appendTableToggle(token, weekPageId, markdownTable, "❤一周事件-表格-时间");
     return NextResponse.json({ success: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
