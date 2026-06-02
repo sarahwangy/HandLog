@@ -54,6 +54,7 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
   const [monthTableError, setMonthTableError] = useState<string | null>(null);
   const [monthTableSaving, setMonthTableSaving] = useState(false);
   const [monthTableSaved, setMonthTableSaved] = useState(false);
+  const [monthlyTablePageId, setMonthlyTablePageId] = useState<string | null>(null);
 
   // 页面加载时先检查 sessionStorage 里有没有从 Capture 页传来的复盘结果
   useEffect(() => {
@@ -290,15 +291,17 @@ ${parts.filter(Boolean).join("")}
     setMonthTableError(null);
     setMonthTable(null);
     setMonthTableSaved(false);
+    setMonthlyTablePageId(null);
     try {
       const res = await fetch("/api/table/monthly", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ year: monthYear, month: monthMonth }),
       });
-      const data = await res.json() as { markdownTable?: string; error?: string };
+      const data = await res.json() as { markdownTable?: string; monthlyTablePageId?: string; error?: string };
       if (!res.ok) throw new Error(data.error ?? "Failed");
       setMonthTable(data.markdownTable ?? null);
+      setMonthlyTablePageId(data.monthlyTablePageId ?? null);
     } catch (err) {
       setMonthTableError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -307,14 +310,14 @@ ${parts.filter(Boolean).join("")}
   };
 
   const saveMonthTable = async () => {
-    if (!monthTable) return;
+    if (!monthTable || !monthlyTablePageId) return;
     setMonthTableSaving(true);
     setMonthTableError(null);
     try {
       const res = await fetch("/api/table/monthly/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ markdownTable: monthTable, year: monthYear, month: monthMonth }),
+        body: JSON.stringify({ markdownTable: monthTable, monthlyTablePageId, year: monthYear, month: monthMonth }),
       });
       const data = await res.json() as { error?: string };
       if (!res.ok) throw new Error(data.error ?? "Save failed");

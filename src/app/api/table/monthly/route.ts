@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getNotionTokenInternal, getNotionDatabaseId } from "@/lib/auth";
-import { queryDatabase } from "@/lib/notion";
+import { queryDatabase, findOrCreateMonthlyTablePage } from "@/lib/notion";
 import { generateWeeklyTableBullets, type DayBullets } from "@/lib/claude";
 
 // POST /api/table/monthly
@@ -55,7 +55,10 @@ export async function POST(req: NextRequest) {
     }
 
     const markdownTable = buildMarkdownTable(allBullets, year);
-    return NextResponse.json({ markdownTable });
+
+    // 生成时就找或建好目标页面，save 步骤直接用 ID（和 weekly 一样的流程）
+    const monthlyTablePageId = await findOrCreateMonthlyTablePage(token, databaseId, year, month);
+    return NextResponse.json({ markdownTable, monthlyTablePageId });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json({ error: message }, { status: 500 });
