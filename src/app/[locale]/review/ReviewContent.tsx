@@ -553,7 +553,7 @@ ${parts.filter(Boolean).join("")}
           <div className="mb-5">
             <h2 className="text-[26px] font-semibold text-[#2C1F14] tracking-tight">Weekly Review <span className="text-[16px] font-normal text-[#8B6B4A]">每周复盘</span></h2>
             {/* 周标签输入框：可以手动改成上周，如 "5-18-24" */}
-            <div className="flex items-center gap-3 mt-3">
+            <div className="flex flex-wrap items-center gap-3 mt-3">
               <label className="text-[13px] text-[#8B6B4A]">Week</label>
               <input
                 type="text"
@@ -568,7 +568,15 @@ ${parts.filter(Boolean).join("")}
                 disabled={weekLoading}
                 className="h-[34px] px-5 bg-[#C4783A] text-white rounded-[8px] text-[13px] font-medium hover:bg-[#A85E28] transition-colors disabled:bg-[#EDD4BC] disabled:cursor-not-allowed"
               >
-                {weekLoading ? "Generating..." : "✨ Generate"}
+                {weekLoading ? "Generating..." : "✨ Generate Weekly Review"}
+              </button>
+              <button
+                type="button"
+                onClick={generateWeekTable}
+                disabled={weekTableLoading}
+                className="h-[34px] px-5 bg-[#C4783A] text-white rounded-[8px] text-[13px] font-medium hover:bg-[#A85E28] transition-colors disabled:bg-[#EDD4BC] disabled:cursor-not-allowed"
+              >
+                {weekTableLoading ? "Generating..." : "✨ Generate Weekly Table"}
               </button>
               {weekReview && (
                 <>
@@ -578,7 +586,7 @@ ${parts.filter(Boolean).join("")}
                     disabled={weekSaving || weekSaved}
                     className="h-[34px] px-5 rounded-[8px] text-[13px] font-medium border border-[#C4783A] text-[#C4783A] hover:bg-[#FDF0E6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {weekSaved ? "✓ Saved to Notion" : weekSaving ? "Saving..." : "💾 Save to Notion"}
+                    {weekSaved ? "✓ Saved to Notion" : weekSaving ? "Saving..." : "💾 Save Review"}
                   </button>
                   <button
                     type="button"
@@ -589,8 +597,19 @@ ${parts.filter(Boolean).join("")}
                   </button>
                 </>
               )}
+              {weekTable && (
+                <button
+                  type="button"
+                  onClick={saveWeekTable}
+                  disabled={weekTableSaving || weekTableSaved}
+                  className="h-[34px] px-5 rounded-[8px] text-[13px] font-medium border border-[#C4783A] text-[#C4783A] hover:bg-[#FDF0E6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {weekTableSaved ? "✓ Table Saved" : weekTableSaving ? "Saving..." : "💾 Save Table"}
+                </button>
+              )}
             </div>
             {weekError && <p className="text-[#C4783A] mt-2 text-[13px]">{weekError}</p>}
+            {weekTableError && <p className="text-[#C4783A] mt-1 text-[13px]">{weekTableError}</p>}
           </div>
 
           {weekReview && (
@@ -717,35 +736,12 @@ ${parts.filter(Boolean).join("")}
             </div>
           )}
 
-          {/* ── Weekly Table Section ─────────────────────────────── */}
-          <div className="mt-6 pt-5 border-t border-[#E4D4C0]">
-            <div className="flex flex-wrap items-center gap-3 mb-2">
-              <button
-                type="button"
-                onClick={generateWeekTable}
-                disabled={weekTableLoading}
-                className="h-[34px] px-5 bg-[#C4783A] text-white rounded-[8px] text-[13px] font-medium hover:bg-[#A85E28] transition-colors disabled:bg-[#EDD4BC] disabled:cursor-not-allowed"
-              >
-                {weekTableLoading ? "Generating..." : "✨ Generate Weekly Table"}
-              </button>
-              {weekTable && (
-                <button
-                  type="button"
-                  onClick={saveWeekTable}
-                  disabled={weekTableSaving || weekTableSaved}
-                  className="h-[34px] px-5 rounded-[8px] text-[13px] font-medium border border-[#C4783A] text-[#C4783A] hover:bg-[#FDF0E6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {weekTableSaved ? "✓ Saved to Notion" : weekTableSaving ? "Saving..." : "💾 Save to Notion"}
-                </button>
-              )}
+          {/* ── Weekly Table Preview ─────────────────────────────── */}
+          {weekTable && (
+            <div className="mt-4 bg-white border border-[#E4D4C0] rounded-[12px] p-4 overflow-x-auto">
+              <pre className="text-[13px] text-[#4A3324] whitespace-pre font-mono leading-relaxed">{weekTable}</pre>
             </div>
-            {weekTableError && <p className="text-[#C4783A] text-[13px]">{weekTableError}</p>}
-            {weekTable && (
-              <div className="mt-3 bg-white border border-[#E4D4C0] rounded-[12px] p-4 overflow-x-auto">
-                <pre className="text-[13px] text-[#4A3324] whitespace-pre font-mono leading-relaxed">{weekTable}</pre>
-              </div>
-            )}
-          </div>
+          )}
         </div>
       )}
 
@@ -781,7 +777,15 @@ ${parts.filter(Boolean).join("")}
                 disabled={monthLoading}
                 className="h-[34px] px-5 bg-[#C4783A] text-white rounded-[8px] text-[13px] font-medium hover:bg-[#A85E28] transition-colors disabled:bg-[#EDD4BC] disabled:cursor-not-allowed"
               >
-                {monthLoading ? "Generating..." : "✨ Generate"}
+                {monthLoading ? "Generating..." : "✨ Generate Monthly Review"}
+              </button>
+              <button
+                type="button"
+                onClick={generateMonthTable}
+                disabled={monthTableLoading}
+                className="h-[34px] px-5 bg-[#C4783A] text-white rounded-[8px] text-[13px] font-medium hover:bg-[#A85E28] transition-colors disabled:bg-[#EDD4BC] disabled:cursor-not-allowed"
+              >
+                {monthTableLoading ? "Generating..." : "✨ Generate Monthly Table"}
               </button>
               {monthReview && (
                 <>
@@ -791,7 +795,7 @@ ${parts.filter(Boolean).join("")}
                     disabled={monthSaving || monthSaved}
                     className="h-[34px] px-5 rounded-[8px] text-[13px] font-medium border border-[#C4783A] text-[#C4783A] hover:bg-[#FDF0E6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {monthSaved ? "✓ Saved to Notion" : monthSaving ? "Saving..." : "💾 Save to Notion"}
+                    {monthSaved ? "✓ Saved to Notion" : monthSaving ? "Saving..." : "💾 Save Review"}
                   </button>
                   <button
                     type="button"
@@ -802,8 +806,19 @@ ${parts.filter(Boolean).join("")}
                   </button>
                 </>
               )}
+              {monthTable && (
+                <button
+                  type="button"
+                  onClick={saveMonthTable}
+                  disabled={monthTableSaving || monthTableSaved}
+                  className="h-[34px] px-5 rounded-[8px] text-[13px] font-medium border border-[#C4783A] text-[#C4783A] hover:bg-[#FDF0E6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {monthTableSaved ? "✓ Table Saved" : monthTableSaving ? "Saving..." : "💾 Save Table"}
+                </button>
+              )}
             </div>
             {monthError && <p className="text-[#C4783A] mt-2 text-[13px]">{monthError}</p>}
+            {monthTableError && <p className="text-[#C4783A] mt-1 text-[13px]">{monthTableError}</p>}
           </div>
 
           {monthReview && (
@@ -947,35 +962,12 @@ ${parts.filter(Boolean).join("")}
             </div>
           )}
 
-          {/* ── Monthly Table Section ────────────────────────────── */}
-          <div className="mt-6 pt-5 border-t border-[#E4D4C0]">
-            <div className="flex flex-wrap items-center gap-3 mb-2">
-              <button
-                type="button"
-                onClick={generateMonthTable}
-                disabled={monthTableLoading}
-                className="h-[34px] px-5 bg-[#C4783A] text-white rounded-[8px] text-[13px] font-medium hover:bg-[#A85E28] transition-colors disabled:bg-[#EDD4BC] disabled:cursor-not-allowed"
-              >
-                {monthTableLoading ? "Generating..." : "✨ Generate Monthly Table"}
-              </button>
-              {monthTable && (
-                <button
-                  type="button"
-                  onClick={saveMonthTable}
-                  disabled={monthTableSaving || monthTableSaved}
-                  className="h-[34px] px-5 rounded-[8px] text-[13px] font-medium border border-[#C4783A] text-[#C4783A] hover:bg-[#FDF0E6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {monthTableSaved ? "✓ Saved to Notion" : monthTableSaving ? "Saving..." : "💾 Save to Notion"}
-                </button>
-              )}
+          {/* ── Monthly Table Preview ────────────────────────────── */}
+          {monthTable && (
+            <div className="mt-4 bg-white border border-[#E4D4C0] rounded-[12px] p-4 overflow-x-auto">
+              <pre className="text-[13px] text-[#4A3324] whitespace-pre font-mono leading-relaxed">{monthTable}</pre>
             </div>
-            {monthTableError && <p className="text-[#C4783A] text-[13px]">{monthTableError}</p>}
-            {monthTable && (
-              <div className="mt-3 bg-white border border-[#E4D4C0] rounded-[12px] p-4 overflow-x-auto">
-                <pre className="text-[13px] text-[#4A3324] whitespace-pre font-mono leading-relaxed">{monthTable}</pre>
-              </div>
-            )}
-          </div>
+          )}
         </div>
       )}
     </div>
