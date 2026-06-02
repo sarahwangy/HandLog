@@ -133,6 +133,79 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
     }
   };
 
+  // 把复盘对象渲染成可打印的 HTML 并触发打印对话框
+  function exportReviewPDF(title: string, data: DailyReview | WeeklyReview | MonthlyReview) {
+    // 把字段转成 HTML section 行
+    function section(label: string, content: string) {
+      if (!content.trim()) return "";
+      return `<div class="section"><div class="label">${label}</div><div class="body">${content}</div></div>`;
+    }
+    function tags(items: string[]) {
+      return items.map(t => `<span class="tag">${t.replace(/</g, "&lt;")}</span>`).join(" ");
+    }
+    function bullets(items: string[]) {
+      return `<ul>${items.map(t => `<li>${t.replace(/</g, "&lt;")}</li>`).join("")}</ul>`;
+    }
+
+    const r = data;
+    const parts: string[] = [
+      section("💡 一句话感悟", `<em>${r.oneLineInsight}</em>${r.oneLineInsightZh ? `<br>「${r.oneLineInsightZh}」` : ""}`),
+      section("⭐ 评分", `<strong>${r.score}/10</strong> · ${r.scoreReason}`),
+      r.people?.length ? section("👥 人物", tags(r.people)) : "",
+      r.emotions?.length ? section("🌊 情绪", tags(r.emotions)) : "",
+      r.events?.length ? section("📅 事件", r.events.map(g => `<strong>${g.category}</strong>: ${g.items.join("、")}`).join("<br>")) : "",
+      r.learning?.length ? section("🧠 学到的", tags(r.learning)) : "",
+      r.health?.length ? section("💪 健康", tags(r.health)) : "",
+      r.places?.length ? section("📍 地点", tags(r.places)) : "",
+      r.books?.length ? section("📚 在读", tags(r.books)) : "",
+      r.mediaConsumed?.length ? section("🎙 播客 · 文章", tags(r.mediaConsumed)) : "",
+      r.moviesTV?.length ? section("🎬 影视", tags(r.moviesTV)) : "",
+      r.parenting?.length ? section("👶 育儿", tags(r.parenting)) : "",
+      r.finance?.length ? section("💰 理财", tags(r.finance)) : "",
+      r.creativeOutput?.length ? section("✍️ 创作", tags(r.creativeOutput)) : "",
+      Object.keys(r.energyDistribution).length ? section("⚡ 精力分布", Object.entries(r.energyDistribution).map(([k, v]) => `${k} ${v}%`).join(" · ")) : "",
+      (r.progressZones.breakthrough || r.progressZones.inPractice || r.progressZones.plantedSeed)
+        ? section("🌱 成长区域", [
+          r.progressZones.breakthrough ? `🟢 ${r.progressZones.breakthrough}` : "",
+          r.progressZones.inPractice   ? `🟡 ${r.progressZones.inPractice}` : "",
+          r.progressZones.plantedSeed  ? `🔵 ${r.progressZones.plantedSeed}` : "",
+        ].filter(Boolean).join("<br>")) : "",
+      "emotionPattern" in r && r.emotionPattern ? section("🌊 情绪规律", r.emotionPattern) : "",
+      "coreProblem" in r && r.coreProblem ? section("🔍 核心困境", r.coreProblem) : "",
+      "crossWeekFlag" in r && r.crossWeekFlag ? section("🚩 跨期信号", r.crossWeekFlag) : "",
+      "monthlyPattern" in r && r.monthlyPattern ? section("📊 本月规律", r.monthlyPattern) : "",
+      r.dueDates?.length ? section("📌 待办日期", bullets(r.dueDates.map(d => `${d.date} · ${d.title}${d.note ? " · " + d.note : ""}`))) : "",
+      r.nextSteps.length ? section("🎯 下一步", bullets(r.nextSteps)) : "",
+      "nextMonthDirection" in r && r.nextMonthDirection?.length ? section("🧭 下月方向", bullets(r.nextMonthDirection)) : "",
+      section("🪞 复盘", r.reviewParagraph),
+      r.psychNote ? section("🧘 心理正能量", `<em>${r.psychNote}</em>`) : "",
+    ];
+
+    const now = new Date().toLocaleString("zh-CN", { timeZone: "Australia/Melbourne" });
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title>
+<style>
+  body { font-family: -apple-system, "Helvetica Neue", sans-serif; max-width: 760px; margin: 0 auto; padding: 32px; color: #2C1F14; }
+  h1 { font-size: 20px; color: #C4783A; margin-bottom: 4px; }
+  .meta { font-size: 12px; color: #8B6B4A; margin-bottom: 24px; }
+  .section { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #E4D4C0; }
+  .label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #8B6B4A; margin-bottom: 6px; }
+  .body { font-size: 14px; line-height: 1.7; color: #4A3324; }
+  .tag { display: inline-block; background: #FDF0E6; border: 1px solid #E4D4C0; border-radius: 20px; padding: 2px 10px; margin: 2px; font-size: 13px; }
+  ul { margin: 4px 0; padding-left: 18px; } li { margin-bottom: 4px; }
+  em { color: #2C1F14; font-style: italic; }
+  @media print { body { padding: 16px; } }
+</style></head><body>
+<h1>${title}</h1>
+<div class="meta">导出于 ${now}</div>
+${parts.filter(Boolean).join("")}
+</body></html>`;
+
+    const win = window.open("", "_blank");
+    if (!win) return;
+    win.document.documentElement.innerHTML = html;
+    setTimeout(() => win.print(), 300);
+  }
+
   const saveMonthly = async () => {
     if (!monthReview) return;
     setMonthSaving(true);
@@ -362,6 +435,15 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
             </RCard>
 
           </div>
+
+          {/* Daily PDF export */}
+          <div className="flex justify-end mt-2">
+            <button type="button"
+              onClick={() => exportReviewPDF(`Daily Review · ${dateKey}`, review!)}
+              className="h-[34px] px-5 rounded-[8px] text-[13px] font-medium border border-[#3A7BC4] text-[#3A7BC4] hover:bg-[#EEF3FC] transition-colors">
+              📄 Export PDF
+            </button>
+          </div>
         </div>
       )}
 
@@ -389,14 +471,23 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
                 {weekLoading ? "Generating..." : "✨ Generate"}
               </button>
               {weekReview && (
-                <button
-                  type="button"
-                  onClick={saveWeekly}
-                  disabled={weekSaving || weekSaved}
-                  className="h-[34px] px-5 rounded-[8px] text-[13px] font-medium border border-[#C4783A] text-[#C4783A] hover:bg-[#FDF0E6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {weekSaved ? "✓ Saved to Notion" : weekSaving ? "Saving..." : "💾 Save to Notion"}
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={saveWeekly}
+                    disabled={weekSaving || weekSaved}
+                    className="h-[34px] px-5 rounded-[8px] text-[13px] font-medium border border-[#C4783A] text-[#C4783A] hover:bg-[#FDF0E6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {weekSaved ? "✓ Saved to Notion" : weekSaving ? "Saving..." : "💾 Save to Notion"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => exportReviewPDF(`Weekly Review · ${weekLabel}`, weekReview)}
+                    className="h-[34px] px-5 rounded-[8px] text-[13px] font-medium border border-[#3A7BC4] text-[#3A7BC4] hover:bg-[#EEF3FC] transition-colors"
+                  >
+                    📄 Export PDF
+                  </button>
+                </>
               )}
             </div>
             {weekError && <p className="text-[#C4783A] mt-2 text-[13px]">{weekError}</p>}
@@ -563,14 +654,23 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
                 {monthLoading ? "Generating..." : "✨ Generate"}
               </button>
               {monthReview && (
-                <button
-                  type="button"
-                  onClick={saveMonthly}
-                  disabled={monthSaving || monthSaved}
-                  className="h-[34px] px-5 rounded-[8px] text-[13px] font-medium border border-[#C4783A] text-[#C4783A] hover:bg-[#FDF0E6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {monthSaved ? "✓ Saved to Notion" : monthSaving ? "Saving..." : "💾 Save to Notion"}
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={saveMonthly}
+                    disabled={monthSaving || monthSaved}
+                    className="h-[34px] px-5 rounded-[8px] text-[13px] font-medium border border-[#C4783A] text-[#C4783A] hover:bg-[#FDF0E6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {monthSaved ? "✓ Saved to Notion" : monthSaving ? "Saving..." : "💾 Save to Notion"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => exportReviewPDF(`Monthly Review · ${monthYear}年${monthMonth}月`, monthReview)}
+                    className="h-[34px] px-5 rounded-[8px] text-[13px] font-medium border border-[#3A7BC4] text-[#3A7BC4] hover:bg-[#EEF3FC] transition-colors"
+                  >
+                    📄 Export PDF
+                  </button>
+                </>
               )}
             </div>
             {monthError && <p className="text-[#C4783A] mt-2 text-[13px]">{monthError}</p>}
