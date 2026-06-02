@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HandLog — Chat UI Mockup</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, sans-serif; background: #FDFAF6; color: #2C1F14; }
+
+  /* ── 顶部导航 ── */
+  .topnav {
+    position: fixed; top: 0; left: 0; right: 0; height: 56px;
+    background: #FDFAF6; border-bottom: 1px solid #E4D4C0;
+    display: flex; align-items: center; padding: 0 24px; gap: 0; z-index: 100;
+  }
+  .logo { font-size: 18px; font-weight: 700; color: #C4783A; margin-right: 32px; text-decoration: none; }
+  .nav-links { display: flex; gap: 24px; flex: 1; }
+  .nav-link { font-size: 14px; font-weight: 500; color: #8B6B4A; text-decoration: none; padding-bottom: 2px; }
+  .nav-link.active { color: #2C1F14; border-bottom: 2px solid #C4783A; }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; background: #C4783A; color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; }
+
+  /* ── 主体布局 ── */
+  .main { margin-top: 56px; height: calc(100vh - 56px); display: flex; flex-direction: column; max-width: 760px; margin-left: auto; margin-right: auto; padding: 0 16px; }
+
+  /* ── 页面标题 ── */
+  .page-header { padding: 20px 0 12px; border-bottom: 1px solid #E4D4C0; }
+  .page-header h1 { font-size: 20px; font-weight: 700; }
+  .page-header p { font-size: 13px; color: #8B6B4A; margin-top: 3px; }
+  .context-badge { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; background: #F5EDE0; border: 1px solid #E4D4C0; border-radius: 20px; padding: 4px 12px; font-size: 12px; color: #8B6B4A; }
+  .context-badge span { color: #C4783A; font-weight: 600; }
+
+  /* ── 消息列表 ── */
+  .messages { flex: 1; overflow-y: auto; padding: 16px 0; display: flex; flex-direction: column; gap: 16px; }
+
+  /* ── 单条消息 ── */
+  .msg { display: flex; flex-direction: column; gap: 6px; }
+  .msg.user { align-items: flex-end; }
+  .msg.ai { align-items: flex-start; }
+
+  .bubble {
+    max-width: 85%; padding: 12px 16px; border-radius: 16px;
+    font-size: 14px; line-height: 1.7;
+  }
+  .msg.user .bubble { background: #C4783A; color: white; border-bottom-right-radius: 4px; }
+  .msg.ai .bubble { background: white; border: 1px solid #E4D4C0; border-bottom-left-radius: 4px; color: #2C1F14;
+    box-shadow: 0 1px 6px rgba(80,40,10,0.06); }
+
+  /* AI 消息操作按钮 */
+  .msg-actions { display: flex; gap: 8px; padding-left: 4px; }
+  .btn-action {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 12px; padding: 4px 10px; border-radius: 20px; border: 1px solid #E4D4C0;
+    background: white; color: #8B6B4A; cursor: pointer; transition: all 0.15s;
+  }
+  .btn-action:hover { border-color: #C4783A; color: #C4783A; }
+  .btn-action.save { background: #FDF5EE; border-color: #E4D4C0; }
+  .btn-action.delete { }
+  .btn-action.saved { background: #E8F5E8; border-color: #8FBC8F; color: #5A8A5A; }
+
+  /* 打字中动画 */
+  .typing { display: flex; gap: 4px; align-items: center; padding: 14px 16px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #C4A98A; animation: bounce 1.2s infinite; }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+
+  /* ── 输入区 ── */
+  .input-area {
+    border-top: 1px solid #E4D4C0; padding: 12px 0 16px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .save-all-row { display: flex; justify-content: flex-end; }
+  .btn-save-all {
+    font-size: 12px; color: #8B6B4A; border: 1px solid #E4D4C0;
+    background: white; border-radius: 20px; padding: 5px 14px; cursor: pointer;
+  }
+  .btn-save-all:hover { border-color: #C4783A; color: #C4783A; }
+
+  .input-row { display: flex; gap: 10px; align-items: flex-end; }
+  .input-box {
+    flex: 1; min-height: 44px; max-height: 120px;
+    padding: 10px 14px; border: 1px solid #E4D4C0; border-radius: 12px;
+    font-size: 14px; font-family: inherit; resize: none; outline: none;
+    background: white; color: #2C1F14; line-height: 1.5;
+  }
+  .input-box:focus { border-color: #C4783A; }
+  .btn-send {
+    width: 44px; height: 44px; border-radius: 12px; border: none;
+    background: #C4783A; color: white; font-size: 18px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: background 0.15s;
+  }
+  .btn-send:hover { background: #A85E28; }
+
+  /* 快捷提问 */
+  .quick-prompts { display: flex; flex-wrap: wrap; gap: 6px; }
+  .quick-btn {
+    font-size: 12px; padding: 5px 12px; border-radius: 20px;
+    border: 1px solid #E4D4C0; background: white; color: #8B6B4A;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .quick-btn:hover { border-color: #C4783A; color: #C4783A; background: #FDF5EE; }
+
+  /* ── 系统消息 ── */
+  .sys-msg { text-align: center; font-size: 12px; color: #B89A7A; padding: 4px 0; }
+
+  /* ── 手机底部 tab bar 占位 ── */
+  @media (max-width: 640px) {
+    .main { padding: 0 12px; }
+    .topnav .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<nav class="topnav">
+  <a class="logo" href="#">✍ HandLog</a>
+  <div class="nav-links">
+    <a class="nav-link" href="#">Capture</a>
+    <a class="nav-link" href="#">Review</a>
+    <a class="nav-link" href="#">Timeline</a>
+    <a class="nav-link" href="#">Dashboard</a>
+    <a class="nav-link active" href="#">Chat</a>
+  </div>
+  <div class="avatar">S</div>
+</nav>
+
+<!-- 主体 -->
+<div class="main">
+
+  <!-- 页面标题 -->
+  <div class="page-header">
+    <h1>💬 Deep Chat</h1>
+    <p>基于你的日记，深度分析你的想法和模式</p>
+    <div class="context-badge">
+      📓 已读取 <span>38 周</span> 日记 · 2025-09 至 2026-05
+    </div>
+  </div>
+
+  <!-- 消息列表 -->
+  <div class="messages" id="messages">
+
+    <div class="sys-msg">对话开始 · AI 已读取你的全部日记</div>
+
+    <!-- AI 开场白 -->
+    <div class="msg ai">
+      <div class="bubble">
+        你好！我已经读取了你从 2025 年 9 月到现在的 38 周日记。<br><br>
+        你可以问我任何关于你自己的问题——比如某段时间你在专注什么、哪些事情反复出现、你的状态有什么变化。我会结合你的实际记录来分析。
+      </div>
+      <div class="msg-actions">
+        <button class="btn-action save" onclick="markSaved(this)">💾 保存</button>
+        <button class="btn-action delete" onclick="deleteMsg(this)">🗑 删除</button>
+      </div>
+    </div>
+
+    <!-- 用户提问 -->
+    <div class="msg user">
+      <div class="bubble">我这几个月在哪些方面花了最多时间和精力？</div>
+    </div>
+
+    <!-- AI 回复 -->
+    <div class="msg ai">
+      <div class="bubble">
+        从你的标签和日常记录来看，精力主要集中在三个方向：<br><br>
+        <strong>1. 技术学习</strong>（出现频率最高）<br>
+        几乎每周都有提到，学习方式也在变化——从跟着教程走，到开始自己做项目、解决真实的问题。<br><br>
+        <strong>2. 育儿和家庭</strong><br>
+        图书馆、公园、陪伴孩子的片段出现得很规律，是生活里的稳定锚点。<br><br>
+        <strong>3. 探索周边环境</strong><br>
+        新地方、新超市、新路线，这类记录集中在最近几个月，有明显的「安定下来」的节奏。
+      </div>
+      <div class="msg-actions">
+        <button class="btn-action save" onclick="markSaved(this)">💾 保存</button>
+        <button class="btn-action delete" onclick="deleteMsg(this)">🗑 删除</button>
+      </div>
+    </div>
+
+    <!-- 用户追问 -->
+    <div class="msg user">
+      <div class="bubble">技术学习那部分，我有没有什么卡住的地方？</div>
+    </div>
+
+    <!-- 打字中 -->
+    <div class="msg ai" id="typing-bubble">
+      <div class="bubble">
+        <div class="typing">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 输入区 -->
+  <div class="input-area">
+
+    <!-- 快捷提问 -->
+    <div class="quick-prompts">
+      <button class="quick-btn" onclick="fillInput(this)">我哪段时间状态最好？</button>
+      <button class="quick-btn" onclick="fillInput(this)">我在育儿上花了多少精力？</button>
+      <button class="quick-btn" onclick="fillInput(this)">我有没有在逃避什么？</button>
+      <button class="quick-btn" onclick="fillInput(this)">我这几个月学了什么？</button>
+    </div>
+
+    <!-- 保存全部 -->
+    <div class="save-all-row">
+      <button class="btn-save-all" onclick="alert('整段对话已保存到 Notion · Deep Chat-相关')">
+        📋 保存全部对话到 Notion
+      </button>
+    </div>
+
+    <!-- 输入框 + 发送 -->
+    <div class="input-row">
+      <textarea class="input-box" id="inputBox" placeholder="问任何关于你自己的问题..." rows="1"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"
+        oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+      <button class="btn-send" onclick="sendMsg()">↑</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function markSaved(btn) {
+  btn.textContent = '✓ 已保存';
+  btn.className = 'btn-action saved';
+}
+function deleteMsg(btn) {
+  btn.closest('.msg').style.opacity = '0.3';
+  setTimeout(() => btn.closest('.msg').remove(), 300);
+}
+function fillInput(btn) {
+  document.getElementById('inputBox').value = btn.textContent;
+  document.getElementById('inputBox').focus();
+}
+function sendMsg() {
+  const box = document.getElementById('inputBox');
+  const text = box.value.trim();
+  if (!text) return;
+
+  const msgs = document.getElementById('messages');
+
+  // 用户消息
+  const userMsg = document.createElement('div');
+  userMsg.className = 'msg user';
+  userMsg.innerHTML = `<div class="bubble">${text}</div>`;
+  msgs.insertBefore(userMsg, document.getElementById('typing-bubble'));
+
+  box.value = '';
+  box.style.height = 'auto';
+
+  // 滚到底部
+  msgs.scrollTop = msgs.scrollHeight;
+
+  // 模拟 AI 回复（3 秒后）
+  setTimeout(() => {
+    const typing = document.getElementById('typing-bubble');
+    typing.innerHTML = `
+      <div class="bubble">有几个地方在你的记录里反复出现：调试问题花了很长时间、某些概念需要看好几次才真正理解。但你通常不会卡太久——遇到问题会换方式继续，这个习惯很好。</div>
+      <div class="msg-actions">
+        <button class="btn-action save" onclick="markSaved(this)">💾 保存</button>
+        <button class="btn-action delete" onclick="deleteMsg(this)">🗑 删除</button>
+      </div>`;
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 2000);
+}
+</script>
+</body>
+</html>

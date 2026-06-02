@@ -136,6 +136,42 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; b
 .voice-btn { width: 56px; height: 56px; border-radius: 50%; background: #C4783A; border: none; cursor: pointer; font-size: 22px; flex-shrink: 0; }
 .sec { margin-bottom: 20px; }
 
+/* ── Chat ── */
+.chat-wrap { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; height: calc(100vh - 56px - 72px - 48px); }
+.chat-header { padding: 16px 0 12px; border-bottom: 1px solid #E4D4C0; margin-bottom: 0; }
+.chat-header h1 { font-size: 20px; font-weight: 700; }
+.chat-header p { font-size: 13px; color: #8B6B4A; margin-top: 3px; }
+.context-badge { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; background: #F5EDE0; border: 1px solid #E4D4C0; border-radius: 20px; padding: 4px 12px; font-size: 12px; color: #8B6B4A; }
+.context-badge strong { color: #C4783A; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 16px 0; display: flex; flex-direction: column; gap: 14px; min-height: 260px; max-height: 420px; }
+.sys-msg { text-align: center; font-size: 12px; color: #B89A7A; }
+.cmsg { display: flex; flex-direction: column; gap: 5px; }
+.cmsg.user { align-items: flex-end; }
+.cmsg.ai { align-items: flex-start; }
+.cbubble { max-width: 85%; padding: 11px 15px; border-radius: 16px; font-size: 14px; line-height: 1.7; }
+.cmsg.user .cbubble { background: #C4783A; color: white; border-bottom-right-radius: 4px; }
+.cmsg.ai .cbubble { background: white; border: 1px solid #E4D4C0; border-bottom-left-radius: 4px; color: #2C1F14; box-shadow: 0 1px 6px rgba(80,40,10,.06); }
+.cmsg-actions { display: flex; gap: 6px; padding-left: 2px; }
+.cbtn { font-size: 11px; padding: 3px 10px; border-radius: 20px; border: 1px solid #E4D4C0; background: white; color: #8B6B4A; cursor: pointer; }
+.cbtn:hover { border-color: #C4783A; color: #C4783A; }
+.cbtn.saved { background: #E8F5E8; border-color: #8FBC8F; color: #5A8A5A; }
+.typing-dots { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: #C4A98A; animation: bounce 1.2s infinite; }
+.dot:nth-child(2) { animation-delay: .2s; } .dot:nth-child(3) { animation-delay: .4s; }
+@keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+.chat-input-area { border-top: 1px solid #E4D4C0; padding: 12px 0 4px; display: flex; flex-direction: column; gap: 8px; }
+.quick-prompts { display: flex; flex-wrap: wrap; gap: 6px; }
+.qbtn { font-size: 12px; padding: 4px 11px; border-radius: 20px; border: 1px solid #E4D4C0; background: white; color: #8B6B4A; cursor: pointer; }
+.qbtn:hover { border-color: #C4783A; color: #C4783A; background: #FDF5EE; }
+.chat-row { display: flex; gap: 8px; align-items: flex-end; }
+.chat-box { flex: 1; min-height: 42px; padding: 9px 13px; border: 1px solid #E4D4C0; border-radius: 12px; font-size: 14px; font-family: inherit; resize: none; outline: none; background: white; line-height: 1.5; }
+.chat-box:focus { border-color: #C4783A; }
+.send-btn { width: 42px; height: 42px; border-radius: 12px; border: none; background: #C4783A; color: white; font-size: 18px; cursor: pointer; flex-shrink: 0; }
+.send-btn:hover { background: #A85E28; }
+.save-all-row { display: flex; justify-content: flex-end; }
+.save-all-btn { font-size: 12px; color: #8B6B4A; border: 1px solid #E4D4C0; background: white; border-radius: 20px; padding: 4px 13px; cursor: pointer; }
+.save-all-btn:hover { border-color: #C4783A; color: #C4783A; }
+
 /* ── Login ── */
 #page-login { margin-top: 0; max-width: 100%; }
 .login-wrap { display: flex; min-height: 100vh; }
@@ -195,6 +231,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; b
     <div class="nav-item" onclick="showPage('review',this)">🔍 Review</div>
     <div class="nav-item" onclick="showPage('dashboard',this)">📊 Dashboard</div>
     <div class="nav-item" onclick="showPage('timeline',this)">🗂 Timeline</div>
+    <div class="nav-item" onclick="showPage('chat',this)">💬 Chat</div>
   </div>
   <div class="nav-demo"><strong>Demo</strong> · sample data</div>
 </nav>
@@ -682,6 +719,84 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; b
   </div>
 </div>
 
+<!-- ═══════════════ CHAT ═══════════════ -->
+<div id="page-chat" class="main page">
+  <div class="chat-wrap">
+
+    <div class="chat-header">
+      <h1>💬 Deep Chat</h1>
+      <p>基于你的日记，深度分析你的想法和模式</p>
+      <div class="context-badge">📓 已读取 <strong>38 周</strong> 日记 · 2025-09 至 2026-05</div>
+    </div>
+
+    <div class="chat-messages" id="chat-messages">
+      <div class="sys-msg">对话开始 · AI 已读取你的全部日记</div>
+
+      <div class="cmsg ai">
+        <div class="cbubble">
+          你好！我已经读取了你从 2025 年 9 月到现在的 38 周日记。<br><br>
+          你可以问我任何关于你自己的问题——比如某段时间你在专注什么、哪些事情反复出现、你的状态有什么变化。我会结合你的实际记录来分析。
+        </div>
+        <div class="cmsg-actions">
+          <button type="button" class="cbtn" onclick="cSave(this)">💾 保存</button>
+          <button type="button" class="cbtn" onclick="cDel(this)">🗑 删除</button>
+        </div>
+      </div>
+
+      <div class="cmsg user">
+        <div class="cbubble">我这几个月在哪些方面花了最多时间和精力？</div>
+      </div>
+
+      <div class="cmsg ai">
+        <div class="cbubble">
+          从你的标签和日常记录来看，精力主要集中在三个方向：<br><br>
+          <strong>1. 技术学习</strong>（出现频率最高）<br>
+          几乎每周都有提到，从跟教程走，到自己做项目解决真实问题。<br><br>
+          <strong>2. 育儿和家庭</strong><br>
+          图书馆、公园、陪伴孩子的片段非常规律，是生活里的稳定锚点。<br><br>
+          <strong>3. 探索周边环境</strong><br>
+          新地方、新超市、新路线，集中在最近几个月，有明显"安定下来"的节奏。
+        </div>
+        <div class="cmsg-actions">
+          <button type="button" class="cbtn" onclick="cSave(this)">💾 保存</button>
+          <button type="button" class="cbtn" onclick="cDel(this)">🗑 删除</button>
+        </div>
+      </div>
+
+      <div class="cmsg user">
+        <div class="cbubble">技术学习那部分，我有没有什么卡住的地方？</div>
+      </div>
+
+      <div class="cmsg ai" id="chat-typing">
+        <div class="cbubble">
+          <div class="typing-dots">
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-input-area">
+      <div class="quick-prompts">
+        <button type="button" class="qbtn" onclick="cFill(this)">我哪段时间状态最好？</button>
+        <button type="button" class="qbtn" onclick="cFill(this)">我在育儿上花了多少精力？</button>
+        <button type="button" class="qbtn" onclick="cFill(this)">我有没有在逃避什么？</button>
+        <button type="button" class="qbtn" onclick="cFill(this)">我这几个月学了什么？</button>
+      </div>
+      <div class="save-all-row">
+        <button type="button" class="save-all-btn" onclick="alert('整段对话已保存到 Notion · Deep Chat-相关')">📋 保存全部对话到 Notion</button>
+      </div>
+      <div class="chat-row">
+        <textarea class="chat-box" id="chat-input" placeholder="问任何关于你自己的问题..." rows="1"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();cSend()}"
+          oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+        <button type="button" class="send-btn" onclick="cSend()">↑</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 </div><!-- /app-shell -->
 
 <script>
@@ -702,6 +817,31 @@ function showTab(name, el) {
   document.getElementById('tab-' + name).style.display = 'block';
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
+}
+
+function cSave(btn) { btn.textContent = '✓ 已保存'; btn.className = 'cbtn saved'; }
+function cDel(btn) { const m = btn.closest('.cmsg'); m.style.opacity = '0.3'; setTimeout(() => m.remove(), 300); }
+function cFill(btn) { const box = document.getElementById('chat-input'); box.value = btn.textContent; box.focus(); }
+function cSend() {
+  const box = document.getElementById('chat-input');
+  const text = box.value.trim();
+  if (!text) return;
+  const msgs = document.getElementById('chat-messages');
+  const userMsg = document.createElement('div');
+  userMsg.className = 'cmsg user';
+  userMsg.innerHTML = `<div class="cbubble">${text}</div>`;
+  msgs.insertBefore(userMsg, document.getElementById('chat-typing'));
+  box.value = ''; box.style.height = 'auto';
+  msgs.scrollTop = msgs.scrollHeight;
+  setTimeout(() => {
+    const t = document.getElementById('chat-typing');
+    t.innerHTML = `<div class="cbubble">根据你的日记记录，我发现了一些有趣的规律……（模拟回复）</div>
+      <div class="cmsg-actions">
+        <button type="button" class="cbtn" onclick="cSave(this)">💾 保存</button>
+        <button type="button" class="cbtn" onclick="cDel(this)">🗑 删除</button>
+      </div>`;
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 1800);
 }
 
 function toggleResult() {
