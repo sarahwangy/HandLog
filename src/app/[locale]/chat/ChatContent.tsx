@@ -276,27 +276,73 @@ export default function ChatContent() {
   }
 
   // 导出对话为 PDF（打开新窗口 → 触发打印）
+  // 把 markdown 文字转成可读 HTML（用于 PDF）
+  function mdToHtml(text: string): string {
+    const escape = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const inlineBold = (s: string) => escape(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+
+    const lines = text.split("\n");
+    const out: string[] = [];
+    let bulletBuf: string[] = [];
+
+    function flushBullets() {
+      if (!bulletBuf.length) return;
+      out.push(`<ul>${bulletBuf.map(b => `<li>${inlineBold(b)}</li>`).join("")}</ul>`);
+      bulletBuf = [];
+    }
+
+    for (const line of lines) {
+      if (/^-{3,}$/.test(line.trim())) { flushBullets(); out.push("<hr>"); continue; }
+      const h2 = line.match(/^##\s+(.+)/);
+      const h3 = line.match(/^###\s+(.+)/);
+      const bullet = line.match(/^[-*]\s+(.+)/);
+      const numbered = line.match(/^(\d+)\.\s+(.+)/);
+      if (h2)       { flushBullets(); out.push(`<h2>${inlineBold(h2[1])}</h2>`); }
+      else if (h3)  { flushBullets(); out.push(`<h3>${inlineBold(h3[1])}</h3>`); }
+      else if (numbered && line.length <= 80) { flushBullets(); out.push(`<h3>${numbered[1]}. ${inlineBold(numbered[2])}</h3>`); }
+      else if (bullet) { bulletBuf.push(bullet[1]); }
+      else if (!line.trim()) { flushBullets(); out.push("<br>"); }
+      else { flushBullets(); out.push(`<p>${inlineBold(line)}</p>`); }
+    }
+    flushBullets();
+    return out.join("\n");
+  }
+
   function exportPDF() {
-    const lines = messages.map((m) => {
-      const role = m.role === "user" ? "🙋 我" : "🤖 AI";
-      const content = m.content.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
-      return `<div class="${m.role}"><strong>${role}</strong><p>${content}</p></div>`;
-    }).join("");
+    const blocks = messages.map((m) => {
+      if (m.role === "user") {
+        const escaped = m.content.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        return `<div class="bubble user"><div class="role">🙋 我</div><p>${escaped}</p></div>`;
+      } else {
+        return `<div class="bubble assistant"><div class="role">🤖 AI</div><div class="md">${mdToHtml(m.content)}</div></div>`;
+      }
+    }).join("\n");
 
     const now = new Date().toLocaleString("zh-CN", { timeZone: "Australia/Melbourne" });
     const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <title>Chat 记录 · ${now}</title>
 <style>
-  body { font-family: -apple-system, sans-serif; max-width: 720px; margin: 0 auto; padding: 32px; color: #2C1F14; }
-  h1 { font-size: 18px; margin-bottom: 24px; color: #C4783A; }
-  .user { background: #FDF0E6; border-radius: 10px; padding: 12px 16px; margin: 12px 0; }
-  .assistant { background: #F5F5F5; border-radius: 10px; padding: 12px 16px; margin: 12px 0; }
-  strong { font-size: 12px; color: #8B6B4A; display: block; margin-bottom: 6px; }
-  p { font-size: 14px; line-height: 1.7; margin: 0; }
-  @media print { body { padding: 16px; } }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Helvetica Neue", sans-serif; max-width: 720px; margin: 0 auto; padding: 36px 32px; color: #2C1F14; background: #FAF6F0; }
+  h1 { font-size: 17px; color: #C4783A; font-weight: 700; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid #E4D4C0; }
+  .bubble { border-radius: 14px; padding: 14px 18px; margin-bottom: 14px; }
+  .bubble.user { background: #C4783A; color: white; margin-left: 60px; }
+  .bubble.user .role { font-size: 11px; opacity: 0.8; margin-bottom: 6px; }
+  .bubble.user p { font-size: 14px; line-height: 1.7; }
+  .bubble.assistant { background: white; border: 1px solid #E4D4C0; margin-right: 60px; }
+  .bubble.assistant .role { font-size: 11px; color: #B89A7A; margin-bottom: 8px; }
+  .md p { font-size: 14px; line-height: 1.75; color: #2C1F14; margin: 6px 0; }
+  .md h2 { font-size: 15px; font-weight: 700; color: #2C1F14; margin: 14px 0 4px; }
+  .md h3 { font-size: 13px; font-weight: 600; color: #4A3324; margin: 10px 0 3px; }
+  .md ul { padding-left: 18px; margin: 6px 0; }
+  .md li { font-size: 14px; line-height: 1.7; margin-bottom: 3px; }
+  .md hr { border: none; border-top: 1px solid #E4D4C0; margin: 12px 0; }
+  .md strong { font-weight: 600; }
+  br { display: block; margin: 4px 0; }
+  @media print { body { background: white; padding: 20px; } .bubble.user { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
 </style></head><body>
 <h1>💬 Chat 记录 · ${now}</h1>
-${lines}
+${blocks}
 </body></html>`;
 
     const win = window.open("", "_blank");

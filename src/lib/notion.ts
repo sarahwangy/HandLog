@@ -918,7 +918,7 @@ export async function findMemoryPage(
   return page.id;
 }
 
-// 读取「记忆本」里所有 bullet 块，返回文字数组
+// 读取「记忆本」里的洞察，兼容 toggle（新格式）和 bullet（旧格式）
 export async function readMemoryBlocks(
   token: string,
   pageId: string
@@ -927,32 +927,87 @@ export async function readMemoryBlocks(
 
   const res = await withAuthCheck(() =>
     notion.blocks.children.list({ block_id: pageId, page_size: 100 })
-  ) as { results: { type: string; bulleted_list_item?: { rich_text: { plain_text: string }[] } }[] };
+  ) as {
+    results: {
+      type: string;
+      toggle?: { rich_text: { plain_text: string }[] };
+      bulleted_list_item?: { rich_text: { plain_text: string }[] };
+    }[];
+  };
 
   return res.results
-    .filter(b => b.type === "bulleted_list_item")
-    .map(b => b.bulleted_list_item?.rich_text.map(t => t.plain_text).join("") ?? "")
+    .map(b => {
+      if (b.type === "toggle") return b.toggle?.rich_text.map(t => t.plain_text).join("") ?? "";
+      if (b.type === "bulleted_list_item") return b.bulleted_list_item?.rich_text.map(t => t.plain_text).join("") ?? "";
+      return "";
+    })
     .filter(Boolean);
 }
 
-// 向「记忆本」追加一条 bullet 洞察
+// 把 markdown 文字解析成 Notion block 子项（heading_2 / bulleted_list_item / paragraph）
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function parseMarkdownToBlocks(text: string): any[] {
+  const lines = text.split("\n");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const blocks: any[] = [];
+  const buffer: string[] = [];
+
+  function strip(s: string) { return s.replace(/\*\*(.+?)\*\*/g, "$1").replace(/^-{3,}$/gm, "").trim(); }
+
+  function flushBuffer() {
+    const t = buffer.join(" ").replace(/\*\*(.+?)\*\*/g, "$1").trim();
+    if (t) blocks.push({ type: "paragraph", paragraph: { rich_text: [{ type: "text", text: { content: t } }] } });
+    buffer.length = 0;
+  }
+
+  for (const line of lines) {
+    if (/^-{3,}$/.test(line.trim())) { flushBuffer(); continue; }
+    const h2 = line.match(/^##\s+(.+)/);
+    const h3 = line.match(/^###\s+(.+)/);
+    const bullet = line.match(/^[-*]\s+(.+)/);
+    if (h2) { flushBuffer(); blocks.push({ type: "heading_2", heading_2: { rich_text: [{ type: "text", text: { content: strip(h2[1]) } }] } }); }
+    else if (h3) { flushBuffer(); blocks.push({ type: "heading_3", heading_3: { rich_text: [{ type: "text", text: { content: strip(h3[1]) } }] } }); }
+    else if (bullet) { flushBuffer(); blocks.push({ type: "bulleted_list_item", bulleted_list_item: { rich_text: [{ type: "text", text: { content: strip(bullet[1]) } }] } }); }
+    else if (!line.trim()) { flushBuffer(); }
+    else { buffer.push(line); }
+  }
+  flushBuffer();
+  return blocks;
+}
+
+// 向「记忆本」追加一条洞察（toggle + callout 格式）
 export async function appendMemoryBlock(
   token: string,
   pageId: string,
-  text: string
+  toggleTitle: string, // 格式：日期 · 首句
+  fullText: string,    // 完整内容，用于 callout 子块
 ): Promise<void> {
   const notion = createNotionClient(token);
+
+  const contentBlocks = parseMarkdownToBlocks(fullText);
 
   await withAuthCheck(() =>
     notion.blocks.children.append({
       block_id: pageId,
       children: [
         {
-          type: "bulleted_list_item",
-          bulleted_list_item: {
-            rich_text: [{ type: "text", text: { content: text } }],
+          type: "toggle",
+          toggle: {
+            rich_text: [{ type: "text", text: { content: toggleTitle } }],
+            color: "purple_background",
+            children: [
+              {
+                type: "callout",
+                callout: {
+                  rich_text: [{ type: "text", text: { content: "" } }],
+                  icon: { type: "emoji", emoji: "🧠" },
+                  color: "purple_background",
+                  children: contentBlocks,
+                },
+              } as Parameters<typeof notion.blocks.children.append>[0]["children"][number],
+            ],
           },
-        } as Parameters<typeof notion.blocks.children.append>[0]["children"][0],
+        } as Parameters<typeof notion.blocks.children.append>[0]["children"][number],
       ],
     })
   );

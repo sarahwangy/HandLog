@@ -29,7 +29,10 @@ export async function POST(req: NextRequest) {
     const databaseId = getNotionDatabaseId();
     const pageId = await findMemoryPage(token, databaseId);
     const now = new Date().toLocaleDateString("zh-CN", { timeZone: "Australia/Melbourne" });
-    await appendMemoryBlock(token, pageId, `${now} · ${text.trim()}`);
+    // toggle 标题用日期 + 首句（去掉 markdown 符号，最多 40 字）
+    const firstLine = text.replace(/^#+\s+/, "").replace(/\*\*(.+?)\*\*/g, "$1").trim().split("\n")[0].slice(0, 40);
+    const toggleTitle = `${now} · ${firstLine}`;
+    await appendMemoryBlock(token, pageId, toggleTitle, text.trim());
     return NextResponse.json({ success: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
