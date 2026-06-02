@@ -558,7 +558,7 @@ ${parts.filter(Boolean).join("")}
               <input
                 type="text"
                 value={weekLabel}
-                onChange={e => { setWeekLabel(e.target.value); setWeekReview(null); }}
+                onChange={e => { setWeekLabel(e.target.value); setWeekReview(null); setWeekTable(null); setWeekTablePageId(null); setWeekTableSaved(false); }}
                 placeholder="5-25-31"
                 className="w-[120px] h-[34px] px-3 rounded-[8px] border border-[#E4D4C0] text-[13px] text-[#2C1F14] bg-white focus:outline-none focus:border-[#C4A98A]"
               />
