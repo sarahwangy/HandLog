@@ -40,6 +40,21 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
   const [monthYear, setMonthYear] = useState(() => new Date().getFullYear());
   const [monthMonth, setMonthMonth] = useState(() => new Date().getMonth() + 1);
 
+  // Weekly Table state
+  const [weekTable, setWeekTable] = useState<string | null>(null);
+  const [weekTableLoading, setWeekTableLoading] = useState(false);
+  const [weekTableError, setWeekTableError] = useState<string | null>(null);
+  const [weekTableSaving, setWeekTableSaving] = useState(false);
+  const [weekTableSaved, setWeekTableSaved] = useState(false);
+  const [weekTablePageId, setWeekTablePageId] = useState<string | null>(null);
+
+  // Monthly Table state
+  const [monthTable, setMonthTable] = useState<string | null>(null);
+  const [monthTableLoading, setMonthTableLoading] = useState(false);
+  const [monthTableError, setMonthTableError] = useState<string | null>(null);
+  const [monthTableSaving, setMonthTableSaving] = useState(false);
+  const [monthTableSaved, setMonthTableSaved] = useState(false);
+
   // 页面加载时先检查 sessionStorage 里有没有从 Capture 页传来的复盘结果
   useEffect(() => {
     const pending = sessionStorage.getItem("pendingReview");
@@ -225,6 +240,89 @@ ${parts.filter(Boolean).join("")}
       setMonthError(err instanceof Error ? err.message : "Save failed");
     } finally {
       setMonthSaving(false);
+    }
+  };
+
+  const generateWeekTable = async () => {
+    setWeekTableLoading(true);
+    setWeekTableError(null);
+    setWeekTable(null);
+    setWeekTableSaved(false);
+    try {
+      const res = await fetch("/api/table/weekly", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ weekLabel }),
+      });
+      const data = await res.json() as { markdownTable?: string; weekPageId?: string; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Failed");
+      setWeekTable(data.markdownTable ?? null);
+      setWeekTablePageId(data.weekPageId ?? null);
+    } catch (err) {
+      setWeekTableError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setWeekTableLoading(false);
+    }
+  };
+
+  const saveWeekTable = async () => {
+    if (!weekTable || !weekTablePageId) return;
+    setWeekTableSaving(true);
+    setWeekTableError(null);
+    try {
+      const res = await fetch("/api/table/weekly/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ markdownTable: weekTable, weekPageId: weekTablePageId }),
+      });
+      const data = await res.json() as { error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Save failed");
+      setWeekTableSaved(true);
+    } catch (err) {
+      setWeekTableError(err instanceof Error ? err.message : "Save failed");
+    } finally {
+      setWeekTableSaving(false);
+    }
+  };
+
+  const generateMonthTable = async () => {
+    setMonthTableLoading(true);
+    setMonthTableError(null);
+    setMonthTable(null);
+    setMonthTableSaved(false);
+    try {
+      const res = await fetch("/api/table/monthly", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ year: monthYear, month: monthMonth }),
+      });
+      const data = await res.json() as { markdownTable?: string; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Failed");
+      setMonthTable(data.markdownTable ?? null);
+    } catch (err) {
+      setMonthTableError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setMonthTableLoading(false);
+    }
+  };
+
+  const saveMonthTable = async () => {
+    if (!monthTable) return;
+    setMonthTableSaving(true);
+    setMonthTableError(null);
+    try {
+      const res = await fetch("/api/table/monthly/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ markdownTable: monthTable, year: monthYear, month: monthMonth }),
+      });
+      const data = await res.json() as { error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Save failed");
+      setMonthTableSaved(true);
+    } catch (err) {
+      setMonthTableError(err instanceof Error ? err.message : "Save failed");
+    } finally {
+      setMonthTableSaving(false);
     }
   };
 
@@ -618,6 +716,37 @@ ${parts.filter(Boolean).join("")}
               )}
             </div>
           )}
+
+          {/* ── Weekly Table Section ─────────────────────────────── */}
+          <div className="mt-6 pt-5 border-t border-[#E4D4C0]">
+            <div className="flex flex-wrap items-center gap-3 mb-2">
+              <span className="text-[14px] font-semibold text-[#2C1F14]">📅 一周大事记 Table</span>
+              <button
+                type="button"
+                onClick={generateWeekTable}
+                disabled={weekTableLoading}
+                className="h-[34px] px-5 bg-[#2C1F14] text-white rounded-[8px] text-[13px] font-medium hover:bg-[#4A3324] transition-colors disabled:bg-[#E4D4C0] disabled:text-[#8B6B4A] disabled:cursor-not-allowed"
+              >
+                {weekTableLoading ? "Generating..." : "📊 Generate Table"}
+              </button>
+              {weekTable && (
+                <button
+                  type="button"
+                  onClick={saveWeekTable}
+                  disabled={weekTableSaving || weekTableSaved}
+                  className="h-[34px] px-5 rounded-[8px] text-[13px] font-medium border border-[#C4783A] text-[#C4783A] hover:bg-[#FDF0E6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {weekTableSaved ? "✓ Saved to Notion" : weekTableSaving ? "Saving..." : "💾 Save to Notion"}
+                </button>
+              )}
+            </div>
+            {weekTableError && <p className="text-[#C4783A] text-[13px]">{weekTableError}</p>}
+            {weekTable && (
+              <div className="mt-3 bg-white border border-[#E4D4C0] rounded-[12px] p-4 overflow-x-auto">
+                <pre className="text-[13px] text-[#4A3324] whitespace-pre font-mono leading-relaxed">{weekTable}</pre>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -818,6 +947,37 @@ ${parts.filter(Boolean).join("")}
               )}
             </div>
           )}
+
+          {/* ── Monthly Table Section ────────────────────────────── */}
+          <div className="mt-6 pt-5 border-t border-[#E4D4C0]">
+            <div className="flex flex-wrap items-center gap-3 mb-2">
+              <span className="text-[14px] font-semibold text-[#2C1F14]">📅 月度大事记 Table</span>
+              <button
+                type="button"
+                onClick={generateMonthTable}
+                disabled={monthTableLoading}
+                className="h-[34px] px-5 bg-[#2C1F14] text-white rounded-[8px] text-[13px] font-medium hover:bg-[#4A3324] transition-colors disabled:bg-[#E4D4C0] disabled:text-[#8B6B4A] disabled:cursor-not-allowed"
+              >
+                {monthTableLoading ? "Generating..." : "📊 Generate Table"}
+              </button>
+              {monthTable && (
+                <button
+                  type="button"
+                  onClick={saveMonthTable}
+                  disabled={monthTableSaving || monthTableSaved}
+                  className="h-[34px] px-5 rounded-[8px] text-[13px] font-medium border border-[#C4783A] text-[#C4783A] hover:bg-[#FDF0E6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {monthTableSaved ? "✓ Saved to Notion" : monthTableSaving ? "Saving..." : "💾 Save to Notion"}
+                </button>
+              )}
+            </div>
+            {monthTableError && <p className="text-[#C4783A] text-[13px]">{monthTableError}</p>}
+            {monthTable && (
+              <div className="mt-3 bg-white border border-[#E4D4C0] rounded-[12px] p-4 overflow-x-auto">
+                <pre className="text-[13px] text-[#4A3324] whitespace-pre font-mono leading-relaxed">{monthTable}</pre>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
