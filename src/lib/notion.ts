@@ -1053,6 +1053,8 @@ export async function getMonthDailyEntries(
 
 // 在页面 body 里追加一个 Toggle，Toggle 内存储 markdown 表格内容
 // 每行作为独立 paragraph block 存入（最稳定的方式，前端 TablePreview 负责渲染）
+// Toggle 内创建 Notion 原生表格，把 markdown 表格解析为行列
+// 把 table+rows 作为 toggle 的 children 一次性传入（同 toggle+callout 的创建方式）
 export async function appendTableToggle(
   accessToken: string,
   pageId: string,
@@ -1061,38 +1063,53 @@ export async function appendTableToggle(
 ): Promise<void> {
   const notion = createNotionClient(accessToken);
 
-  const lines = markdownTable.split("\n").filter(line => line.trim().length > 0);
-  if (lines.length === 0) throw new Error("markdownTable is empty, nothing to save");
+  // 解析 markdown：跳过分隔线，每行拆成单元格
+  const allRows = markdownTable
+    .split("\n")
+    .filter(line => line.trim().startsWith("|") && !line.includes("---"))
+    .map(line => line.split("|").slice(1, -1).map(cell => cell.trim()));
 
-  // Step 1：建 Toggle 块
-  const toggleRes = await withAuthCheck(() =>
-    notion.blocks.children.append({
-      block_id: pageId,
-      children: [
-        {
-          type: "toggle",
-          toggle: {
-            rich_text: [{ type: "text", text: { content: toggleTitle }, annotations: { bold: true } }],
-            color: "default",
-          },
-        } as Parameters<typeof notion.blocks.children.append>[0]["children"][0],
-      ],
-    })
-  ) as { results: { id: string }[] };
+  if (allRows.length === 0) throw new Error("markdownTable is empty, nothing to save");
+  const tableWidth = allRows[0].length;
 
-  const toggleId = toggleRes.results[0]?.id;
-  if (!toggleId) throw new Error("Failed to create toggle block — no ID returned");
-
-  // Step 2：每行 markdown 存为 paragraph block（确保内容写入，前端解析渲染）
+  // 事项列换行："• a  • b" → "• a\n• b"
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const blocks: any[] = lines.map(line => ({
-    type: "paragraph",
-    paragraph: {
-      rich_text: [{ type: "text", text: { content: line.slice(0, 2000) } }],
+  const tableRows: any[] = allRows.map(row => ({
+    type: "table_row",
+    table_row: {
+      cells: row.map(cell => [{
+        type: "text",
+        text: { content: cell.replace(/\s{2,}•/g, "\n•").slice(0, 2000) },
+      }]),
     },
   }));
 
-  await batchAppend(notion, toggleId, blocks);
+  // 一次性创建 Toggle，children 里嵌入带完整行数据的 table
+  // （和 toggle+callout 同样的模式，Notion API 支持嵌套 children）
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const toggleBlock: any = {
+    type: "toggle",
+    toggle: {
+      rich_text: [{ type: "text", text: { content: toggleTitle }, annotations: { bold: true } }],
+      color: "default",
+      children: [{
+        type: "table",
+        table: {
+          table_width: tableWidth,
+          has_column_header: true,
+          has_row_header: false,
+          children: tableRows,
+        },
+      }],
+    },
+  };
+
+  await withAuthCheck(() =>
+    notion.blocks.children.append({
+      block_id: pageId,
+      children: [toggleBlock] as Parameters<typeof notion.blocks.children.append>[0]["children"],
+    })
+  );
 }
 
 // 在主数据库中查找或创建标题为 "YYYY-MM-月度-table" 的页面
