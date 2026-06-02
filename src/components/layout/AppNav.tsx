@@ -16,6 +16,7 @@ export default function AppNav() {
   const navItems = [
     { label: "Capture",   href: `/${locale}/capture`,   icon: "✍️" },
     { label: "Review",    href: `/${locale}/review`,    icon: "📋" },
+    { label: "History",   href: `/${locale}/history`,   icon: "🗂" },
     { label: "Timeline",  href: `/${locale}/timeline`,  icon: "🗓" },
     { label: "Dashboard", href: `/${locale}/dashboard`, icon: "📊" },
     { label: "Chat",      href: `/${locale}/chat`,      icon: "💬" },
