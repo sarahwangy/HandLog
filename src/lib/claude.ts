@@ -300,5 +300,12 @@ ${entries.map(e => `日期：${e.date}\n内容：${e.dailySummary}`).join("\n\n"
   });
 
   const text = message.content[0].type === "text" ? message.content[0].text.trim() : "[]";
-  return JSON.parse(text) as DayBullets[];
+  try {
+    const extracted = extractJson(text);
+    const sanitized = sanitizeJson(extracted);
+    return JSON.parse(sanitized) as DayBullets[];
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(`Failed to parse table bullets JSON (${msg}). Raw: ${text.slice(0, 200)}`);
+  }
 }
