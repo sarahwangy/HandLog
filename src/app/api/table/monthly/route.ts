@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getNotionTokenInternal, getNotionDatabaseId } from "@/lib/auth";
 import { queryDatabase, findOrCreateMonthlyTablePage } from "@/lib/notion";
-import { generateWeeklyTableBullets, type DayBullets } from "@/lib/claude";
+import { generateMonthlyTableBullets, type DayBullets } from "@/lib/claude";
 
 // POST /api/table/monthly
 // Body: { year: 2026, month: 5 }
@@ -35,20 +35,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: `${year}年${month}月没有找到日记内容` }, { status: 404 });
     }
 
-    // 逐周读取「简短日常」，让 Claude 解析每天内容提取要点
-    const allBullets: DayBullets[] = [];
-    for (const weekPage of weekPages) {
-      const props = weekPage.properties as Record<string, {
-        title?: { plain_text: string }[];
-        rich_text?: { plain_text: string }[];
-      }>;
-      const weekLabel = props["Name"]?.title?.[0]?.plain_text ?? "";
-      const dailySummary = props["简短日常"]?.rich_text?.[0]?.plain_text ?? "";
-      if (!dailySummary.trim()) continue;
+    // 收集所有周的内容，一次 Claude 调用处理整月（省 75% token）
+    const weeks = weekPages
+      .map(p => {
+        const props = p.properties as Record<string, {
+          title?: { plain_text: string }[];
+          rich_text?: { plain_text: string }[];
+        }>;
+        return {
+          weekLabel: props["Name"]?.title?.[0]?.plain_text ?? "",
+          dailySummary: props["简短日常"]?.rich_text?.[0]?.plain_text ?? "",
+        };
+      })
+      .filter(w => w.weekLabel && w.dailySummary.trim());
 
-      const bullets = await generateWeeklyTableBullets(weekLabel, dailySummary);
-      allBullets.push(...bullets);
+    if (weeks.length === 0) {
+      return NextResponse.json({ error: `${year}年${month}月没有找到日记内容` }, { status: 404 });
     }
+
+    const allBullets: DayBullets[] = await generateMonthlyTableBullets(weeks, month);
 
     if (allBullets.length === 0) {
       return NextResponse.json({ error: `${year}年${month}月日记内容为空` }, { status: 404 });

@@ -313,6 +313,50 @@ ${entries.map(e => `日期：${e.date}\n内容：${e.dailySummary}`).join("\n\n"
 }
 
 // 从周页面的「简短日常」原始内容生成每天的 bullet points
+// 整月一次调用：把所有周内容合并传给 Claude，只用 1 次 API 调用处理整月
+// 比逐周调用节省 75% token 费用
+export async function generateMonthlyTableBullets(
+  weeks: Array<{ weekLabel: string; dailySummary: string }>,
+  month: number
+): Promise<DayBullets[]> {
+  const client = new Anthropic();
+
+  const weeksText = weeks
+    .map(w => `【${w.weekLabel}周】\n${w.dailySummary}`)
+    .join("\n\n");
+
+  const prompt = `你是一个日记助手。以下是用户${month}月的日记内容，按周分段。
+内容可能用"一. 二. 三."等标记区分每天，也可能是其他格式。
+
+请识别每一天的内容，对每一天提取 2-4 个最重要的事项，每个用简短短语（不超过 15 字）表达。
+
+以 JSON 数组格式输出，结构如下：
+[{"date": "${month}-4", "bullets": ["事项1", "事项2"]}, {"date": "${month}-5", "bullets": ["事项1"]}]
+
+date 字段格式为 "月-日"，如 "${month}-4"。只输出 JSON，不要任何其他文字。
+
+日记内容：
+${weeksText}`;
+
+  const message = await client.messages.create({
+    model: "claude-haiku-4-5-20251001",
+    max_tokens: 2048,
+    messages: [{ role: "user", content: prompt }],
+  });
+
+  const text = message.content[0].type === "text" ? message.content[0].text.trim() : "[]";
+  try {
+    const start = text.indexOf("[");
+    const end = text.lastIndexOf("]");
+    const arrayText = start !== -1 && end !== -1 ? text.slice(start, end + 1) : text;
+    return JSON.parse(sanitizeJson(arrayText)) as DayBullets[];
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(`Failed to parse monthly table bullets JSON (${msg}). Raw: ${text.slice(0, 200)}`);
+  }
+}
+
+// 单周调用：处理一周的日记内容
 // 不依赖固定格式解析，让 Claude 理解内容并按天拆分
 // weekLabel 格式 "5-4-10"（5月4日到10日），month-startDay-endDay
 export async function generateWeeklyTableBullets(
