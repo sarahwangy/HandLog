@@ -1097,14 +1097,18 @@ export async function appendTableToggle(
 
 // 在主数据库中查找或创建标题为 "YYYY-MM-月度-table" 的页面
 // 例如 "2026-06-月度-table"
+// 查找数据库里标题为「月度-table」的页面，找不到就创建
+// 和「复盘-汇总」的模式一致：一个固定页面，toggle 标题带月份区分不同月份的内容
 export async function findOrCreateMonthlyTablePage(
   accessToken: string,
   databaseId: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   year: number,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   month: number
 ): Promise<string> {
   const notion = createNotionClient(accessToken);
-  const title = `月度-table-${year}-${String(month).padStart(2, "0")}`;
+  const title = "月度-table";
 
   const res = await withAuthCheck(() =>
     notion.databases.query({
@@ -1116,7 +1120,7 @@ export async function findOrCreateMonthlyTablePage(
 
   if (res.results.length > 0) return res.results[0].id;
 
-  // 不存在则新建一行
+  // 不存在则新建（和「复盘-汇总」一样，只建一次）
   const page = await withAuthCheck(() =>
     notion.pages.create({
       parent: { database_id: databaseId },
