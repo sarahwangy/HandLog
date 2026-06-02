@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getNotionTokenInternal, getNotionDatabaseId } from "@/lib/auth";
-import { getMonthDailyEntries } from "@/lib/notion";
-import { generateTableBullets } from "@/lib/claude";
+import { queryDatabase } from "@/lib/notion";
+import { generateWeeklyTableBullets, type DayBullets } from "@/lib/claude";
 
 // POST /api/table/monthly
-// Body: { year: 2026, month: 6 }
-// 读取该月所有日页面的「简短日常」，生成 markdown 表格
+// Body: { year: 2026, month: 5 }
+// 读取该月所有周页面（"5-4-10" 格式）的「简短日常」，让 Claude 解析每天内容，生成 markdown 表格
+// 注意：和月复盘一样，数据来源是周页面（三段标题），而不是单日页面
 export async function POST(req: NextRequest) {
   const { year, month } = await req.json() as { year: number; month: number };
   if (!year || !month) return NextResponse.json({ error: "Missing year or month" }, { status: 400 });
@@ -14,17 +15,46 @@ export async function POST(req: NextRequest) {
     const token = getNotionTokenInternal();
     const databaseId = getNotionDatabaseId();
 
-    const entries = await getMonthDailyEntries(token, databaseId, month);
+    // 查询本月所有页面，筛选出周页面（三段标题，如 "5-4-10"）
+    const allPages = await queryDatabase(token, {
+      database_id: databaseId,
+      filter: {
+        property: "Name",
+        title: { starts_with: `${month}-` },
+      },
+      sorts: [{ property: "Name", direction: "ascending" }],
+    }) as { results: Array<{ properties: Record<string, unknown> }> };
 
-    if (entries.length === 0) {
+    const weekPages = allPages.results.filter(p => {
+      const props = p.properties as Record<string, { title?: { plain_text: string }[] }>;
+      const name = props["Name"]?.title?.[0]?.plain_text ?? "";
+      return name.split("-").length === 3;
+    });
+
+    if (weekPages.length === 0) {
       return NextResponse.json({ error: `${year}年${month}月没有找到日记内容` }, { status: 404 });
     }
 
-    const bulleted = await generateTableBullets(
-      entries.map(e => ({ date: e.date, dailySummary: e.dailySummary }))
-    );
+    // 逐周读取「简短日常」，让 Claude 解析每天内容提取要点
+    const allBullets: DayBullets[] = [];
+    for (const weekPage of weekPages) {
+      const props = weekPage.properties as Record<string, {
+        title?: { plain_text: string }[];
+        rich_text?: { plain_text: string }[];
+      }>;
+      const weekLabel = props["Name"]?.title?.[0]?.plain_text ?? "";
+      const dailySummary = props["简短日常"]?.rich_text?.[0]?.plain_text ?? "";
+      if (!dailySummary.trim()) continue;
 
-    const markdownTable = buildMarkdownTable(bulleted, year);
+      const bullets = await generateWeeklyTableBullets(weekLabel, dailySummary);
+      allBullets.push(...bullets);
+    }
+
+    if (allBullets.length === 0) {
+      return NextResponse.json({ error: `${year}年${month}月日记内容为空` }, { status: 404 });
+    }
+
+    const markdownTable = buildMarkdownTable(allBullets, year);
     return NextResponse.json({ markdownTable });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
@@ -33,7 +63,7 @@ export async function POST(req: NextRequest) {
 }
 
 function buildMarkdownTable(
-  rows: Array<{ date: string; bullets: string[] }>,
+  rows: DayBullets[],
   year: number
 ): string {
   const CN_WEEKDAY = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
