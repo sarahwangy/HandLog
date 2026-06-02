@@ -273,7 +273,7 @@ ${parts.filter(Boolean).join("")}
       const res = await fetch("/api/table/weekly/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ markdownTable: weekTable, weekPageId: weekTablePageId }),
+        body: JSON.stringify({ markdownTable: weekTable, weekPageId: weekTablePageId, weekLabel }),
       });
       const data = await res.json() as { error?: string };
       if (!res.ok) throw new Error(data.error ?? "Save failed");
@@ -604,7 +604,7 @@ ${parts.filter(Boolean).join("")}
                   disabled={weekTableSaving || weekTableSaved}
                   className="h-[34px] px-5 rounded-[8px] text-[13px] font-medium border border-[#C4783A] text-[#C4783A] hover:bg-[#FDF0E6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {weekTableSaved ? "✓ Table Saved" : weekTableSaving ? "Saving..." : "💾 Save Table"}
+                  {weekTableSaved ? "✓ Saved to Notion" : weekTableSaving ? "Saving..." : "💾 Save to Notion"}
                 </button>
               )}
             </div>
@@ -809,7 +809,7 @@ ${parts.filter(Boolean).join("")}
                   disabled={monthTableSaving || monthTableSaved}
                   className="h-[34px] px-5 rounded-[8px] text-[13px] font-medium border border-[#C4783A] text-[#C4783A] hover:bg-[#FDF0E6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {monthTableSaved ? "✓ Table Saved" : monthTableSaving ? "Saving..." : "💾 Save Table"}
+                  {monthTableSaved ? "✓ Saved to Notion" : monthTableSaving ? "Saving..." : "💾 Save to Notion"}
                 </button>
               )}
             </div>

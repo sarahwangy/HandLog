@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
 
     // 找或建 "2026-06-月度-table" 这一行
     const pageId = await findOrCreateMonthlyTablePage(token, databaseId, year, month);
-    await appendTableToggle(token, pageId, markdownTable, "❤月事件-表格-时间");
+    await appendTableToggle(token, pageId, markdownTable, `❤月事件-表格-${year}-${month}`);
     return NextResponse.json({ success: true, pageId });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";

@@ -569,7 +569,7 @@ export async function appendWeeklyReviewBlocks(
         {
           type: "toggle",
           toggle: {
-            rich_text: [{ type: "text", text: { content: "本周复盘" }, annotations: { bold: true } }],
+            rich_text: [{ type: "text", text: { content: `本周复盘-${review.weekLabel}` }, annotations: { bold: true } }],
             color: "default",
             children: [
               {
@@ -1051,8 +1051,8 @@ export async function getMonthDailyEntries(
     .filter(e => e.date.split("-").length === 2 && e.dailySummary.trim());
 }
 
-// 在页面 body 里追加一个 Toggle，Toggle 内包含 Callout，Callout 里存 markdown 表格
-// 每行 markdown 存为单独的 paragraph block，避开 Notion rich_text 2000 字符限制
+// 在页面 body 里追加一个 Toggle，Toggle 内包含真正的 Notion 表格（不是 markdown 文字）
+// markdown 格式 → 解析成行列 → 创建 Notion table block，第一行作为表头
 export async function appendTableToggle(
   accessToken: string,
   pageId: string,
@@ -1061,7 +1061,21 @@ export async function appendTableToggle(
 ): Promise<void> {
   const notion = createNotionClient(accessToken);
 
-  // Step 1：建 Toggle，内含空 Callout
+  // 解析 markdown 表格：跳过分隔线（含 ---）
+  const allRows = markdownTable
+    .split("\n")
+    .filter(line => line.trim().startsWith("|") && !line.includes("---"))
+    .map(line => line.split("|").slice(1, -1).map(cell => cell.trim()));
+
+  if (allRows.length === 0) return;
+  const tableWidth = allRows[0].length;
+
+  // 事项列：把 "• item1  • item2" 转成 "• item1\n• item2"（换行更易读）
+  const processedRows = allRows.map(row =>
+    row.map(cell => cell.replace(/\s{2,}•/g, "\n•"))
+  );
+
+  // Step 1：创建 Toggle 块
   const toggleRes = await withAuthCheck(() =>
     notion.blocks.children.append({
       block_id: pageId,
@@ -1071,44 +1085,39 @@ export async function appendTableToggle(
           toggle: {
             rich_text: [{ type: "text", text: { content: toggleTitle }, annotations: { bold: true } }],
             color: "default",
-            children: [
-              {
-                type: "callout",
-                callout: {
-                  rich_text: [],
-                  icon: { type: "emoji", emoji: "📅" },
-                  color: "gray_background",
-                },
-              } as Parameters<typeof notion.blocks.children.append>[0]["children"][0],
-            ],
           },
         } as Parameters<typeof notion.blocks.children.append>[0]["children"][0],
       ],
     })
-  ) as { results: { id: string; type: string }[] };
+  ) as { results: { id: string }[] };
 
   const toggleId = toggleRes.results[0]?.id;
   if (!toggleId) return;
 
-  // Step 2：找到 Callout 的 ID
-  const toggleChildren = await withAuthCheck(() =>
-    notion.blocks.children.list({ block_id: toggleId })
-  ) as { results: { id: string; type: string }[] };
-
-  const calloutId = toggleChildren.results.find(b => b.type === "callout")?.id;
-  if (!calloutId) return;
-
-  // Step 3：每行 markdown 存为一个 paragraph block（避免超过 2000 字符限制）
-  const lines = markdownTable.split("\n").filter(Boolean);
+  // Step 2：在 Toggle 内创建 Notion 表格（第一行为表头）
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const blocks: any[] = lines.map(line => ({
-    type: "paragraph",
-    paragraph: {
-      rich_text: [{ type: "text", text: { content: line.slice(0, 2000) } }],
+  const tableRows: any[] = processedRows.map(row => ({
+    type: "table_row",
+    table_row: {
+      cells: row.map(cell => [{ type: "text", text: { content: cell.slice(0, 2000) } }]),
     },
   }));
 
-  await batchAppend(notion, calloutId, blocks);
+  await withAuthCheck(() =>
+    notion.blocks.children.append({
+      block_id: toggleId,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      children: [{
+        type: "table",
+        table: {
+          table_width: tableWidth,
+          has_column_header: true,
+          has_row_header: false,
+          children: tableRows,
+        },
+      }] as any,
+    })
+  );
 }
 
 // 在主数据库中查找或创建标题为 "YYYY-MM-月度-table" 的页面
