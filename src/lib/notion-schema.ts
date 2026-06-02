@@ -118,4 +118,5 @@ export function buildNotionProperties(
 export const NOTION_PAGE_NAMES = {
   deepChat: "Deep Chat-相关",   // 聊天记录保存页
   monthlySummary: "复盘-汇总",  // 月复盘保存页
+  memory: "记忆本",             // Chat 跨会话记忆
 } as const;

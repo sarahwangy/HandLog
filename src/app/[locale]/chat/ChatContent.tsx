@@ -120,6 +120,10 @@ export default function ChatContent() {
   const [saving, setSaving] = useState(false);
   const [savedAll, setSavedAll] = useState(false);
 
+  // 记忆本
+  const [memoryCount, setMemoryCount] = useState(0);
+  const [savingMemory, setSavingMemory] = useState<number | null>(null); // 正在保存的消息 index
+
   // 多语言问候循环
   const [greetingIdx, setGreetingIdx] = useState(0);
   const [greetingVisible, setGreetingVisible] = useState(true);
@@ -151,7 +155,15 @@ export default function ChatContent() {
       .finally(() => setLoadingCtx(false));
   }, []);
 
-  // 1b. 从 localStorage 恢复对话历史
+  // 1b. 拉取记忆本条数（静默，失败不影响）
+  useEffect(() => {
+    fetch("/api/chat/memory")
+      .then((r) => r.json())
+      .then((d) => { if (d.memories) setMemoryCount(d.memories.length); })
+      .catch(() => {});
+  }, []);
+
+  // 1c. 从 localStorage 恢复对话历史
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -241,6 +253,58 @@ export default function ChatContent() {
     localStorage.removeItem(STORAGE_KEY);
   }
 
+  // 保存 AI 消息到记忆本
+  async function saveMemory(index: number) {
+    const msg = messages[index];
+    if (!msg || msg.role !== "assistant") return;
+    setSavingMemory(index);
+    try {
+      // 截取前 200 字作为洞察摘要
+      const text = msg.content.replace(/\n+/g, " ").trim().slice(0, 200);
+      const res = await fetch("/api/chat/memory", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      if (!res.ok) throw new Error("保存失败");
+      setMemoryCount((n) => n + 1);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "保存失败");
+    } finally {
+      setSavingMemory(null);
+    }
+  }
+
+  // 导出对话为 PDF（打开新窗口 → 触发打印）
+  function exportPDF() {
+    const lines = messages.map((m) => {
+      const role = m.role === "user" ? "🙋 我" : "🤖 AI";
+      const content = m.content.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
+      return `<div class="${m.role}"><strong>${role}</strong><p>${content}</p></div>`;
+    }).join("");
+
+    const now = new Date().toLocaleString("zh-CN", { timeZone: "Australia/Melbourne" });
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>Chat 记录 · ${now}</title>
+<style>
+  body { font-family: -apple-system, sans-serif; max-width: 720px; margin: 0 auto; padding: 32px; color: #2C1F14; }
+  h1 { font-size: 18px; margin-bottom: 24px; color: #C4783A; }
+  .user { background: #FDF0E6; border-radius: 10px; padding: 12px 16px; margin: 12px 0; }
+  .assistant { background: #F5F5F5; border-radius: 10px; padding: 12px 16px; margin: 12px 0; }
+  strong { font-size: 12px; color: #8B6B4A; display: block; margin-bottom: 6px; }
+  p { font-size: 14px; line-height: 1.7; margin: 0; }
+  @media print { body { padding: 16px; } }
+</style></head><body>
+<h1>💬 Chat 记录 · ${now}</h1>
+${lines}
+</body></html>`;
+
+    const win = window.open("", "_blank");
+    if (!win) return;
+    win.document.documentElement.innerHTML = html;
+    setTimeout(() => win.print(), 300);
+  }
+
   // 单条保存/删除
   function toggleSaved(index: number) {
     setMessages((prev) => prev.map((m, i) => (i === index ? { ...m, saved: !m.saved } : m)));
@@ -308,8 +372,15 @@ export default function ChatContent() {
         <div>
           <h1 className="text-[20px] font-bold text-[#2C1F14]">💬 Deep Chat</h1>
           <p className="text-[13px] text-[#8B6B4A] mt-1">基于你的日记，深度分析你的想法和模式</p>
-          <div className="inline-flex items-center gap-2 mt-2 bg-[#F5EDE0] border border-[#E4D4C0] rounded-full px-3 py-1 text-[12px] text-[#8B6B4A]">
-            📓 已读取 <span className="text-[#C4783A] font-semibold">{weekCount} 周</span> 日记
+          <div className="flex flex-wrap gap-2 mt-2">
+            <div className="inline-flex items-center gap-2 bg-[#F5EDE0] border border-[#E4D4C0] rounded-full px-3 py-1 text-[12px] text-[#8B6B4A]">
+              📓 已读取 <span className="text-[#C4783A] font-semibold">{weekCount} 周</span> 日记
+            </div>
+            {memoryCount > 0 && (
+              <div className="inline-flex items-center gap-1 bg-[#F0EEFF] border border-[#C8BBEE] rounded-full px-3 py-1 text-[12px] text-[#7B5EA7]">
+                🧠 <span className="font-semibold">{memoryCount} 条</span> 记忆
+              </div>
+            )}
           </div>
         </div>
         {messages.length > 0 && (
@@ -371,6 +442,12 @@ export default function ChatContent() {
                       : "bg-white border-[#E4D4C0] text-[#8B6B4A] hover:border-[#C4783A] hover:text-[#C4783A]"}`}>
                   {msg.saved ? "✓ 已保存" : "💾 保存"}
                 </button>
+                <button type="button" onClick={() => saveMemory(i)}
+                  disabled={savingMemory === i}
+                  className="text-[11px] px-3 py-1 rounded-full border border-[#E4D4C0] bg-white text-[#8B6B4A] hover:border-[#7B5EA7] hover:text-[#7B5EA7] transition-colors disabled:opacity-50"
+                  title="保存这条洞察到记忆本，下次对话时 AI 会记得">
+                  {savingMemory === i ? "保存中..." : "🧠 记住这条"}
+                </button>
                 <button type="button" onClick={() => deleteMsg(i)}
                   className="text-[11px] px-3 py-1 rounded-full border border-[#E4D4C0] bg-white text-[#8B6B4A] hover:border-[#C4783A] hover:text-[#C4783A] transition-colors">
                   🗑 删除
@@ -428,10 +505,16 @@ export default function ChatContent() {
             )}
           </div>
           {messages.length > 0 && (
-            <button type="button" onClick={saveAll} disabled={saving || savedAll}
-              className="text-[12px] px-4 py-1 rounded-full border border-[#E4D4C0] bg-white text-[#8B6B4A] hover:border-[#C4783A] hover:text-[#C4783A] transition-colors disabled:opacity-50">
-              {savedAll ? "✓ 已保存到 Notion" : saving ? "保存中..." : "📋 保存全部对话到 Notion"}
-            </button>
+            <div className="flex gap-2">
+              <button type="button" onClick={exportPDF}
+                className="text-[12px] px-4 py-1 rounded-full border border-[#E4D4C0] bg-white text-[#8B6B4A] hover:border-[#3A7BC4] hover:text-[#3A7BC4] transition-colors">
+                📄 导出 PDF
+              </button>
+              <button type="button" onClick={saveAll} disabled={saving || savedAll}
+                className="text-[12px] px-4 py-1 rounded-full border border-[#E4D4C0] bg-white text-[#8B6B4A] hover:border-[#C4783A] hover:text-[#C4783A] transition-colors disabled:opacity-50">
+                {savedAll ? "✓ 已保存到 Notion" : saving ? "保存中..." : "📋 保存全部到 Notion"}
+              </button>
+            </div>
           )}
         </div>
 

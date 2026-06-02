@@ -892,3 +892,68 @@ export async function findDeepChatPage(
   }
   return page.id;
 }
+
+// 找到「记忆本」行，返回其 page ID
+export async function findMemoryPage(
+  token: string,
+  databaseId: string
+): Promise<string> {
+  const { NOTION_PAGE_NAMES } = await import("./notion-schema");
+  const notion = createNotionClient(token);
+
+  const res = await withAuthCheck(() =>
+    notion.databases.query({
+      database_id: databaseId,
+      filter: { property: "Name", title: { equals: NOTION_PAGE_NAMES.memory } },
+      page_size: 1,
+    })
+  );
+
+  const page = res.results[0];
+  if (!page) {
+    throw new Error(
+      `Notion 里找不到「${NOTION_PAGE_NAMES.memory}」页面，请先在数据库里建好这一行`
+    );
+  }
+  return page.id;
+}
+
+// 读取「记忆本」里所有 bullet 块，返回文字数组
+export async function readMemoryBlocks(
+  token: string,
+  pageId: string
+): Promise<string[]> {
+  const notion = createNotionClient(token);
+
+  const res = await withAuthCheck(() =>
+    notion.blocks.children.list({ block_id: pageId, page_size: 100 })
+  ) as { results: { type: string; bulleted_list_item?: { rich_text: { plain_text: string }[] } }[] };
+
+  return res.results
+    .filter(b => b.type === "bulleted_list_item")
+    .map(b => b.bulleted_list_item?.rich_text.map(t => t.plain_text).join("") ?? "")
+    .filter(Boolean);
+}
+
+// 向「记忆本」追加一条 bullet 洞察
+export async function appendMemoryBlock(
+  token: string,
+  pageId: string,
+  text: string
+): Promise<void> {
+  const notion = createNotionClient(token);
+
+  await withAuthCheck(() =>
+    notion.blocks.children.append({
+      block_id: pageId,
+      children: [
+        {
+          type: "bulleted_list_item",
+          bulleted_list_item: {
+            rich_text: [{ type: "text", text: { content: text } }],
+          },
+        } as Parameters<typeof notion.blocks.children.append>[0]["children"][0],
+      ],
+    })
+  );
+}

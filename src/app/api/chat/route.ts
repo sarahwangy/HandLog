@@ -5,10 +5,12 @@
 import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { fetchWeekContexts, type WeekContext } from "@/lib/chat-context";
+import { getNotionTokenInternal, getNotionDatabaseId } from "@/lib/auth";
+import { findMemoryPage, readMemoryBlocks } from "@/lib/notion";
 
 export const dynamic = "force-dynamic";
 
-function buildSystemPrompt(weeks: WeekContext[], mood: string | null): string {
+function buildSystemPrompt(weeks: WeekContext[], mood: string | null, memories: string[]): string {
   const entries = weeks
     .map((w) => {
       const labelStr = w.labels.length > 0 ? `标签：${w.labels.join("、")}` : "";
@@ -25,6 +27,10 @@ function buildSystemPrompt(weeks: WeekContext[], mood: string | null): string {
   };
   const moodLine = mood && moodHints[mood] ? `\n当前用户情绪提示：${moodHints[mood]}` : "";
 
+  const memorySection = memories.length > 0
+    ? `\n\n【你和用户之前聊过的洞察记录】\n${memories.map(m => `- ${m}`).join("\n")}\n请在回答时自然地参考这些洞察，不需要每次都明确提及它们。`
+    : "";
+
   return `你是用户的日记分析助手。以下是她所有周的日记记录：
 
 ${entries}
@@ -34,7 +40,7 @@ ${entries}
 - 只分析日记里真实出现的内容，不要编造
 - 回答要温暖、直接、有洞察力
 - 如果用户用中文问，用中文回答；如果用英文问，用英文回答
-- 如果日记里没有相关信息，直接说没有提到${moodLine}`;
+- 如果日记里没有相关信息，直接说没有提到${moodLine}${memorySection}`;
 }
 
 export async function POST(req: NextRequest) {
@@ -64,8 +70,17 @@ export async function POST(req: NextRequest) {
     return new Response(`读取日记数据失败：${msg}`, { status: 500 });
   }
 
+  // 读取记忆本（失败不影响对话，静默降级为空）
+  let memories: string[] = [];
+  try {
+    const token = getNotionTokenInternal();
+    const databaseId = getNotionDatabaseId();
+    const memPageId = await findMemoryPage(token, databaseId);
+    memories = await readMemoryBlocks(token, memPageId);
+  } catch { /* 记忆本不存在或读取失败时静默跳过 */ }
+
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  const systemPrompt = buildSystemPrompt(weeks, mood);
+  const systemPrompt = buildSystemPrompt(weeks, mood, memories);
 
   let stream: Awaited<ReturnType<typeof client.messages.stream>>;
   try {
