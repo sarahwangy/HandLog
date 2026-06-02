@@ -720,14 +720,13 @@ ${parts.filter(Boolean).join("")}
           {/* ── Weekly Table Section ─────────────────────────────── */}
           <div className="mt-6 pt-5 border-t border-[#E4D4C0]">
             <div className="flex flex-wrap items-center gap-3 mb-2">
-              <span className="text-[14px] font-semibold text-[#2C1F14]">📅 一周大事记 Table</span>
               <button
                 type="button"
                 onClick={generateWeekTable}
                 disabled={weekTableLoading}
-                className="h-[34px] px-5 bg-[#2C1F14] text-white rounded-[8px] text-[13px] font-medium hover:bg-[#4A3324] transition-colors disabled:bg-[#E4D4C0] disabled:text-[#8B6B4A] disabled:cursor-not-allowed"
+                className="h-[34px] px-5 bg-[#C4783A] text-white rounded-[8px] text-[13px] font-medium hover:bg-[#A85E28] transition-colors disabled:bg-[#EDD4BC] disabled:cursor-not-allowed"
               >
-                {weekTableLoading ? "Generating..." : "📊 Generate Table"}
+                {weekTableLoading ? "Generating..." : "✨ Generate Weekly Table"}
               </button>
               {weekTable && (
                 <button
@@ -951,14 +950,13 @@ ${parts.filter(Boolean).join("")}
           {/* ── Monthly Table Section ────────────────────────────── */}
           <div className="mt-6 pt-5 border-t border-[#E4D4C0]">
             <div className="flex flex-wrap items-center gap-3 mb-2">
-              <span className="text-[14px] font-semibold text-[#2C1F14]">📅 月度大事记 Table</span>
               <button
                 type="button"
                 onClick={generateMonthTable}
                 disabled={monthTableLoading}
-                className="h-[34px] px-5 bg-[#2C1F14] text-white rounded-[8px] text-[13px] font-medium hover:bg-[#4A3324] transition-colors disabled:bg-[#E4D4C0] disabled:text-[#8B6B4A] disabled:cursor-not-allowed"
+                className="h-[34px] px-5 bg-[#C4783A] text-white rounded-[8px] text-[13px] font-medium hover:bg-[#A85E28] transition-colors disabled:bg-[#EDD4BC] disabled:cursor-not-allowed"
               >
-                {monthTableLoading ? "Generating..." : "📊 Generate Table"}
+                {monthTableLoading ? "Generating..." : "✨ Generate Monthly Table"}
               </button>
               {monthTable && (
                 <button
