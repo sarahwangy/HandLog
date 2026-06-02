@@ -1104,7 +1104,7 @@ export async function findOrCreateMonthlyTablePage(
   month: number
 ): Promise<string> {
   const notion = createNotionClient(accessToken);
-  const title = `${year}-${String(month).padStart(2, "0")}-月度-table`;
+  const title = `月度-table-${year}-${String(month).padStart(2, "0")}`;
 
   const res = await withAuthCheck(() =>
     notion.databases.query({

@@ -319,9 +319,10 @@ ${parts.filter(Boolean).join("")}
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ markdownTable: monthTable, monthlyTablePageId, year: monthYear, month: monthMonth }),
       });
-      const data = await res.json() as { error?: string };
+      const data = await res.json() as { error?: string; pageTitle?: string };
       if (!res.ok) throw new Error(data.error ?? "Save failed");
       setMonthTableSaved(true);
+      if (data.pageTitle) setMonthTableError(`✓ 已写入 Notion 页面：${data.pageTitle}`);
     } catch (err) {
       setMonthTableError(err instanceof Error ? err.message : "Save failed");
     } finally {

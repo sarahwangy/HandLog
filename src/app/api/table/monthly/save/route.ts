@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   try {
     const token = getNotionTokenInternal();
     await appendTableToggle(token, monthlyTablePageId, markdownTable, `❤月事件-表格-${year}-${month}`);
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, pageTitle: `月度-table-${year}-${String(month).padStart(2, "0")}`, pageId: monthlyTablePageId });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json({ error: message }, { status: 500 });
