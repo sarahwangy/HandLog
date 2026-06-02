@@ -1051,8 +1051,9 @@ export async function getMonthDailyEntries(
     .filter(e => e.date.split("-").length === 2 && e.dailySummary.trim());
 }
 
-// 在页面 body 里追加一个 Toggle，Toggle 内把 markdown 表格每行存为 paragraph block
-// 前端的 TablePreview 组件负责把 markdown 渲染成 HTML 表格，Notion 侧只存原始文字
+// 在页面 body 里追加一个 Toggle，Toggle 内创建真正的 Notion 原生表格
+// Notion API 要求创建 table 时必须同时传入所有行（children 不能为空），所以两步完成：
+// Step 1：建 Toggle；Step 2：往 Toggle 里追加带完整行数据的 table block
 export async function appendTableToggle(
   accessToken: string,
   pageId: string,
@@ -1061,7 +1062,27 @@ export async function appendTableToggle(
 ): Promise<void> {
   const notion = createNotionClient(accessToken);
 
-  // Step 1：建 Toggle
+  // 解析 markdown 表格，跳过分隔线（含 ---）
+  const allRows = markdownTable
+    .split("\n")
+    .filter(line => line.trim().startsWith("|") && !line.includes("---"))
+    .map(line => line.split("|").slice(1, -1).map(cell => cell.trim()));
+
+  if (allRows.length === 0) return;
+  const tableWidth = allRows[0].length;
+
+  // 事项列：把 "• item1  • item2" 转成 "• item1\n• item2"
+  const tableRows = allRows.map(row => ({
+    type: "table_row",
+    table_row: {
+      cells: row.map(cell => [{
+        type: "text",
+        text: { content: cell.replace(/\s{2,}•/g, "\n•").slice(0, 2000) },
+      }]),
+    },
+  }));
+
+  // Step 1：建 Toggle 块
   const toggleRes = await withAuthCheck(() =>
     notion.blocks.children.append({
       block_id: pageId,
@@ -1080,17 +1101,22 @@ export async function appendTableToggle(
   const toggleId = toggleRes.results[0]?.id;
   if (!toggleId) return;
 
-  // Step 2：每行 markdown 存为一个 paragraph block（每行不超过 2000 字符限制）
-  const lines = markdownTable.split("\n").filter(Boolean);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const blocks: any[] = lines.map(line => ({
-    type: "paragraph",
-    paragraph: {
-      rich_text: [{ type: "text", text: { content: line.slice(0, 2000) } }],
-    },
-  }));
-
-  await batchAppend(notion, toggleId, blocks);
+  // Step 2：往 Toggle 里追加 table block，rows 必须和 table 一起传（Notion API 要求）
+  await withAuthCheck(() =>
+    notion.blocks.children.append({
+      block_id: toggleId,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      children: [{
+        type: "table",
+        table: {
+          table_width: tableWidth,
+          has_column_header: true,
+          has_row_header: false,
+          children: tableRows,
+        },
+      }] as any,
+    })
+  );
 }
 
 // 在主数据库中查找或创建标题为 "YYYY-MM-月度-table" 的页面
