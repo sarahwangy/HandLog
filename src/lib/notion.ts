@@ -1012,3 +1012,134 @@ export async function appendMemoryBlock(
     })
   );
 }
+
+// ── Table Feature Helpers ──────────────────────────────────────────────────
+
+// 查询某月所有单日页面（标题格式 "M-D"，两段，如 "6-2"）
+// 月复盘用的是周页面（三段标题），这里专门查日页面
+export async function getMonthDailyEntries(
+  accessToken: string,
+  databaseId: string,
+  month: number
+): Promise<Array<{ date: string; dailySummary: string }>> {
+  const notion = createNotionClient(accessToken);
+
+  // 用 starts_with 先过滤同月的所有页面，再筛选出两段标题（日页面）
+  const results = await withAuthCheck(() =>
+    notion.databases.query({
+      database_id: databaseId,
+      filter: {
+        property: "Name",
+        title: { starts_with: `${month}-` },
+      },
+      sorts: [{ property: "Name", direction: "ascending" }],
+    })
+  ) as { results: Array<{ properties: Record<string, unknown> }> };
+
+  return results.results
+    .map(page => {
+      const props = page.properties as Record<string, {
+        title?: { plain_text: string }[];
+        rich_text?: { plain_text: string }[];
+      }>;
+      return {
+        date: props["Name"]?.title?.[0]?.plain_text ?? "",
+        dailySummary: props["简短日常"]?.rich_text?.[0]?.plain_text ?? "",
+      };
+    })
+    // 只保留两段标题的日页面（"6-2"），排除周页面（"6-2-8"）
+    .filter(e => e.date.split("-").length === 2 && e.dailySummary.trim());
+}
+
+// 在页面 body 里追加一个 Toggle，Toggle 内包含 Callout，Callout 里存 markdown 表格
+// 每行 markdown 存为单独的 paragraph block，避开 Notion rich_text 2000 字符限制
+export async function appendTableToggle(
+  accessToken: string,
+  pageId: string,
+  markdownTable: string,
+  toggleTitle: string
+): Promise<void> {
+  const notion = createNotionClient(accessToken);
+
+  // Step 1：建 Toggle，内含空 Callout
+  const toggleRes = await withAuthCheck(() =>
+    notion.blocks.children.append({
+      block_id: pageId,
+      children: [
+        {
+          type: "toggle",
+          toggle: {
+            rich_text: [{ type: "text", text: { content: toggleTitle }, annotations: { bold: true } }],
+            color: "default",
+            children: [
+              {
+                type: "callout",
+                callout: {
+                  rich_text: [],
+                  icon: { type: "emoji", emoji: "📅" },
+                  color: "gray_background",
+                },
+              } as Parameters<typeof notion.blocks.children.append>[0]["children"][0],
+            ],
+          },
+        } as Parameters<typeof notion.blocks.children.append>[0]["children"][0],
+      ],
+    })
+  ) as { results: { id: string; type: string }[] };
+
+  const toggleId = toggleRes.results[0]?.id;
+  if (!toggleId) return;
+
+  // Step 2：找到 Callout 的 ID
+  const toggleChildren = await withAuthCheck(() =>
+    notion.blocks.children.list({ block_id: toggleId })
+  ) as { results: { id: string; type: string }[] };
+
+  const calloutId = toggleChildren.results.find(b => b.type === "callout")?.id;
+  if (!calloutId) return;
+
+  // Step 3：每行 markdown 存为一个 paragraph block（避免超过 2000 字符限制）
+  const lines = markdownTable.split("\n").filter(Boolean);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const blocks: any[] = lines.map(line => ({
+    type: "paragraph",
+    paragraph: {
+      rich_text: [{ type: "text", text: { content: line.slice(0, 2000) } }],
+    },
+  }));
+
+  await batchAppend(notion, calloutId, blocks);
+}
+
+// 在主数据库中查找或创建标题为 "YYYY-MM-月度-table" 的页面
+// 例如 "2026-06-月度-table"
+export async function findOrCreateMonthlyTablePage(
+  accessToken: string,
+  databaseId: string,
+  year: number,
+  month: number
+): Promise<string> {
+  const notion = createNotionClient(accessToken);
+  const title = `${year}-${String(month).padStart(2, "0")}-月度-table`;
+
+  const res = await withAuthCheck(() =>
+    notion.databases.query({
+      database_id: databaseId,
+      filter: { property: "Name", title: { equals: title } },
+      page_size: 1,
+    })
+  );
+
+  if (res.results.length > 0) return res.results[0].id;
+
+  // 不存在则新建一行
+  const page = await withAuthCheck(() =>
+    notion.pages.create({
+      parent: { database_id: databaseId },
+      properties: {
+        Name: { title: [{ text: { content: title } }] },
+      } as CreatePageParameters["properties"],
+    })
+  );
+  return page.id;
+}
