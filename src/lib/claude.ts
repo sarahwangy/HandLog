@@ -311,3 +311,47 @@ ${entries.map(e => `日期：${e.date}\n内容：${e.dailySummary}`).join("\n\n"
     throw new Error(`Failed to parse table bullets JSON (${msg}). Raw: ${text.slice(0, 200)}`);
   }
 }
+
+// 从周页面的「简短日常」原始内容生成每天的 bullet points
+// 不依赖固定格式解析，让 Claude 理解内容并按天拆分
+// weekLabel 格式 "5-4-10"（5月4日到10日），month-startDay-endDay
+export async function generateWeeklyTableBullets(
+  weekLabel: string,
+  rawDailySummary: string
+): Promise<DayBullets[]> {
+  const client = new Anthropic();
+
+  const parts = weekLabel.split("-");
+  const month = parts[0];
+  const startDay = parseInt(parts[1]);
+
+  const prompt = `你是一个日记助手。以下是用户某一周（${month}月${startDay}日起）的日记内容。
+内容可能用"一. 二. 三. 四. 五. 六. 日."等标记区分每天，也可能是其他格式。
+
+请识别每一天的内容，然后对每一天提取 2-4 个最重要的事项，每个事项用简短短语（不超过 15 字）表达。
+
+以 JSON 数组格式输出，结构如下：
+[{"date": "${month}-${startDay}", "bullets": ["事项1", "事项2"]}, {"date": "${month}-${startDay + 1}", "bullets": ["事项1"]}]
+
+date 字段格式为 "月-日"，如 "5-4"、"5-5"。只输出 JSON，不要任何其他文字。
+
+日记内容：
+${rawDailySummary}`;
+
+  const message = await client.messages.create({
+    model: "claude-haiku-4-5-20251001",
+    max_tokens: 1024,
+    messages: [{ role: "user", content: prompt }],
+  });
+
+  const text = message.content[0].type === "text" ? message.content[0].text.trim() : "[]";
+  try {
+    const start = text.indexOf("[");
+    const end = text.lastIndexOf("]");
+    const arrayText = start !== -1 && end !== -1 ? text.slice(start, end + 1) : text;
+    return JSON.parse(sanitizeJson(arrayText)) as DayBullets[];
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(`Failed to parse weekly table bullets JSON (${msg}). Raw: ${text.slice(0, 200)}`);
+  }
+}

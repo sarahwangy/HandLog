@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getNotionTokenInternal, getNotionDatabaseId } from "@/lib/auth";
 import { findOrCreateWeekPage, getPage } from "@/lib/notion";
-import { generateTableBullets } from "@/lib/claude";
+import { generateWeeklyTableBullets } from "@/lib/claude";
 
 // POST /api/table/weekly
 // Body: { weekLabel: "5-4-10" }
-// 读取周页面的「简短日常」（格式："一. 内容\n二. 内容"），解析每天内容，生成 markdown 表格
-// 注意：日记存在周页面（"5-4-10"）而不是单日页面（"5-4"），与周复盘读取方式相同
+// 读取周页面的「简短日常」原始内容，让 Claude 解析每天内容并提取要点，生成 markdown 表格
 export async function POST(req: NextRequest) {
   const { weekLabel } = await req.json() as { weekLabel: string };
   if (!weekLabel) return NextResponse.json({ error: "Missing weekLabel" }, { status: 400 });
@@ -30,56 +29,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "本周还没有日记内容，请先写日记再生成 Table" }, { status: 404 });
     }
 
-    // 把 "一. 内容\n二. 内容" 格式解析成每天的独立条目
-    const dayEntries = parseWeekDailySummary(weekLabel, dailySummary);
+    // 让 Claude 直接解析原始内容，不依赖固定格式
+    const bulleted = await generateWeeklyTableBullets(weekLabel, dailySummary);
 
-    if (dayEntries.length === 0) {
-      return NextResponse.json({ error: "无法解析本周日记内容格式" }, { status: 404 });
+    if (bulleted.length === 0) {
+      return NextResponse.json({ error: "无法从本周内容提取每日要点" }, { status: 404 });
     }
 
-    const bulleted = await generateTableBullets(dayEntries);
     const markdownTable = buildMarkdownTable(bulleted, year);
     return NextResponse.json({ markdownTable, weekPageId });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json({ error: message }, { status: 500 });
   }
-}
-
-// 把周页面「简短日常」里的 "一. 内容\n二. 内容" 解析成每天条目
-// weekLabel 格式 "5-4-10"，一=周一=5月4日，二=周二=5月5日，以此类推
-function parseWeekDailySummary(
-  weekLabel: string,
-  dailySummary: string
-): Array<{ date: string; dailySummary: string }> {
-  const CN_DAYS = ["一", "二", "三", "四", "五", "六", "日"];
-  const parts = weekLabel.split("-");
-  const month = parseInt(parts[0]);
-  const startDay = parseInt(parts[1]);
-
-  const entries: Array<{ date: string; dailySummary: string }> = [];
-
-  for (let i = 0; i < CN_DAYS.length; i++) {
-    const dayChar = CN_DAYS[i];
-    const marker = `${dayChar}.`;
-    const startIdx = dailySummary.indexOf(marker);
-    if (startIdx === -1) continue;
-
-    const contentStart = startIdx + marker.length;
-    // 找下一个天字符的位置作为结束
-    let contentEnd = dailySummary.length;
-    for (let j = i + 1; j < CN_DAYS.length; j++) {
-      const nextIdx = dailySummary.indexOf(`${CN_DAYS[j]}.`, contentStart);
-      if (nextIdx !== -1) { contentEnd = nextIdx; break; }
-    }
-
-    const content = dailySummary.slice(contentStart, contentEnd).trim();
-    if (!content) continue;
-
-    entries.push({ date: `${month}-${startDay + i}`, dailySummary: content });
-  }
-
-  return entries;
 }
 
 function buildMarkdownTable(
