@@ -318,9 +318,15 @@ export default function ChatContent() {
       }
     }).join("\n");
 
-    const now = new Date().toLocaleString("zh-CN", { timeZone: "Australia/Melbourne" });
+    // 文件名格式：handLog_Chat 记录 · 2026_6_2 14_42_12
+    const d = new Date(new Date().toLocaleString("en-US", { timeZone: "Australia/Melbourne" }));
+    const dateStr = `${d.getFullYear()}_${d.getMonth() + 1}_${d.getDate()}`;
+    const timeStr = `${String(d.getHours()).padStart(2, "0")}_${String(d.getMinutes()).padStart(2, "0")}_${String(d.getSeconds()).padStart(2, "0")}`;
+    const filename = `handLog_Chat 记录 · ${dateStr} ${timeStr}`;
+    const displayDate = `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+
     const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
-<title>Chat 记录 · ${now}</title>
+<title>${filename}</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, "Helvetica Neue", sans-serif; max-width: 720px; margin: 0 auto; padding: 36px 32px; color: #2C1F14; background: #FAF6F0; }
@@ -341,14 +347,16 @@ export default function ChatContent() {
   br { display: block; margin: 4px 0; }
   @media print { body { background: white; padding: 20px; } .bubble.user { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
 </style></head><body>
-<h1>💬 Chat 记录 · ${now}</h1>
+<h1>💬 Chat 记录 · ${displayDate}</h1>
 ${blocks}
 </body></html>`;
 
-    const win = window.open("", "_blank");
+    // 用 Blob URL 避免 about:blank，浏览器用 <title> 作默认文件名
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const win = window.open(url, "_blank");
     if (!win) return;
-    win.document.documentElement.innerHTML = html;
-    setTimeout(() => win.print(), 300);
+    setTimeout(() => { win.print(); URL.revokeObjectURL(url); }, 400);
   }
 
   // 单条保存/删除
