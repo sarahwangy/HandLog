@@ -566,7 +566,7 @@ ${parts.filter(Boolean).join("")}
                 type="button"
                 onClick={generateWeekly}
                 disabled={weekLoading}
-                className="h-[34px] px-5 bg-[#C4783A] text-white rounded-[8px] text-[13px] font-medium hover:bg-[#A85E28] transition-colors disabled:bg-[#EDD4BC] disabled:cursor-not-allowed"
+                className="h-[40px] px-6 bg-[#C4783A] text-white rounded-[8px] text-[13px] font-medium hover:bg-[#A85E28] transition-colors disabled:bg-[#EDD4BC] disabled:cursor-not-allowed"
               >
                 {weekLoading ? "Generating..." : "✨ Generate Weekly Review"}
               </button>
@@ -574,9 +574,9 @@ ${parts.filter(Boolean).join("")}
                 type="button"
                 onClick={generateWeekTable}
                 disabled={weekTableLoading}
-                className="h-[34px] px-5 bg-[#C4783A] text-white rounded-[8px] text-[13px] font-medium hover:bg-[#A85E28] transition-colors disabled:bg-[#EDD4BC] disabled:cursor-not-allowed"
+                className="h-[40px] px-6 rounded-[8px] text-[13px] font-medium border-2 border-[#C4783A] text-[#C4783A] hover:bg-[#FDF0E6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {weekTableLoading ? "Generating..." : "✨ Generate Weekly Table"}
+                {weekTableLoading ? "Generating..." : "📊 Generate Weekly Table"}
               </button>
               {weekReview && (
                 <>
@@ -584,14 +584,14 @@ ${parts.filter(Boolean).join("")}
                     type="button"
                     onClick={saveWeekly}
                     disabled={weekSaving || weekSaved}
-                    className="h-[34px] px-5 rounded-[8px] text-[13px] font-medium border border-[#C4783A] text-[#C4783A] hover:bg-[#FDF0E6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="h-[40px] px-6 rounded-[8px] text-[13px] font-medium border border-[#C4783A] text-[#C4783A] hover:bg-[#FDF0E6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {weekSaved ? "✓ Saved to Notion" : weekSaving ? "Saving..." : "💾 Save Review"}
                   </button>
                   <button
                     type="button"
                     onClick={() => exportReviewPDF(`Weekly Review · ${weekLabel}`, weekReview)}
-                    className="h-[34px] px-5 rounded-[8px] text-[13px] font-medium border border-[#3A7BC4] text-[#3A7BC4] hover:bg-[#EEF3FC] transition-colors"
+                    className="h-[40px] px-6 rounded-[8px] text-[13px] font-medium border border-[#3A7BC4] text-[#3A7BC4] hover:bg-[#EEF3FC] transition-colors"
                   >
                     📄 Export PDF
                   </button>
@@ -602,9 +602,9 @@ ${parts.filter(Boolean).join("")}
                   type="button"
                   onClick={saveWeekTable}
                   disabled={weekTableSaving || weekTableSaved}
-                  className="h-[34px] px-5 rounded-[8px] text-[13px] font-medium border border-[#C4783A] text-[#C4783A] hover:bg-[#FDF0E6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-[40px] px-6 rounded-[8px] text-[13px] font-medium border border-[#C4783A] text-[#C4783A] hover:bg-[#FDF0E6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {weekTableSaved ? "✓ Saved to Notion" : weekTableSaving ? "Saving..." : "💾 Save to Notion"}
+                  {weekTableSaved ? "✓ Table Saved" : weekTableSaving ? "Saving..." : "💾 Save Table"}
                 </button>
               )}
             </div>
@@ -771,7 +771,7 @@ ${parts.filter(Boolean).join("")}
                 type="button"
                 onClick={generateMonthly}
                 disabled={monthLoading}
-                className="h-[34px] px-5 bg-[#C4783A] text-white rounded-[8px] text-[13px] font-medium hover:bg-[#A85E28] transition-colors disabled:bg-[#EDD4BC] disabled:cursor-not-allowed"
+                className="h-[40px] px-6 bg-[#C4783A] text-white rounded-[8px] text-[13px] font-medium hover:bg-[#A85E28] transition-colors disabled:bg-[#EDD4BC] disabled:cursor-not-allowed"
               >
                 {monthLoading ? "Generating..." : "✨ Generate Monthly Review"}
               </button>
@@ -779,9 +779,9 @@ ${parts.filter(Boolean).join("")}
                 type="button"
                 onClick={generateMonthTable}
                 disabled={monthTableLoading}
-                className="h-[34px] px-5 bg-[#C4783A] text-white rounded-[8px] text-[13px] font-medium hover:bg-[#A85E28] transition-colors disabled:bg-[#EDD4BC] disabled:cursor-not-allowed"
+                className="h-[40px] px-6 rounded-[8px] text-[13px] font-medium border-2 border-[#C4783A] text-[#C4783A] hover:bg-[#FDF0E6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {monthTableLoading ? "Generating..." : "✨ Generate Monthly Table"}
+                {monthTableLoading ? "Generating..." : "📊 Generate Monthly Table"}
               </button>
               {monthReview && (
                 <>
@@ -789,14 +789,14 @@ ${parts.filter(Boolean).join("")}
                     type="button"
                     onClick={saveMonthly}
                     disabled={monthSaving || monthSaved}
-                    className="h-[34px] px-5 rounded-[8px] text-[13px] font-medium border border-[#C4783A] text-[#C4783A] hover:bg-[#FDF0E6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="h-[40px] px-6 rounded-[8px] text-[13px] font-medium border border-[#C4783A] text-[#C4783A] hover:bg-[#FDF0E6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {monthSaved ? "✓ Saved to Notion" : monthSaving ? "Saving..." : "💾 Save Review"}
                   </button>
                   <button
                     type="button"
                     onClick={() => exportReviewPDF(`Monthly Review · ${monthYear}年${monthMonth}月`, monthReview)}
-                    className="h-[34px] px-5 rounded-[8px] text-[13px] font-medium border border-[#3A7BC4] text-[#3A7BC4] hover:bg-[#EEF3FC] transition-colors"
+                    className="h-[40px] px-6 rounded-[8px] text-[13px] font-medium border border-[#3A7BC4] text-[#3A7BC4] hover:bg-[#EEF3FC] transition-colors"
                   >
                     📄 Export PDF
                   </button>
@@ -807,9 +807,9 @@ ${parts.filter(Boolean).join("")}
                   type="button"
                   onClick={saveMonthTable}
                   disabled={monthTableSaving || monthTableSaved}
-                  className="h-[34px] px-5 rounded-[8px] text-[13px] font-medium border border-[#C4783A] text-[#C4783A] hover:bg-[#FDF0E6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-[40px] px-6 rounded-[8px] text-[13px] font-medium border border-[#C4783A] text-[#C4783A] hover:bg-[#FDF0E6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {monthTableSaved ? "✓ Saved to Notion" : monthTableSaving ? "Saving..." : "💾 Save to Notion"}
+                  {monthTableSaved ? "✓ Table Saved" : monthTableSaving ? "Saving..." : "💾 Save Table"}
                 </button>
               )}
             </div>
