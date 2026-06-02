@@ -1052,7 +1052,8 @@ export async function getMonthDailyEntries(
 }
 
 // 在页面 body 里追加一个 Toggle，Toggle 内包含真正的 Notion 表格（不是 markdown 文字）
-// markdown 格式 → 解析成行列 → 创建 Notion table block，第一行作为表头
+// 分三步：① 建 Toggle ② 在 Toggle 内建空 table ③ 往 table 里 append rows
+// Notion SDK 不支持在一次调用里创建带 children 的 table，所以必须分步
 export async function appendTableToggle(
   accessToken: string,
   pageId: string,
@@ -1094,16 +1095,8 @@ export async function appendTableToggle(
   const toggleId = toggleRes.results[0]?.id;
   if (!toggleId) return;
 
-  // Step 2：在 Toggle 内创建 Notion 表格（第一行为表头）
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const tableRows: any[] = processedRows.map(row => ({
-    type: "table_row",
-    table_row: {
-      cells: row.map(cell => [{ type: "text", text: { content: cell.slice(0, 2000) } }]),
-    },
-  }));
-
-  await withAuthCheck(() =>
+  // Step 2：在 Toggle 内建空的 table block（不含 rows，分步创建更稳定）
+  const tableRes = await withAuthCheck(() =>
     notion.blocks.children.append({
       block_id: toggleId,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1113,11 +1106,24 @@ export async function appendTableToggle(
           table_width: tableWidth,
           has_column_header: true,
           has_row_header: false,
-          children: tableRows,
         },
       }] as any,
     })
-  );
+  ) as { results: { id: string }[] };
+
+  const tableId = tableRes.results[0]?.id;
+  if (!tableId) return;
+
+  // Step 3：把每一行作为 table_row block append 到 table 里
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const tableRows: any[] = processedRows.map(row => ({
+    type: "table_row",
+    table_row: {
+      cells: row.map(cell => [{ type: "text", text: { content: cell.slice(0, 2000) } }]),
+    },
+  }));
+
+  await batchAppend(notion, tableId, tableRows);
 }
 
 // 在主数据库中查找或创建标题为 "YYYY-MM-月度-table" 的页面
