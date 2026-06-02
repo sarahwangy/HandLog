@@ -36,3 +36,8 @@ yarn-error.log*
 next-env.d.ts
 public/font.ttf
 .claude/
+
+# local mockup files (not for repo)
+docs/superpowers/chat-memory-analysis.html
+docs/superpowers/review-history-mockup.html
+handlog-demo.html
