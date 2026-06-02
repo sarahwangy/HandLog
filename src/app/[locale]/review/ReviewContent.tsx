@@ -182,7 +182,8 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
     ];
 
     const now = new Date().toLocaleString("zh-CN", { timeZone: "Australia/Melbourne" });
-    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title>
+    const filename = `handLog_${title}`;
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${filename}</title>
 <style>
   body { font-family: -apple-system, "Helvetica Neue", sans-serif; max-width: 760px; margin: 0 auto; padding: 32px; color: #2C1F14; }
   h1 { font-size: 20px; color: #C4783A; margin-bottom: 4px; }
@@ -200,10 +201,11 @@ export default function ReviewContent({ dateKey }: ReviewContentProps) {
 ${parts.filter(Boolean).join("")}
 </body></html>`;
 
-    const win = window.open("", "_blank");
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const win = window.open(url, "_blank");
     if (!win) return;
-    win.document.documentElement.innerHTML = html;
-    setTimeout(() => win.print(), 300);
+    setTimeout(() => { win.print(); URL.revokeObjectURL(url); }, 400);
   }
 
   const saveMonthly = async () => {
