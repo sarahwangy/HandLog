@@ -267,3 +267,38 @@ export async function generateMonthlyReview(
     throw new Error(`Failed to parse monthly review JSON (${msg}) near: ...${snippet}...`);
   }
 }
+
+// ── Generate Table Bullets ─────────────────────────────────────────────────
+// 输入多天日记内容，返回每天 2-4 个关键事项 bullet points
+// 用 haiku 模型节省 token，单次批量处理所有天，不逐天调用
+
+export interface DayBullets {
+  date: string;      // e.g. "6-2"
+  bullets: string[]; // e.g. ["完成API开发", "和老师视频通话"]
+}
+
+export async function generateTableBullets(
+  entries: Array<{ date: string; dailySummary: string }>
+): Promise<DayBullets[]> {
+  const client = new Anthropic();
+
+  const prompt = `你是一个日记助手。以下是用户多天的日记简短日常内容。
+对每一天，提取 2-4 个最重要的事项，每个事项用简短短语（不超过 15 字）表达。
+
+以 JSON 数组格式输出，结构如下：
+[{"date": "6-2", "bullets": ["事项1", "事项2"]}]
+
+只输出 JSON，不要任何其他文字。
+
+日记内容：
+${entries.map(e => `日期：${e.date}\n内容：${e.dailySummary}`).join("\n\n")}`;
+
+  const message = await client.messages.create({
+    model: "claude-haiku-4-5-20251001",
+    max_tokens: 1024,
+    messages: [{ role: "user", content: prompt }],
+  });
+
+  const text = message.content[0].type === "text" ? message.content[0].text.trim() : "[]";
+  return JSON.parse(text) as DayBullets[];
+}
