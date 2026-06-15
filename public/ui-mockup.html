@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HandLog — UI Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Caveat:wght@400;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FAF6F0;
+    --warm-white: #FDF9F4;
+    --paper: #F5EFE4;
+    --tan: #E8D5B7;
+    --brown: #8B6B4A;
+    --dark-brown: #4A3728;
+    --ink: #2C1F14;
+    --sage: #7A8C6E;
+    --dusty-rose: #C4907A;
+    --muted-gold: #C4A962;
+    --light-sage: #EAF0E5;
+    --light-rose: #F5EBE6;
+    --border: rgba(139,107,74,0.2);
+    --shadow: rgba(74,55,40,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #E8DDD0;
+    font-family: 'Lora', 'Noto Serif SC', Georgia, serif;
+    color: var(--ink);
+    padding: 40px 20px;
+  }
+
+  /* ── NAV ── */
+  .page-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--dark-brown);
+    padding: 12px 24px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    border-radius: 12px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  .page-nav a {
+    color: var(--tan);
+    text-decoration: none;
+    font-family: 'Caveat', cursive;
+    font-size: 15px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    transition: all 0.2s;
+  }
+  .page-nav a:hover { background: var(--dusty-rose); color: white; }
+
+  /* ── SECTION HEADERS ── */
+  .section-label {
+    font-family: 'Caveat', cursive;
+    font-size: 13px;
+    color: var(--brown);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    opacity: 0.7;
+  }
+
+  /* ── SHARED PHONE FRAME ── */
+  .screen-wrap {
+    margin-bottom: 80px;
+    scroll-margin-top: 80px;
+  }
+  .screen-title {
+    font-family: 'Caveat', cursive;
+    font-size: 28px;
+    color: var(--dark-brown);
+    margin-bottom: 6px;
+  }
+  .screen-sub {
+    font-size: 13px;
+    color: var(--brown);
+    margin-bottom: 24px;
+    opacity: 0.8;
+  }
+
+  /* Desktop frame */
+  .frame-desktop {
+    background: var(--warm-white);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 40px var(--shadow), 0 0 0 1px var(--border);
+    max-width: 960px;
+  }
+
+  /* ── TOP NAV BAR (shared) ── */
+  .app-nav {
+    background: var(--dark-brown);
+    padding: 0 24px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+  .app-nav .logo {
+    font-family: 'Caveat', cursive;
+    font-size: 22px;
+    color: var(--muted-gold);
+    letter-spacing: 1px;
+  }
+  .app-nav .nav-links {
+    display: flex;
+    gap: 24px;
+    flex: 1;
+  }
+  .app-nav .nav-links span {
+    font-family: 'Lora', serif;
+    font-size: 13px;
+    color: var(--tan);
+    opacity: 0.7;
+    cursor: pointer;
+  }
+  .app-nav .nav-links span.active {
+    color: var(--muted-gold);
+    opacity: 1;
+    border-bottom: 1px solid var(--muted-gold);
+    padding-bottom: 1px;
+  }
+  .app-nav .avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--dusty-rose);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Caveat', cursive;
+    color: white; font-size: 14px;
+  }
+
+  /* ── COMMON COMPONENTS ── */
+  .btn-primary {
+    background: var(--dark-brown);
+    color: var(--cream);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 22px;
+    font-family: 'Lora', serif;
+    font-size: 14px;
+    cursor: pointer;
+    display: inline-block;
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--brown);
+    border: 1.5px solid var(--tan);
+    border-radius: 8px;
+    padding: 9px 20px;
+    font-family: 'Lora', serif;
+    font-size: 14px;
+    cursor: pointer;
+    display: inline-block;
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--sage);
+    border: none;
+    font-family: 'Lora', serif;
+    font-size: 13px;
+    cursor: pointer;
+    text-decoration: underline;
+    display: inline-block;
+  }
+  .tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-family: 'Lora', serif;
+    background: var(--light-sage);
+    color: var(--sage);
+    margin: 2px;
+  }
+  .tag.rose { background: var(--light-rose); color: var(--dusty-rose); }
+  .tag.gold { background: #FAF0D7; color: var(--muted-gold); }
+  .card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 20px;
+    box-shadow: 0 2px 12px var(--shadow);
+  }
+
+  /* ══════════════════════════════════════
+     1. LANDING PAGE
+  ══════════════════════════════════════ */
+  #landing .hero {
+    background: var(--dark-brown);
+    padding: 72px 60px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+  #landing .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  #landing .hero-eyebrow {
+    font-family: 'Caveat', cursive;
+    font-size: 16px;
+    color: var(--muted-gold);
+    letter-spacing: 3px;
+    margin-bottom: 20px;
+  }
+  #landing .hero-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--cream);
+    line-height: 1.2;
+    margin-bottom: 16px;
+  }
+  #landing .hero-title em {
+    color: var(--muted-gold);
+    font-style: italic;
+    font-family: 'Lora', serif;
+  }
+  #landing .hero-sub {
+    font-size: 16px;
+    color: var(--tan);
+    max-width: 500px;
+    line-height: 1.7;
+    margin-bottom: 36px;
+  }
+  #landing .hero-btns { display: flex; gap: 12px; align-items: center; }
+  #landing .hero-btns .btn-primary { background: var(--muted-gold); color: var(--dark-brown); font-weight: 600; padding: 14px 28px; }
+  #landing .hero-btns .btn-ghost { color: var(--tan); }
+
+  #landing .hero-visual {
+    position: absolute;
+    right: 60px; top: 40px;
+    width: 260px;
+    background: var(--paper);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 8px 8px 0 var(--brown);
+    transform: rotate(2deg);
+  }
+  #landing .hero-visual .date-chip {
+    font-family: 'Caveat', cursive;
+    font-size: 13px; color: var(--brown); margin-bottom: 8px;
+  }
+  #landing .hero-visual .journal-line {
+    height: 8px; border-radius: 4px;
+    background: var(--tan); margin-bottom: 6px; opacity: 0.6;
+  }
+  #landing .hero-visual .journal-line:nth-child(2) { width: 90%; }
+  #landing .hero-visual .journal-line:nth-child(3) { width: 70%; }
+  #landing .hero-visual .journal-line:nth-child(4) { width: 85%; }
+  #landing .hero-visual .ai-chip {
+    margin-top: 14px; background: var(--dark-brown);
+    border-radius: 8px; padding: 10px 12px;
+    font-size: 11px; color: var(--muted-gold);
+    font-family: 'Caveat', cursive; line-height: 1.5;
+  }
+
+  #landing .features {
+    padding: 48px 60px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  #landing .feature-card {
+    background: var(--paper);
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid var(--border);
+  }
+  #landing .feature-icon {
+    width: 40px; height: 40px;
+    background: var(--dark-brown);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; margin-bottom: 14px;
+  }
+  #landing .feature-card h3 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 16px; margin-bottom: 8px; color: var(--dark-brown);
+  }
+  #landing .feature-card p { font-size: 13px; color: var(--brown); line-height: 1.6; }
+
+  #landing .cta-bar {
+    background: var(--light-sage);
+    padding: 28px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--border);
+  }
+  #landing .cta-bar h3 { font-family: 'Noto Serif SC', serif; font-size: 18px; color: var(--dark-brown); }
+  #landing .cta-bar p { font-size: 13px; color: var(--brown); margin-top: 4px; }
+
+  /* ══════════════════════════════════════
+     2. ONBOARDING
+  ══════════════════════════════════════ */
+  #onboarding .ob-body {
+    padding: 60px;
+    display: flex;
+    gap: 60px;
+    align-items: flex-start;
+  }
+  .ob-steps {
+    width: 180px;
+    flex-shrink: 0;
+  }
+  .ob-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 28px;
+    position: relative;
+  }
+  .ob-step::after {
+    content: '';
+    position: absolute;
+    left: 16px; top: 36px;
+    width: 1px; height: 20px;
+    background: var(--border);
+  }
+  .ob-step:last-child::after { display: none; }
+  .ob-step-num {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--tan);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Caveat', cursive;
+    font-size: 16px; color: var(--brown);
+    flex-shrink: 0;
+  }
+  .ob-step-num.active {
+    background: var(--dark-brown);
+    border-color: var(--dark-brown);
+    color: var(--cream);
+  }
+  .ob-step-num.done {
+    background: var(--sage);
+    border-color: var(--sage);
+    color: white;
+  }
+  .ob-step-text { font-size: 12px; color: var(--brown); padding-top: 6px; }
+  .ob-step-text.active { color: var(--dark-brown); font-weight: 600; }
+
+  .ob-content { flex: 1; }
+  .ob-content h2 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 26px; color: var(--dark-brown);
+    margin-bottom: 8px;
+  }
+  .ob-content .subtitle { font-size: 14px; color: var(--brown); margin-bottom: 32px; line-height: 1.6; }
+
+  .notion-connect-box {
+    border: 2px dashed var(--tan);
+    border-radius: 16px;
+    padding: 40px;
+    text-align: center;
+    background: var(--paper);
+    margin-bottom: 24px;
+  }
+  .notion-logo { font-size: 40px; margin-bottom: 12px; }
+  .notion-connect-box h3 { font-family: 'Noto Serif SC', serif; font-size: 18px; margin-bottom: 8px; color: var(--dark-brown); }
+  .notion-connect-box p { font-size: 13px; color: var(--brown); margin-bottom: 20px; }
+
+  .db-select {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .db-select.selected { border-color: var(--dark-brown); background: var(--light-sage); }
+  .db-icon { width: 32px; height: 32px; background: var(--tan); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .db-info h4 { font-size: 14px; font-weight: 600; color: var(--dark-brown); }
+  .db-info p { font-size: 11px; color: var(--brown); }
+  .db-check { margin-left: auto; color: var(--sage); }
+
+  /* ══════════════════════════════════════
+     3. CAPTURE PAGE
+  ══════════════════════════════════════ */
+  #capture .cap-body { padding: 32px 40px; display: grid; grid-template-columns: 1fr 320px; gap: 32px; }
+  #capture .cap-left h2 { font-family: 'Noto Serif SC', serif; font-size: 22px; color: var(--dark-brown); margin-bottom: 4px; }
+  #capture .cap-date { font-family: 'Caveat', cursive; font-size: 15px; color: var(--brown); margin-bottom: 24px; }
+
+  .voice-btn-area {
+    background: var(--paper);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    border: 1.5px solid var(--border);
+    margin-bottom: 20px;
+  }
+  .mic-btn {
+    width: 68px; height: 68px;
+    border-radius: 50%;
+    background: var(--dark-brown);
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    margin: 0 auto 12px;
+    box-shadow: 0 4px 16px rgba(74,55,40,0.3);
+  }
+  .mic-btn.active { background: var(--dusty-rose); animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(196,144,122,0.4); } 50% { box-shadow: 0 0 0 12px rgba(196,144,122,0); } }
+  .voice-status { font-family: 'Caveat', cursive; font-size: 15px; color: var(--brown); }
+  .voice-wave { display: flex; gap: 3px; justify-content: center; margin-top: 10px; align-items: flex-end; height: 24px; }
+  .wave-bar { width: 3px; border-radius: 2px; background: var(--dusty-rose); animation: wave 0.8s ease-in-out infinite; }
+  .wave-bar:nth-child(1) { height: 8px; animation-delay: 0s; }
+  .wave-bar:nth-child(2) { height: 18px; animation-delay: 0.1s; }
+  .wave-bar:nth-child(3) { height: 14px; animation-delay: 0.2s; }
+  .wave-bar:nth-child(4) { height: 20px; animation-delay: 0.3s; }
+  .wave-bar:nth-child(5) { height: 10px; animation-delay: 0.4s; }
+  .wave-bar:nth-child(6) { height: 16px; animation-delay: 0.5s; }
+  @keyframes wave { 0%,100% { transform: scaleY(0.5); } 50% { transform: scaleY(1); } }
+
+  .journal-textarea {
+    width: 100%; height: 220px;
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    font-family: 'Lora', serif;
+    font-size: 14px; line-height: 1.8;
+    color: var(--ink);
+    resize: none;
+    outline: none;
+  }
+  .journal-textarea:focus { border-color: var(--brown); }
+  .textarea-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .char-count { font-size: 11px; color: var(--brown); opacity: 0.6; }
+  .autosave { font-size: 11px; color: var(--sage); }
+
+  .ai-followup {
+    background: var(--light-rose);
+    border-radius: 12px;
+    border: 1px solid rgba(196,144,122,0.3);
+    padding: 16px;
+    margin-top: 16px;
+  }
+  .ai-followup-label { font-family: 'Caveat', cursive; font-size: 13px; color: var(--dusty-rose); margin-bottom: 10px; }
+  .followup-q {
+    background: white;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px; color: var(--dark-brown);
+    margin-bottom: 8px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .followup-q span { font-size: 11px; color: var(--dusty-rose); }
+
+  #capture .cap-right {}
+  .lang-switcher {
+    background: var(--paper);
+    border-radius: 10px;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    margin-bottom: 20px;
+    display: flex; gap: 8px; align-items: center;
+  }
+  .lang-chip { padding: 4px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; background: transparent; color: var(--brown); }
+  .lang-chip.active { background: var(--dark-brown); color: var(--cream); }
+
+  .tips-card {
+    background: var(--paper);
+    border-radius: 12px; padding: 20px;
+    border: 1px solid var(--border); margin-bottom: 20px;
+  }
+  .tips-card h4 { font-family: 'Caveat', cursive; font-size: 16px; color: var(--brown); margin-bottom: 12px; }
+  .tip-item { font-size: 12px; color: var(--brown); line-height: 1.6; margin-bottom: 6px; padding-left: 12px; position: relative; }
+  .tip-item::before { content: '·'; position: absolute; left: 0; color: var(--dusty-rose); }
+
+  .submit-area { margin-top: 20px; }
+  .submit-area .btn-primary { width: 100%; text-align: center; padding: 14px; font-size: 15px; border-radius: 10px; }
+
+  /* ══════════════════════════════════════
+     4. REVIEW PAGE
+  ══════════════════════════════════════ */
+  #review .rev-body { padding: 32px 40px; display: grid; grid-template-columns: 1fr 280px; gap: 32px; }
+  #review .rev-main h2 { font-family: 'Noto Serif SC', serif; font-size: 22px; color: var(--dark-brown); margin-bottom: 4px; }
+  #review .rev-date { font-family: 'Caveat', cursive; font-size: 14px; color: var(--brown); margin-bottom: 24px; }
+
+  .field-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    position: relative;
+  }
+  .field-label {
+    font-family: 'Caveat', cursive;
+    font-size: 13px; color: var(--brown);
+    letter-spacing: 1px; margin-bottom: 8px;
+  }
+  .field-content { font-size: 14px; color: var(--ink); line-height: 1.7; }
+  .field-actions {
+    position: absolute; top: 14px; right: 14px;
+    display: flex; gap: 6px;
+  }
+  .field-action-btn {
+    font-size: 11px; color: var(--sage);
+    background: var(--light-sage);
+    border: none; border-radius: 6px;
+    padding: 3px 8px; cursor: pointer;
+  }
+
+  .score-slider-area { display: flex; align-items: center; gap: 16px; margin-top: 8px; }
+  .score-num { font-family: 'Caveat', cursive; font-size: 32px; color: var(--dark-brown); width: 40px; }
+  .slider-track { flex: 1; height: 6px; background: var(--tan); border-radius: 3px; position: relative; }
+  .slider-fill { height: 100%; border-radius: 3px; background: var(--muted-gold); width: 75%; }
+  .slider-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--dark-brown); position: absolute; top: -5px; left: 73%; }
+
+  .tags-area { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .tag-add { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border: 1.5px dashed var(--tan); border-radius: 20px; font-size: 11px; color: var(--brown); cursor: pointer; }
+
+  #review .style-switcher {
+    background: var(--paper);
+    border-radius: 12px; padding: 16px;
+    border: 1px solid var(--border); margin-bottom: 20px;
+  }
+  #review .style-switcher h4 { font-family: 'Caveat', cursive; font-size: 15px; color: var(--brown); margin-bottom: 10px; }
+  .style-option { padding: 8px 12px; border-radius: 8px; font-size: 12px; color: var(--brown); cursor: pointer; margin-bottom: 4px; }
+  .style-option.selected { background: var(--dark-brown); color: var(--cream); }
+
+  .distribution-preview {
+    background: var(--paper);
+    border-radius: 12px; padding: 16px;
+    border: 1px solid var(--border); margin-bottom: 20px;
+  }
+  .distribution-preview h4 { font-family: 'Caveat', cursive; font-size: 15px; color: var(--brown); margin-bottom: 12px; }
+  .dist-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .dist-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dist-name { font-size: 12px; color: var(--dark-brown); flex: 1; }
+  .dist-tick { font-size: 14px; color: var(--sage); }
+  .dist-skip { font-size: 14px; color: var(--border); }
+
+  /* ══════════════════════════════════════
+     5. HANDLOG PAGE (手账图)
+  ══════════════════════════════════════ */
+  #handlog .hl-body { padding: 32px 40px; display: grid; grid-template-columns: 1fr 300px; gap: 40px; }
+  #handlog .hl-left h2 { font-family: 'Noto Serif SC', serif; font-size: 22px; color: var(--dark-brown); margin-bottom: 4px; }
+  #handlog .hl-sub { font-size: 13px; color: var(--brown); margin-bottom: 24px; }
+
+  /* Handwritten journal card */
+  .handlog-card {
+    background: var(--paper);
+    border-radius: 4px;
+    padding: 32px;
+    border: 1px solid var(--tan);
+    position: relative;
+    font-family: 'Caveat', cursive;
+    box-shadow: 4px 4px 0 var(--tan), inset 0 0 0 1px rgba(255,255,255,0.5);
+    max-width: 480px;
+  }
+  .handlog-card::before {
+    content: '';
+    position: absolute; left: 52px; top: 0; bottom: 0;
+    width: 1px; background: rgba(196,169,98,0.3);
+  }
+  .handlog-card::after {
+    content: '';
+    position: absolute; top: 0; bottom: 0; left: 0;
+    width: 40px; background: rgba(196,169,98,0.08);
+    border-right: 1px solid rgba(196,169,98,0.2);
+  }
+  .hl-date-header {
+    text-align: center;
+    font-size: 22px;
+    color: var(--dark-brown);
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+  }
+  .hl-section-title {
+    font-size: 14px; color: var(--dusty-rose);
+    border-bottom: 1px solid var(--tan);
+    padding-bottom: 4px; margin-bottom: 10px; margin-top: 18px;
+  }
+  .hl-line { height: 1px; background: rgba(139,107,74,0.15); margin: 7px 0; }
+  .hl-text { font-size: 16px; color: var(--ink); line-height: 1.8; }
+  .hl-quote {
+    font-size: 18px; color: var(--dark-brown);
+    font-style: italic;
+    padding: 10px 0;
+    position: relative;
+  }
+  .hl-quote::before { content: '"'; color: var(--muted-gold); font-size: 36px; position: absolute; top: -4px; left: -8px; opacity: 0.4; }
+  .hl-score-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .hl-score-dot { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--tan); }
+  .hl-score-dot.filled { background: var(--muted-gold); border-color: var(--muted-gold); }
+  .hl-action-item { font-size: 15px; color: var(--ink); margin-bottom: 6px; display: flex; gap: 8px; align-items: flex-start; }
+  .hl-checkbox { width: 14px; height: 14px; border: 1.5px solid var(--brown); border-radius: 3px; flex-shrink: 0; margin-top: 2px; }
+  .hl-stamp {
+    position: absolute; right: 24px; bottom: 24px;
+    width: 50px; height: 50px;
+    border: 2px solid var(--dusty-rose);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; color: var(--dusty-rose);
+    text-align: center; line-height: 1.3;
+    transform: rotate(-12deg);
+    opacity: 0.7;
+  }
+
+  .template-picker { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+  .template-chip {
+    padding: 8px 16px; border-radius: 8px;
+    border: 1.5px solid var(--border);
+    font-family: 'Caveat', cursive; font-size: 15px;
+    color: var(--brown); cursor: pointer;
+    background: white;
+  }
+  .template-chip.active { border-color: var(--dark-brown); background: var(--dark-brown); color: var(--cream); }
+
+  .export-btns { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+  .export-btn { padding: 10px 18px; border-radius: 8px; font-family: 'Lora', serif; font-size: 13px; cursor: pointer; }
+  .export-png { background: var(--dark-brown); color: var(--cream); border: none; }
+  .export-pdf { background: transparent; color: var(--brown); border: 1.5px solid var(--tan); }
+  .export-notion { background: transparent; color: var(--sage); border: 1.5px solid rgba(122,140,110,0.4); }
+
+  /* ══════════════════════════════════════
+     6. TIMELINE
+  ══════════════════════════════════════ */
+  #timeline .tl-body { padding: 32px 40px; }
+  #timeline .tl-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  #timeline .tl-header h2 { font-family: 'Noto Serif SC', serif; font-size: 22px; color: var(--dark-brown); }
+  .search-box {
+    display: flex; align-items: center; gap: 8px;
+    background: white; border: 1.5px solid var(--border);
+    border-radius: 10px; padding: 8px 14px;
+  }
+  .search-box input { border: none; outline: none; font-family: 'Lora', serif; font-size: 13px; color: var(--ink); background: transparent; width: 180px; }
+
+  .filter-row { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+  .filter-chip { padding: 5px 14px; border-radius: 20px; font-size: 12px; border: 1.5px solid var(--border); color: var(--brown); cursor: pointer; background: white; }
+  .filter-chip.active { background: var(--dark-brown); color: var(--cream); border-color: var(--dark-brown); }
+
+  .tl-month { font-family: 'Caveat', cursive; font-size: 20px; color: var(--brown); margin-bottom: 14px; margin-top: 24px; }
+
+  .entry-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 10px; }
+  .entry-card {
+    background: white; border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .entry-card:hover { transform: translateY(-2px); }
+  .entry-thumb {
+    height: 100px;
+    background: linear-gradient(135deg, var(--paper) 0%, var(--light-rose) 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Caveat', cursive; font-size: 22px; color: var(--brown);
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .entry-thumb .mini-stamp {
+    position: absolute; right: 8px; top: 8px;
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 1.5px solid var(--dusty-rose);
+    font-size: 7px; color: var(--dusty-rose);
+    display: flex; align-items: center; justify-content: center;
+    transform: rotate(-8deg);
+  }
+  .entry-meta { padding: 12px; }
+  .entry-date { font-family: 'Caveat', cursive; font-size: 13px; color: var(--brown); margin-bottom: 4px; }
+  .entry-quote { font-size: 12px; color: var(--ink); line-height: 1.5; margin-bottom: 8px; }
+  .entry-tags { display: flex; flex-wrap: wrap; gap: 3px; }
+
+  /* ══════════════════════════════════════
+     7. DASHBOARD
+  ══════════════════════════════════════ */
+  #dashboard .dash-body { padding: 32px 40px; }
+  #dashboard .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+  #dashboard .dash-header h2 { font-family: 'Noto Serif SC', serif; font-size: 22px; color: var(--dark-brown); }
+  .period-switcher { display: flex; gap: 4px; }
+  .period-btn { padding: 5px 14px; border-radius: 8px; font-size: 12px; border: 1.5px solid var(--border); color: var(--brown); cursor: pointer; background: white; }
+  .period-btn.active { background: var(--dark-brown); color: var(--cream); border-color: var(--dark-brown); }
+
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .stat-box { background: white; border-radius: 12px; padding: 18px; border: 1px solid var(--border); }
+  .stat-num { font-family: 'Caveat', cursive; font-size: 36px; color: var(--dark-brown); line-height: 1; }
+  .stat-label { font-size: 11px; color: var(--brown); margin-top: 4px; }
+  .stat-trend { font-size: 11px; color: var(--sage); margin-top: 4px; }
+
+  .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+  .chart-box {
+    background: white; border-radius: 12px; padding: 20px;
+    border: 1px solid var(--border);
+  }
+  .chart-box h4 { font-family: 'Caveat', cursive; font-size: 17px; color: var(--brown); margin-bottom: 16px; }
+
+  /* Simple bar chart */
+  .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 100px; padding: 0 4px; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .bar { border-radius: 4px 4px 0 0; width: 100%; background: var(--tan); }
+  .bar.highlight { background: var(--muted-gold); }
+  .bar-label { font-size: 9px; color: var(--brown); font-family: 'Caveat', cursive; }
+
+  /* Pie donut */
+  .donut-wrap { display: flex; gap: 20px; align-items: center; }
+  .donut-svg { width: 90px; height: 90px; flex-shrink: 0; }
+  .donut-legend { display: flex; flex-direction: column; gap: 6px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--brown); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Heatmap */
+  .heatmap-box { grid-column: 1 / -1; }
+  .heatmap-grid { display: flex; gap: 3px; flex-wrap: wrap; }
+  .heat-cell { width: 14px; height: 14px; border-radius: 3px; background: var(--tan); }
+  .heat-cell.h1 { background: #D4C4A8; }
+  .heat-cell.h2 { background: #B89B72; }
+  .heat-cell.h3 { background: #8B6B4A; }
+  .heat-cell.h4 { background: var(--dark-brown); }
+
+  /* ══════════════════════════════════════
+     8. SETTINGS
+  ══════════════════════════════════════ */
+  #settings .set-body { padding: 0; display: grid; grid-template-columns: 200px 1fr; min-height: 600px; }
+  .set-sidebar {
+    background: var(--paper);
+    border-right: 1px solid var(--border);
+    padding: 24px 0;
+  }
+  .set-nav-item {
+    padding: 11px 20px;
+    font-size: 13px; color: var(--brown);
+    cursor: pointer; display: flex; align-items: center; gap: 10px;
+  }
+  .set-nav-item.active {
+    background: white;
+    color: var(--dark-brown);
+    font-weight: 600;
+    border-right: 3px solid var(--dark-brown);
+  }
+  .set-nav-icon { font-size: 16px; }
+  .set-nav-group { padding: 12px 20px 6px; font-family: 'Caveat', cursive; font-size: 12px; color: var(--brown); opacity: 0.5; letter-spacing: 1px; }
+
+  .set-content { padding: 32px 40px; }
+  .set-content h3 { font-family: 'Noto Serif SC', serif; font-size: 18px; color: var(--dark-brown); margin-bottom: 4px; }
+  .set-content .set-sub { font-size: 13px; color: var(--brown); margin-bottom: 28px; }
+
+  .notion-connected {
+    background: var(--light-sage);
+    border-radius: 12px; padding: 16px 20px;
+    border: 1px solid rgba(122,140,110,0.3);
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 20px;
+  }
+  .notion-connected .check { color: var(--sage); font-size: 24px; }
+  .notion-connected .info h4 { font-size: 14px; font-weight: 600; color: var(--dark-brown); }
+  .notion-connected .info p { font-size: 12px; color: var(--brown); }
+  .notion-connected .actions { margin-left: auto; display: flex; gap: 8px; }
+
+  .set-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 0; border-bottom: 1px solid var(--border);
+  }
+  .set-row:last-child { border-bottom: none; }
+  .set-row-info h4 { font-size: 14px; color: var(--dark-brown); }
+  .set-row-info p { font-size: 12px; color: var(--brown); margin-top: 2px; }
+  .toggle {
+    width: 40px; height: 22px; border-radius: 11px;
+    background: var(--sage);
+    position: relative; cursor: pointer;
+  }
+  .toggle::after {
+    content: '';
+    position: absolute; top: 3px; right: 3px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  .toggle.off { background: var(--tan); }
+  .toggle.off::after { right: auto; left: 3px; }
+  .set-select {
+    background: white; border: 1.5px solid var(--border);
+    border-radius: 8px; padding: 6px 12px;
+    font-family: 'Lora', serif; font-size: 13px; color: var(--dark-brown);
+  }
+
+  .db-mapping-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+  .db-mapping-table th { font-family: 'Caveat', cursive; font-size: 13px; color: var(--brown); padding: 8px 12px; text-align: left; border-bottom: 1.5px solid var(--border); }
+  .db-mapping-table td { font-size: 12px; color: var(--dark-brown); padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  .db-mapping-table tr:last-child td { border-bottom: none; }
+  .db-badge { display: inline-block; padding: 2px 8px; border-radius: 6px; background: var(--light-sage); color: var(--sage); font-size: 11px; }
+  .db-badge.missing { background: var(--light-rose); color: var(--dusty-rose); }
+
+  /* ══════════════════════════════════════
+     GLOBAL UTILS
+  ══════════════════════════════════════ */
+  hr.divider { border: none; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<!-- ── JUMP NAV ── -->
+<nav class="page-nav">
+  <span style="font-family:'Caveat',cursive;color:var(--muted-gold);font-size:17px;margin-right:8px;">HandLog</span>
+  <a href="#landing">① Landing</a>
+  <a href="#onboarding">② Onboarding</a>
+  <a href="#capture">③ Capture</a>
+  <a href="#review">④ Review</a>
+  <a href="#handlog">⑤ HandLog 手账图</a>
+  <a href="#timeline">⑥ Timeline</a>
+  <a href="#dashboard">⑦ Dashboard</a>
+  <a href="#settings">⑧ Settings</a>
+</nav>
+
+
+<!-- ══════════════════════════════════════
+     1. LANDING
+══════════════════════════════════════ -->
+<div class="screen-wrap" id="landing">
+  <div class="section-label">Page 01</div>
+  <div class="screen-title">Landing  <span style="font-size:16px;color:var(--brown)">/</span></div>
+  <div class="screen-sub">首屏介绍 · 产品价值 · CTA</div>
+  <div class="frame-desktop">
+    <div class="app-nav">
+      <span class="logo">✍ HandLog</span>
+      <div class="nav-links">
+        <span>功能</span><span>Demo</span><span>关于</span>
+      </div>
+      <span class="btn-primary" style="padding:7px 16px;font-size:12px;">开始使用</span>
+    </div>
+    <div class="hero">
+      <div class="hero-eyebrow">✦ YOUR AI REFLECTION COMPANION</div>
+      <h1 class="hero-title">把日常碎碎念<br>变成<em>有温度的</em>手账</h1>
+      <p class="hero-sub">语音说出你的一天，AI 自动整理成复盘 + 行动项 + 手绘手账图，自动归档到 Notion。</p>
+      <div class="hero-btns">
+        <span class="btn-primary">连接 Notion，免费开始 →</span>
+        <span class="btn-ghost">看 Demo 视频 ▶</span>
+      </div>
+
+      <!-- Floating journal preview -->
+      <div class="hero-visual">
+        <div class="date-chip">📅 5月25日（周日）</div>
+        <div class="journal-line" style="width:90%"></div>
+        <div class="journal-line" style="width:70%"></div>
+        <div class="journal-line" style="width:85%"></div>
+        <div class="ai-chip">
+          ✨ AI 复盘<br>
+          「和小朋友去社区图书馆，探索了亲子空间，内心有种踏实感 🌱」
+        </div>
+      </div>
+    </div>
+
+    <div class="features">
+      <div class="feature-card">
+        <div class="feature-icon">🎙</div>
+        <h3>语音 + 文字输入</h3>
+        <p>开口说话或直接输入，支持中英文混合，AI 自动追问补全细节。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🤖</div>
+        <h3>AI 自动提炼复盘</h3>
+        <p>按你的 Notion 标签体系分类，生成一句话感悟、行动项、复盘段落。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📖</div>
+        <h3>手账图 · 可临摹</h3>
+        <p>生成精美手绘风 SVG，可下载 PNG/PDF，对照临摹到纸质手账本。</p>
+      </div>
+    </div>
+
+    <div class="cta-bar">
+      <div>
+        <h3>准备好开始你的复盘了吗？</h3>
+        <p>连接 Notion，不破坏现有习惯，所有数据归你所有。</p>
+      </div>
+      <span class="btn-primary" style="padding:12px 24px;">立即开始 →</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     2. ONBOARDING
+══════════════════════════════════════ -->
+<div class="screen-wrap" id="onboarding">
+  <div class="section-label">Page 02</div>
+  <div class="screen-title">Onboarding  <span style="font-size:16px;color:var(--brown)">/onboarding</span></div>
+  <div class="screen-sub">Notion OAuth · 数据库选择 · 字段映射</div>
+  <div class="frame-desktop">
+    <div class="app-nav">
+      <span class="logo">✍ HandLog</span>
+      <div class="nav-links"></div>
+      <span style="font-size:12px;color:var(--tan)">步骤 2/4</span>
+    </div>
+    <div class="ob-body">
+      <div class="ob-steps">
+        <div class="ob-step"><div class="ob-step-num done">✓</div><div class="ob-step-text">欢迎</div></div>
+        <div class="ob-step"><div class="ob-step-num active">2</div><div class="ob-step-text active">连接 Notion</div></div>
+        <div class="ob-step"><div class="ob-step-num">3</div><div class="ob-step-text">选择数据库</div></div>
+        <div class="ob-step"><div class="ob-step-num">4</div><div class="ob-step-text">字段映射</div></div>
+      </div>
+      <div class="ob-content">
+        <h2>连接你的 Notion Workspace</h2>
+        <p class="subtitle">HandLog 将读写你的 Notion 数据库，所有日记数据都会保存在你自己的 Notion 中，随时可以断开。</p>
+
+        <div class="notion-connect-box">
+          <div class="notion-logo">◼</div>
+          <h3>授权 Notion 访问</h3>
+          <p>点击下方按钮，在 Notion 页面完成授权。HandLog 只请求对指定数据库的读写权限。</p>
+          <span class="btn-primary" style="padding:12px 28px;">使用 Notion 账号授权 →</span>
+        </div>
+
+        <p style="font-size:12px;color:var(--brown);text-align:center;margin-top:12px;opacity:0.7">
+          🔒 Token 加密存储 · 随时可撤销授权 · 不分享给第三方
+        </p>
+
+        <div style="margin-top:28px">
+          <div style="font-family:'Caveat',cursive;font-size:16px;color:var(--brown);margin-bottom:12px">或者，选择已连接的数据库：</div>
+          <div class="db-select selected">
+            <div class="db-icon">📅</div>
+            <div class="db-info"><h4>日常复盘记录</h4><p>28 条记录 · 最近更新 2 天前</p></div>
+            <div class="db-check">✓</div>
+          </div>
+          <div class="db-select">
+            <div class="db-icon">📚</div>
+            <div class="db-info"><h4>阅读笔记</h4><p>142 条记录</p></div>
+          </div>
+          <div class="db-select">
+            <div class="db-icon">🌱</div>
+            <div class="db-info"><h4>创建新数据库</h4><p>HandLog 帮你建好结构</p></div>
+          </div>
+        </div>
+
+        <div style="margin-top:24px;display:flex;gap:12px;justify-content:flex-end">
+          <span class="btn-ghost">← 上一步</span>
+          <span class="btn-primary">确认并继续 →</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     3. CAPTURE
+══════════════════════════════════════ -->
+<div class="screen-wrap" id="capture">
+  <div class="section-label">Page 03</div>
+  <div class="screen-title">Capture  <span style="font-size:16px;color:var(--brown)">/capture</span></div>
+  <div class="screen-sub">语音/文字输入 · AI 追问 · 自动草稿</div>
+  <div class="frame-desktop">
+    <div class="app-nav">
+      <span class="logo">✍ HandLog</span>
+      <div class="nav-links">
+        <span class="active">记录</span>
+        <span>时间轴</span>
+        <span>看板</span>
+      </div>
+      <div class="avatar">J</div>
+    </div>
+    <div class="cap-body">
+      <div class="cap-left">
+        <h2>今天过得怎么样？</h2>
+        <div class="cap-date">📅 2026年5月25日（周一）· 草稿已自动保存</div>
+
+        <!-- Voice input -->
+        <div class="voice-btn-area">
+          <button class="mic-btn active">🎙</button>
+          <div class="voice-status">● 录音中  0:23</div>
+          <div class="voice-wave">
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+          </div>
+        </div>
+
+        <!-- Textarea -->
+        <textarea class="journal-textarea" readonly>今天和 Jamie 聊了他换工作的事，从 传统行业转型学习 AI。下午下午带小朋友去社区 Storytime，他走路越来越稳了，特别开心。最近最近睡眠很好，精力充沛，心情不错。晚上看了一会儿《原则》...</textarea>
+        <div class="textarea-footer">
+          <span class="char-count">已输入 98 字</span>
+          <span class="autosave">✓ 3 秒前已保存</span>
+        </div>
+
+        <!-- AI followup -->
+        <div class="ai-followup">
+          <div class="ai-followup-label">✨ AI 想多了解一些 →</div>
+          <div class="followup-q">和朋友聊职业转型时，你有什么感受或收获吗？<span>点击填入</span></div>
+          <div class="followup-q">今天带小朋友去图书馆，有哪个瞬间让你印象深刻？<span>点击填入</span></div>
+        </div>
+      </div>
+
+      <div class="cap-right">
+        <!-- Language switcher -->
+        <div class="lang-switcher">
+          <span style="font-size:12px;color:var(--brown)">语言：</span>
+          <span class="lang-chip active">中文</span>
+          <span class="lang-chip">English</span>
+        </div>
+
+        <!-- Tips -->
+        <div class="tips-card">
+          <h4>💡 输入小贴士</h4>
+          <div class="tip-item">说人名，AI 会自动更新你的人物卡</div>
+          <div class="tip-item">提到 孩子的成长，会自动记录月龄</div>
+          <div class="tip-item">提到身体不适，会记录到健康日志</div>
+          <div class="tip-item">不需要精简，越真实越好 🌱</div>
+        </div>
+
+        <!-- Draft history -->
+        <div class="card">
+          <div style="font-family:'Caveat',cursive;font-size:15px;color:var(--brown);margin-bottom:12px">📂 近期草稿</div>
+          <div style="font-size:12px;color:var(--dark-brown);padding:8px 0;border-bottom:1px solid var(--border)">5月24日 · 已提交 ✓</div>
+          <div style="font-size:12px;color:var(--dark-brown);padding:8px 0;border-bottom:1px solid var(--border)">5月23日 · 已提交 ✓</div>
+          <div style="font-size:12px;color:var(--dusty-rose);padding:8px 0">5月22日 · 草稿未完成</div>
+        </div>
+
+        <div class="submit-area">
+          <span class="btn-primary">✨ AI 开始整理复盘 →</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     4. REVIEW
+══════════════════════════════════════ -->
+<div class="screen-wrap" id="review">
+  <div class="section-label">Page 04</div>
+  <div class="screen-title">Review  <span style="font-size:16px;color:var(--brown)">/review/:draftId</span></div>
+  <div class="screen-sub">AI 草稿编辑 · 字段调整 · 分发预览</div>
+  <div class="frame-desktop">
+    <div class="app-nav">
+      <span class="logo">✍ HandLog</span>
+      <div class="nav-links">
+        <span>记录</span><span class="active">审阅</span><span>时间轴</span>
+      </div>
+      <div class="avatar">J</div>
+    </div>
+    <div class="rev-body">
+      <div class="rev-main">
+        <h2>AI 复盘草稿</h2>
+        <div class="rev-date">📅 2026年5月25日（周一）· 基于 98 字原始输入</div>
+
+        <div class="field-card">
+          <div class="field-label">简短日常</div>
+          <div class="field-content">和朋友聊职业转型，陪小朋友去图书馆亲子活动，下午读书，继续保持好状态。</div>
+          <div class="field-actions">
+            <span class="field-action-btn">✏️ 编辑</span>
+            <span class="field-action-btn">↺ 重生成</span>
+          </div>
+        </div>
+
+        <div class="field-card">
+          <div class="field-label">一句话感悟</div>
+          <div class="field-content" style="font-style:italic;color:var(--dark-brown)">「在别人的转变故事里，看见了自己也可以更勇敢的可能。」</div>
+          <div class="field-actions">
+            <span class="field-action-btn">✏️ 编辑</span>
+            <span class="field-action-btn">↺ 重生成</span>
+          </div>
+        </div>
+
+        <div class="field-card">
+          <div class="field-label">复盘（100-200字）</div>
+          <div class="field-content">今天的核心是「连接」——和 朋友的对话让我重新审视了职业转型的勇气，他从跨行转型学 AI 的选择，既让我感佩，也触发了一点焦虑式的对照。下午陪小朋友去图书馆，他稳稳走路的样子让我觉得时间在悄悄流动。睡眠质量很好，心情愉快。《原则》看了几页，对"极度透明"的部分有些共鸣。</div>
+          <div class="field-actions">
+            <span class="field-action-btn">✏️ 编辑</span>
+            <span class="field-action-btn">↺ 重生成</span>
+          </div>
+        </div>
+
+        <div class="field-card">
+          <div class="field-label">心理学正能量</div>
+          <div class="field-content" style="color:var(--sage)">你注意到 Jamie 的转变让自己有些「焦虑式的对照」——这其实是「社会比较」的自然反应。把它看作信号而非评判：它在告诉你，你内心有个还没被充分探索的方向。今天陪小朋友出门，这种「在场感」本身就是一种自我关怀 🌱</div>
+          <div class="field-actions">
+            <span class="field-action-btn">↺ 重生成</span>
+          </div>
+        </div>
+
+        <div class="field-card">
+          <div class="field-label">下一步行动</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+            <div style="display:flex;align-items:center;gap:8px"><div class="hl-checkbox" style="border-color:var(--sage)"></div><span style="font-size:13px">和 和朋友再约一次，深聊职业规划</span></div>
+            <div style="display:flex;align-items:center;gap:8px"><div class="hl-checkbox"></div><span style="font-size:13px">继续读《原则》第三章</span></div>
+            <div style="display:flex;align-items:center;gap:8px"><div class="hl-checkbox"></div><span style="font-size:13px">保持好的睡眠习惯</span></div>
+          </div>
+          <div class="field-actions">
+            <span class="field-action-btn">+ 添加</span>
+          </div>
+        </div>
+
+        <div class="field-card">
+          <div class="field-label">标签</div>
+          <div class="tags-area">
+            <span class="tag">人物-Jamie</span>
+            <span class="tag rose">育儿-亲子</span>
+            <span class="tag">健康-睡眠</span>
+            <span class="tag gold">爱好-看书</span>
+            <span class="tag">探索-社区</span>
+            <span class="tag-add">+ 添加标签</span>
+          </div>
+        </div>
+
+        <div class="field-card">
+          <div class="field-label">今日评分</div>
+          <div class="score-slider-area">
+            <div class="score-num">7.5</div>
+            <div class="slider-track">
+              <div class="slider-fill"></div>
+              <div class="slider-thumb"></div>
+            </div>
+            <span style="font-size:12px;color:var(--brown)">/10</span>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:24px;justify-content:flex-end">
+          <span class="btn-ghost">← 重新输入</span>
+          <span class="btn-secondary">保存草稿</span>
+          <span class="btn-primary">确认 · 生成手账图 →</span>
+        </div>
+      </div>
+
+      <div class="rev-right">
+        <!-- Style switcher -->
+        <div class="rev-style-switcher" style="background:var(--paper);border-radius:12px;padding:16px;border:1px solid var(--border);margin-bottom:20px">
+          <div style="font-family:'Caveat',cursive;font-size:15px;color:var(--brown);margin-bottom:10px">✍ AI 风格</div>
+          <div class="style-option selected">精简有力</div>
+          <div class="style-option">温暖详细</div>
+          <div class="style-option">直接犀利</div>
+        </div>
+
+        <!-- Distribution preview -->
+        <div class="distribution-preview">
+          <h4>📤 将写入子页面</h4>
+          <div class="dist-item"><div class="dist-dot" style="background:var(--dark-brown)"></div><span class="dist-name">日常复盘（主表）</span><span class="dist-tick">✓</span></div>
+          <div class="dist-item"><div class="dist-dot" style="background:var(--muted-gold)"></div><span class="dist-name">人物卡 · Jamie</span><span class="dist-tick">✓</span></div>
+          <div class="dist-item"><div class="dist-dot" style="background:var(--dusty-rose)"></div><span class="dist-name">育儿成长时间轴</span><span class="dist-tick">✓</span></div>
+          <div class="dist-item"><div class="dist-dot" style="background:var(--sage)"></div><span class="dist-name">健康日志</span><span class="dist-tick">✓</span></div>
+          <div class="dist-item"><div class="dist-dot" style="background:var(--tan)"></div><span class="dist-name">理财相关</span><span class="dist-skip">—</span></div>
+          <div class="dist-item"><div class="dist-dot" style="background:var(--tan)"></div><span class="dist-name">博主/Podcast</span><span class="dist-skip">—</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     5. HANDLOG 手账图
+══════════════════════════════════════ -->
+<div class="screen-wrap" id="handlog">
+  <div class="section-label">Page 05</div>
+  <div class="screen-title">HandLog 手账图  <span style="font-size:16px;color:var(--brown)">/handlog/:entryId</span></div>
+  <div class="screen-sub">手绘风 SVG 预览 · 模板选择 · 导出 PNG/PDF · 提交 Notion</div>
+  <div class="frame-desktop">
+    <div class="app-nav">
+      <span class="logo">✍ HandLog</span>
+      <div class="nav-links">
+        <span>记录</span><span class="active">手账图</span><span>时间轴</span>
+      </div>
+      <div class="avatar">J</div>
+    </div>
+    <div class="hl-body">
+      <div class="hl-left">
+        <h2>你的手账图已生成</h2>
+        <div class="hl-sub">可临摹到纸质手账本 · 或下载保存</div>
+
+        <!-- Template picker -->
+        <div class="template-picker">
+          <div class="template-chip active">极简</div>
+          <div class="template-chip">可爱</div>
+          <div class="template-chip">复古</div>
+        </div>
+
+        <!-- HandLog card -->
+        <div class="handlog-card">
+          <div class="hl-date-header">✦  2026. 05. 25  ✦</div>
+
+          <div class="hl-section-title">今日关键词</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px">
+            <span style="font-size:15px;color:var(--brown)">连接</span>
+            <span style="font-size:15px;color:var(--brown)">·</span>
+            <span style="font-size:15px;color:var(--brown)">成长</span>
+            <span style="font-size:15px;color:var(--brown)">·</span>
+            <span style="font-size:15px;color:var(--brown)">阅读</span>
+          </div>
+
+          <div class="hl-section-title">一句话</div>
+          <div class="hl-quote">在别人的转变故事里，看见了自己也可以更勇敢的可能。</div>
+
+          <div class="hl-section-title">今日复盘</div>
+          <div class="hl-line"></div>
+          <div class="hl-line" style="width:85%"></div>
+          <div class="hl-line" style="width:92%"></div>
+          <div class="hl-line" style="width:70%"></div>
+
+          <div class="hl-section-title">下一步</div>
+          <div class="hl-action-item"><div class="hl-checkbox"></div>再约 Jamie 深聊</div>
+          <div class="hl-action-item"><div class="hl-checkbox"></div>读《原则》第三章</div>
+          <div class="hl-action-item"><div class="hl-checkbox"></div>保持好状态</div>
+
+          <div class="hl-section-title">今日评分</div>
+          <div class="hl-score-row">
+            <div class="hl-score-dot filled"></div>
+            <div class="hl-score-dot filled"></div>
+            <div class="hl-score-dot filled"></div>
+            <div class="hl-score-dot filled"></div>
+            <div class="hl-score-dot filled"></div>
+            <div class="hl-score-dot filled"></div>
+            <div class="hl-score-dot filled"></div>
+            <div class="hl-score-dot" style="background:rgba(196,169,98,0.3)"></div>
+            <div class="hl-score-dot"></div>
+            <div class="hl-score-dot"></div>
+          </div>
+
+          <div class="hl-stamp">Hand<br>Log</div>
+        </div>
+
+        <div class="export-btns">
+          <button class="export-btn export-png">⬇ 下载 PNG</button>
+          <button class="export-btn export-pdf">⬇ PDF (A5)</button>
+          <button class="export-btn export-notion">↗ 上传 Notion 封面</button>
+        </div>
+      </div>
+
+      <div class="hl-right">
+        <div class="card" style="margin-bottom:16px">
+          <div style="font-family:'Caveat',cursive;font-size:16px;color:var(--brown);margin-bottom:14px">📤 提交到 Notion</div>
+          <div style="font-size:13px;color:var(--dark-brown);margin-bottom:16px;line-height:1.6">
+            将写入 Notion 数据库 <strong>「日常复盘记录」</strong>，新增一行：
+          </div>
+          <div style="font-size:12px;color:var(--brown);background:var(--paper);border-radius:8px;padding:12px;line-height:1.8;margin-bottom:16px">
+            Name: 5-25<br>
+            简短日常: 和朋友聊职业...<br>
+            标签: 人物-Jamie, 育儿-亲子...<br>
+            打分: 7.5<br>
+            感悟 + 复盘 + 手账图封面
+          </div>
+          <span class="btn-primary" style="width:100%;text-align:center;display:block;padding:12px">✓ 确认提交 Notion →</span>
+        </div>
+
+        <div class="card">
+          <div style="font-family:'Caveat',cursive;font-size:16px;color:var(--brown);margin-bottom:14px">🎨 配色主题</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--paper);border:2px solid var(--dark-brown);cursor:pointer"></div>
+            <div style="width:28px;height:28px;border-radius:50%;background:#F5EBE6;cursor:pointer"></div>
+            <div style="width:28px;height:28px;border-radius:50%;background:#EAF0E5;cursor:pointer"></div>
+            <div style="width:28px;height:28px;border-radius:50%;background:#E8E0F0;cursor:pointer"></div>
+            <div style="width:28px;height:28px;border-radius:50%;background:#E0EAF0;cursor:pointer"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     6. TIMELINE
+══════════════════════════════════════ -->
+<div class="screen-wrap" id="timeline">
+  <div class="section-label">Page 06</div>
+  <div class="screen-title">Timeline  <span style="font-size:16px;color:var(--brown)">/timeline</span></div>
+  <div class="screen-sub">历史复盘 · 卡片浏览 · 筛选搜索</div>
+  <div class="frame-desktop">
+    <div class="app-nav">
+      <span class="logo">✍ HandLog</span>
+      <div class="nav-links">
+        <span>记录</span><span class="active">时间轴</span><span>看板</span>
+      </div>
+      <div class="avatar">J</div>
+    </div>
+    <div class="tl-body">
+      <div class="tl-header">
+        <h2>我的手账时间轴</h2>
+        <div class="search-box">
+          <span style="color:var(--brown)">🔍</span>
+          <input type="text" placeholder="搜索关键词...">
+        </div>
+      </div>
+
+      <div class="filter-row">
+        <span class="filter-chip active">全部</span>
+        <span class="filter-chip">育儿-亲子</span>
+        <span class="filter-chip">爱好-看书</span>
+        <span class="filter-chip">探索-社区</span>
+        <span class="filter-chip">健康</span>
+        <span class="filter-chip">人物卡</span>
+        <span style="font-size:12px;color:var(--brown);padding:5px 8px">评分 ≥</span>
+        <span class="filter-chip">7+</span>
+        <span class="filter-chip">8+</span>
+      </div>
+
+      <div class="tl-month">2026 年 5 月 · 22 条记录</div>
+      <div class="entry-grid">
+        <div class="entry-card">
+          <div class="entry-thumb" style="background:linear-gradient(135deg,var(--paper),var(--light-rose))">
+            5.25<div class="mini-stamp">HandLog</div>
+          </div>
+          <div class="entry-meta">
+            <div class="entry-date">5月25日（周一）· ⭐ 7.5</div>
+            <div class="entry-quote">「在别人的转变故事里，看见了自己的可能。」</div>
+            <div class="entry-tags"><span class="tag">人物</span><span class="tag rose">育儿</span><span class="tag">健康</span></div>
+          </div>
+        </div>
+        <div class="entry-card">
+          <div class="entry-thumb" style="background:linear-gradient(135deg,var(--light-sage),var(--paper))">
+            5.24<div class="mini-stamp">HandLog</div>
+          </div>
+          <div class="entry-meta">
+            <div class="entry-date">5月24日（周日）· ⭐ 8</div>
+            <div class="entry-quote">「把一块安静的时间还给了自己，值得。」</div>
+            <div class="entry-tags"><span class="tag">爱好-看书</span><span class="tag gold">探索</span></div>
+          </div>
+        </div>
+        <div class="entry-card">
+          <div class="entry-thumb" style="background:linear-gradient(135deg,#EAF0E5,var(--light-sage))">
+            5.23
+          </div>
+          <div class="entry-meta">
+            <div class="entry-date">5月23日（周六）· ⭐ 6</div>
+            <div class="entry-quote">「有些疲惫，但陪伴本身就是答案。」</div>
+            <div class="entry-tags"><span class="tag rose">育儿-亲子</span><span class="tag">健康</span></div>
+          </div>
+        </div>
+        <div class="entry-card">
+          <div class="entry-thumb" style="background:linear-gradient(135deg,#FDF0E8,var(--light-rose))">
+            5.22
+          </div>
+          <div class="entry-meta">
+            <div class="entry-date">5月22日（周五）· ⭐ 7</div>
+            <div class="entry-quote">「新的社区空间，带来了意外的归属感。」</div>
+            <div class="entry-tags"><span class="tag">探索-社区</span><span class="tag gold">爱好</span></div>
+          </div>
+        </div>
+        <div class="entry-card">
+          <div class="entry-thumb" style="background:linear-gradient(135deg,var(--paper),#E8E0F0)">
+            5.21
+          </div>
+          <div class="entry-meta">
+            <div class="entry-date">5月21日（周四）· ⭐ 8.5</div>
+            <div class="entry-quote">「代码跑通的一刻，有种创作者的快感。」</div>
+            <div class="entry-tags"><span class="tag">技术学习</span><span class="tag gold">AI项目</span></div>
+          </div>
+        </div>
+        <div class="entry-card" style="background:var(--paper);border:1.5px dashed var(--tan);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;padding:20px;cursor:pointer">
+          <div style="font-size:28px">+</div>
+          <div style="font-family:'Caveat',cursive;font-size:15px;color:var(--brown)">记录今天</div>
+        </div>
+      </div>
+
+      <div class="tl-month">2026 年 4 月 · 18 条记录</div>
+      <div class="entry-grid">
+        <div class="entry-card">
+          <div class="entry-thumb" style="background:linear-gradient(135deg,#E8F0E0,var(--light-sage))">4.30</div>
+          <div class="entry-meta">
+            <div class="entry-date">4月30日 · ⭐ 9</div>
+            <div class="entry-quote">「这个月的尾声，感觉在很多事上有了清晰。」</div>
+            <div class="entry-tags"><span class="tag">月复盘</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     7. DASHBOARD
+══════════════════════════════════════ -->
+<div class="screen-wrap" id="dashboard">
+  <div class="section-label">Page 07</div>
+  <div class="screen-title">Dashboard  <span style="font-size:16px;color:var(--brown)">/dashboard</span></div>
+  <div class="screen-sub">标签分布 · 评分趋势 · 热力图 · 关键词云</div>
+  <div class="frame-desktop">
+    <div class="app-nav">
+      <span class="logo">✍ HandLog</span>
+      <div class="nav-links">
+        <span>记录</span><span>时间轴</span><span class="active">看板</span>
+      </div>
+      <div class="avatar">J</div>
+    </div>
+    <div class="dash-body">
+      <div class="dash-header">
+        <h2>数据看板</h2>
+        <div class="period-switcher">
+          <span class="period-btn">周</span>
+          <span class="period-btn active">月</span>
+          <span class="period-btn">全部</span>
+        </div>
+      </div>
+
+      <!-- Stats row -->
+      <div class="stat-row">
+        <div class="stat-box">
+          <div class="stat-num">22</div>
+          <div class="stat-label">本月记录天数</div>
+          <div class="stat-trend">↑ +4 vs 上月</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">7.3</div>
+          <div class="stat-label">平均评分</div>
+          <div class="stat-trend">↑ +0.5 vs 上月</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">14</div>
+          <div class="stat-label">AI 建议采纳条数</div>
+          <div class="stat-trend">采纳率 78%</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">3</div>
+          <div class="stat-label">本月手账图</div>
+          <div class="stat-trend">2 周复盘 + 1 月复盘</div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="chart-row">
+        <!-- Bar chart: score trend -->
+        <div class="chart-box">
+          <h4>📈 评分趋势（近 14 天）</h4>
+          <div class="bar-chart">
+            <div class="bar-col"><div class="bar" style="height:55px"></div><div class="bar-label">5/12</div></div>
+            <div class="bar-col"><div class="bar" style="height:70px"></div><div class="bar-label">13</div></div>
+            <div class="bar-col"><div class="bar" style="height:48px"></div><div class="bar-label">14</div></div>
+            <div class="bar-col"><div class="bar highlight" style="height:85px"></div><div class="bar-label">15</div></div>
+            <div class="bar-col"><div class="bar" style="height:60px"></div><div class="bar-label">16</div></div>
+            <div class="bar-col"><div class="bar" style="height:75px"></div><div class="bar-label">17</div></div>
+            <div class="bar-col"><div class="bar" style="height:40px"></div><div class="bar-label">18</div></div>
+            <div class="bar-col"><div class="bar" style="height:65px"></div><div class="bar-label">19</div></div>
+            <div class="bar-col"><div class="bar highlight" style="height:90px"></div><div class="bar-label">20</div></div>
+            <div class="bar-col"><div class="bar" style="height:72px"></div><div class="bar-label">21</div></div>
+            <div class="bar-col"><div class="bar" style="height:60px"></div><div class="bar-label">22</div></div>
+            <div class="bar-col"><div class="bar" style="height:58px"></div><div class="bar-label">23</div></div>
+            <div class="bar-col"><div class="bar highlight" style="height:80px"></div><div class="bar-label">24</div></div>
+            <div class="bar-col"><div class="bar" style="height:75px"></div><div class="bar-label">25</div></div>
+          </div>
+        </div>
+
+        <!-- Pie: tag distribution -->
+        <div class="chart-box">
+          <h4>🏷 标签分布</h4>
+          <div class="donut-wrap">
+            <svg class="donut-svg" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="13" fill="none" stroke="#E8D5B7" stroke-width="6"/>
+              <circle cx="18" cy="18" r="13" fill="none" stroke="#C4907A" stroke-width="6" stroke-dasharray="28 72" stroke-dashoffset="25" transform="rotate(-90 18 18)"/>
+              <circle cx="18" cy="18" r="13" fill="none" stroke="#7A8C6E" stroke-width="6" stroke-dasharray="22 78" stroke-dashoffset="-3" transform="rotate(-90 18 18)"/>
+              <circle cx="18" cy="18" r="13" fill="none" stroke="#C4A962" stroke-width="6" stroke-dasharray="18 82" stroke-dashoffset="-25" transform="rotate(-90 18 18)"/>
+              <circle cx="18" cy="18" r="13" fill="none" stroke="#8B6B4A" stroke-width="6" stroke-dasharray="14 86" stroke-dashoffset="-43" transform="rotate(-90 18 18)"/>
+              <circle cx="18" cy="18" r="13" fill="none" stroke="#4A3728" stroke-width="6" stroke-dasharray="18 82" stroke-dashoffset="-57" transform="rotate(-90 18 18)"/>
+            </svg>
+            <div class="donut-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#C4907A"></div>育儿-亲子 28%</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#7A8C6E"></div>爱好-看书 22%</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#C4A962"></div>探索-社区 18%</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#8B6B4A"></div>技术学习 14%</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#4A3728"></div>健康 18%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Heatmap -->
+      <div class="chart-box heatmap-box" style="margin-bottom:0">
+        <h4>🗓 记录频率热力图（2026年5月）</h4>
+        <div style="margin-bottom:8px;font-size:11px;color:var(--brown);display:flex;gap:24px">
+          <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+        </div>
+        <div class="heatmap-grid">
+          <!-- Row 1 -->
+          <div class="heat-cell"></div><div class="heat-cell"></div><div class="heat-cell"></div><div class="heat-cell h1"></div><div class="heat-cell h2"></div><div class="heat-cell h1"></div><div class="heat-cell h3"></div>
+          <!-- Row 2 -->
+          <div class="heat-cell h2"></div><div class="heat-cell h1"></div><div class="heat-cell h3"></div><div class="heat-cell h2"></div><div class="heat-cell h4"></div><div class="heat-cell h1"></div><div class="heat-cell h3"></div>
+          <!-- Row 3 -->
+          <div class="heat-cell h1"></div><div class="heat-cell h3"></div><div class="heat-cell h2"></div><div class="heat-cell h4"></div><div class="heat-cell h3"></div><div class="heat-cell h2"></div><div class="heat-cell h4"></div>
+          <!-- Row 4 -->
+          <div class="heat-cell h2"></div><div class="heat-cell h1"></div><div class="heat-cell h3"></div><div class="heat-cell h2"></div><div class="heat-cell h4"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;margin-top:10px;font-size:10px;color:var(--brown)">
+          <span>少</span>
+          <div class="heat-cell h1" style="width:10px;height:10px"></div>
+          <div class="heat-cell h2" style="width:10px;height:10px"></div>
+          <div class="heat-cell h3" style="width:10px;height:10px"></div>
+          <div class="heat-cell h4" style="width:10px;height:10px"></div>
+          <span>多</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     8. SETTINGS
+══════════════════════════════════════ -->
+<div class="screen-wrap" id="settings">
+  <div class="section-label">Page 08</div>
+  <div class="screen-title">Settings  <span style="font-size:16px;color:var(--brown)">/settings</span></div>
+  <div class="screen-sub">Notion 连接 · 子库映射 · AI 偏好 · 语言 · 数据导出</div>
+  <div class="frame-desktop">
+    <div class="app-nav">
+      <span class="logo">✍ HandLog</span>
+      <div class="nav-links">
+        <span>记录</span><span>时间轴</span><span>看板</span>
+      </div>
+      <div class="avatar">J</div>
+    </div>
+    <div class="set-body">
+      <div class="set-sidebar">
+        <div class="set-nav-group">集成</div>
+        <div class="set-nav-item active"><span class="set-nav-icon">◼</span>Notion 连接</div>
+        <div class="set-nav-item"><span class="set-nav-icon">🗂</span>子库映射</div>
+        <div class="set-nav-group">偏好</div>
+        <div class="set-nav-item"><span class="set-nav-icon">🤖</span>AI 风格</div>
+        <div class="set-nav-item"><span class="set-nav-icon">📖</span>手账模板</div>
+        <div class="set-nav-item"><span class="set-nav-icon">🌐</span>语言</div>
+        <div class="set-nav-group">数据</div>
+        <div class="set-nav-item"><span class="set-nav-icon">📥</span>导出数据</div>
+        <div class="set-nav-item"><span class="set-nav-icon">🗑</span>删除账号</div>
+      </div>
+
+      <div class="set-content">
+        <h3>Notion 连接</h3>
+        <p class="set-sub">管理你的 Notion workspace 授权和数据库映射</p>
+
+        <div class="notion-connected">
+          <span class="check">✓</span>
+          <div class="info">
+            <h4>已连接 My Workspace</h4>
+            <p>user@example.com · 授权于 2026-05-01</p>
+          </div>
+          <div class="actions">
+            <span class="btn-secondary" style="font-size:11px;padding:6px 12px">重新授权</span>
+            <span class="btn-ghost" style="font-size:11px;color:var(--dusty-rose)">断开</span>
+          </div>
+        </div>
+
+        <div style="font-family:'Caveat',cursive;font-size:16px;color:var(--dark-brown);margin:20px 0 14px">🗂 子库映射</div>
+
+        <table class="db-mapping-table">
+          <thead>
+            <tr>
+              <th>功能页面</th>
+              <th>Notion 数据库</th>
+              <th>状态</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>📅 日常复盘（主表）</td>
+              <td><span class="db-badge">日常复盘记录</span></td>
+              <td style="color:var(--sage)">✓ 已连接</td>
+            </tr>
+            <tr>
+              <td>👤 朋友/社交圈</td>
+              <td><span class="db-badge">人物卡</span></td>
+              <td style="color:var(--sage)">✓ 已连接</td>
+            </tr>
+            <tr>
+              <td>👶 育儿成长时间轴</td>
+              <td><span class="db-badge">亲子成长记录</span></td>
+              <td style="color:var(--sage)">✓ 已连接</td>
+            </tr>
+            <tr>
+              <td>❤️ 健康/身体变化</td>
+              <td><span class="db-badge">健康日志</span></td>
+              <td style="color:var(--sage)">✓ 已连接</td>
+            </tr>
+            <tr>
+              <td>💰 理财相关</td>
+              <td><span class="db-badge missing">未配置</span></td>
+              <td style="color:var(--dusty-rose)">⚠ 点击配置</td>
+            </tr>
+            <tr>
+              <td>🎙 博主/Podcast</td>
+              <td><span class="db-badge missing">未配置</span></td>
+              <td style="color:var(--dusty-rose)">⚠ 点击配置</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="margin-top:28px">
+          <div style="font-family:'Caveat',cursive;font-size:16px;color:var(--dark-brown);margin-bottom:16px">⚙️ 其他设置</div>
+          <div class="set-row">
+            <div class="set-row-info">
+              <h4>语言</h4>
+              <p>界面语言和 AI 输出语言</p>
+            </div>
+            <select class="set-select"><option>中文</option><option>English</option></select>
+          </div>
+          <div class="set-row">
+            <div class="set-row-info">
+              <h4>孩子出生日期</h4>
+              <p>用于自动计算月龄</p>
+            </div>
+            <span style="font-size:13px;color:var(--dark-brown)">2025-08-01</span>
+          </div>
+          <div class="set-row">
+            <div class="set-row-info">
+              <h4>自动周复盘</h4>
+              <p>周日 21:00 自动生成（需完整度 ≥5 天）</p>
+            </div>
+            <div class="toggle"></div>
+          </div>
+          <div class="set-row">
+            <div class="set-row-info">
+              <h4>邮件通知</h4>
+              <p>复盘生成完成 / 缺日记提醒</p>
+            </div>
+            <div class="toggle off"></div>
+          </div>
+          <div class="set-row">
+            <div class="set-row-info">
+              <h4>暗色模式</h4>
+            </div>
+            <div class="toggle off"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center;padding:40px 20px;font-family:'Caveat',cursive;font-size:16px;color:var(--brown);opacity:0.6">
+  ✦ HandLog UI Mockup · 8 Pages · v0.1 MVP ✦
+</div>
+
+</body>
+</html>
