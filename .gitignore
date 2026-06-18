@@ -42,3 +42,4 @@ public/font.ttf
 # podcast & speaking materials (local only)
 outputs/podcast-speaking/
 PPT-podcast-outputs/
+.vscode/
