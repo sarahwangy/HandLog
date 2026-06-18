@@ -103,13 +103,13 @@ App 的大脑，用于：
 
 ```json
 {
-  "people": ["老公", "Sally HK"],
-  "emotions": ["充实", "有点焦虑"],
-  "events": [{"category": "学习", "items": ["完成 API 开发"]}],
+  "people": ["导师 Chloe", "同事 Mia"],
+  "emotions": ["充满活力", "专注"],
+  "events": [{"category": "学习", "items": ["完成 API 模块"]}],
   "score": 8,
-  "scoreReason": "高产出但有点累",
-  "nextSteps": ["周四前完成 PR", "给妈妈打电话"],
-  "reviewParagraph": "今天是很充实的一天..."
+  "scoreReason": "高产出，进入心流状态",
+  "nextSteps": ["周四前提交 PR", "晨跑连续打卡第 5 天"],
+  "reviewParagraph": "今天是充实而有活力的一天..."
 }
 ```
 
@@ -244,9 +244,9 @@ Subagent 执行：
 
 **第 1 步：** API 从 Notion 读取周页面的 `简短日常` 字段：
 ```
-一. Wheeler hills library借书看书，整理4月复盘，遇见Sally HK
-二. Bentleigh toy library办卡，完成4月复盘并获AI建议...
-三. 预定6月sewing课程，整理AI项目创意数据库...
+一. 晨跑5公里，整理4月复盘，和朋友 Mia 喝咖啡
+二. 瑜伽课，完成4月复盘并获AI建议，为本周备餐
+三. 预定6月水彩课程，整理AI项目创意数据库
 ```
 
 **第 2 步：** 发给 Claude Haiku，prompt 说："识别每天内容，提取 2–4 个要点，返回 JSON 数组。"
@@ -254,8 +254,8 @@ Subagent 执行：
 **第 3 步：** Claude 返回：
 ```json
 [
-  {"date": "5-4", "bullets": ["Wheeler Hills图书馆借书", "整理4月复盘", "遇见Sally HK"]},
-  {"date": "5-5", "bullets": ["Bentleigh toy library办卡", "完成复盘获AI建议"]},
+  {"date": "5-4", "bullets": ["晨跑5公里", "整理4月复盘", "与 Mia 喝咖啡"]},
+  {"date": "5-5", "bullets": ["瑜伽课", "完成复盘获AI建议", "备餐"]},
   ...
 ]
 ```
@@ -264,8 +264,8 @@ Subagent 执行：
 
 | 日期 | 重点事项 |
 |------|--------|
-| 5月4日 周一 | • Wheeler Hills图书馆借书 • 整理4月复盘 • 遇见Sally HK |
-| 5月5日 周二 | • Bentleigh toy library办卡 • 完成复盘获AI建议 |
+| 5月4日 周一 | • 晨跑5公里 • 整理4月复盘 • 与 Mia 喝咖啡 |
+| 5月5日 周二 | • 瑜伽课 • 完成复盘获AI建议 • 备餐 |
 
 **第 5 步：** 用户点击 Save → 写入 Notion，成为 Toggle 块包含原生表格。
 

@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HandLog — Demo (English)</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #FAF6F1; color: #2C1F14; min-height: 100vh; }
+
+.topnav { position: fixed; top: 0; left: 0; right: 0; height: 56px; background: #F5EDE0; border-bottom: 1px solid #E4D4C0; display: flex; align-items: center; padding: 0 32px; gap: 0; z-index: 100; }
+.nav-logo { font-size: 17px; font-weight: 700; color: #2C1F14; margin-right: 36px; white-space: nowrap; }
+.nav-logo span { color: #C4783A; }
+.nav-links { display: flex; gap: 4px; flex: 1; }
+.nav-item { padding: 6px 14px; border-radius: 8px; font-size: 13px; color: #8B6B4A; cursor: pointer; transition: all .15s; }
+.nav-item:hover { background: #EDD4BC; color: #2C1F14; }
+.nav-item.active { background: #2C1F14; color: #fff; }
+.nav-demo { margin-left: auto; background: #FDF0E6; border: 1px solid #E4D4C0; border-radius: 20px; padding: 4px 14px; font-size: 12px; color: #8B6B4A; }
+.nav-demo strong { color: #C4783A; }
+
+.main { margin-top: 56px; padding: 36px 48px; max-width: 1000px; margin-left: auto; margin-right: auto; }
+.page { display: none; }
+.page.active { display: block; }
+
+.card { background: #FDFAF6; border: 1px solid #E4D4C0; border-radius: 14px; padding: 20px; box-shadow: 0 2px 6px rgba(80,40,10,.05), 0 4px 12px rgba(80,40,10,.08); }
+.card.warm { background: #F5EDE0; }
+.card.full { grid-column: span 2; }
+.card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.lbl-main { font-size: 11px; font-weight: 700; color: #8B6B4A; text-transform: uppercase; letter-spacing: .6px; }
+.lbl { margin-bottom: 10px; }
+
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { background: #FDF0E6; border: 1px solid #E4D4C0; border-radius: 20px; padding: 4px 12px; font-size: 13px; color: #4A3324; }
+
+.btn { height: 34px; padding: 0 18px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all .15s; }
+.btn-primary { background: #C4783A; color: #fff; }
+.btn-primary:hover { background: #A85E28; }
+.btn-outline { background: #fff; border: 1px solid #C4783A; color: #C4783A; }
+.btn-saved { background: #fff; border: 1px solid #6B8F5E; color: #6B8F5E; cursor: default; }
+.btn-google { width: 100%; height: 48px; background: #fff; border: 1.5px solid #E4D4C0; border-radius: 12px; font-size: 15px; color: #2C1F14; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.btn-demo-lg { width: 100%; height: 48px; background: #C4783A; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; color: #fff; cursor: pointer; margin-top: 12px; }
+
+.ptitle { font-size: 26px; font-weight: 600; color: #2C1F14; letter-spacing: -.5px; }
+.psub { font-size: 13px; color: #8B6B4A; margin: 4px 0 24px; }
+
+.tab-bar { display: flex; gap: 8px; margin-bottom: 24px; }
+.tab { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid #E4D4C0; background: #fff; color: #8B6B4A; transition: all .15s; }
+.tab.active { background: #2C1F14; color: #fff; border-color: #2C1F14; }
+
+.prog-track { height: 6px; background: #F5EDE0; border-radius: 3px; }
+.prog-fill { height: 6px; background: #C4783A; border-radius: 3px; }
+
+.big-score { font-size: 42px; font-weight: 700; color: #2C1F14; line-height: 1; }
+.score-sub { font-size: 13px; color: #8B6B4A; margin-top: 4px; }
+
+.quote { font-size: 20px; font-weight: 600; font-style: italic; color: #2C1F14; line-height: 1.5; }
+
+.check-row { display: flex; align-items: flex-start; gap: 10px; padding: 9px 0; border-bottom: 1px solid #EDE3D8; }
+.check-row:last-child { border-bottom: none; }
+.checkbox { width: 18px; height: 18px; border: 1.5px solid #C4A98A; border-radius: 4px; flex-shrink: 0; margin-top: 1px; }
+.check-row span { font-size: 14px; color: #4A3324; }
+
+.zone-row { font-size: 14px; color: #4A3324; margin-bottom: 8px; }
+
+.people-list { display: flex; flex-direction: column; gap: 8px; }
+.p-row { display: flex; align-items: baseline; gap: 8px; }
+.p-name { font-weight: 600; font-size: 13px; color: #2C1F14; flex-shrink: 0; }
+.p-desc { font-size: 12px; color: #8B6B4A; }
+
+.due-list { display: flex; flex-direction: column; gap: 8px; }
+.due-row { display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: #FDF0E6; border-radius: 8px; }
+.due-date { font-size: 12px; font-weight: 600; color: #C4783A; width: 86px; flex-shrink: 0; }
+.due-title { font-size: 13px; color: #2C1F14; }
+.due-note { font-size: 12px; color: #8B6B4A; margin-left: auto; }
+
+.stat-cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.stat-card { background: #FDFAF6; border: 1px solid #E4D4C0; border-radius: 14px; padding: 20px; }
+.stat-label { font-size: 11px; color: #8B6B4A; text-transform: uppercase; letter-spacing: .6px; font-weight: 700; }
+.stat-val { font-size: 36px; font-weight: 700; color: #2C1F14; line-height: 1.1; margin-top: 4px; }
+.stat-val.accent { color: #C4783A; }
+.stat-sub-s { font-size: 12px; color: #8B6B4A; margin-top: 2px; }
+
+.tl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.tl-card { border-radius: 12px; overflow: hidden; border: 1px solid #E4D4C0; cursor: pointer; }
+.tl-top { height: 56px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; }
+.tl-body { padding: 12px 14px; background: #FDFAF6; }
+.tl-date { font-size: 11px; color: #8B6B4A; margin-bottom: 4px; }
+.tl-ins { font-size: 13px; color: #2C1F14; line-height: 1.5; margin-bottom: 8px; }
+.tl-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.tl-tag { font-size: 11px; background: #FDF0E6; border: 1px solid #E4D4C0; border-radius: 10px; padding: 2px 8px; color: #4A3324; }
+
+.cap-wrap { max-width: 640px; }
+.form-label { font-size: 13px; font-weight: 600; color: #8B6B4A; margin-bottom: 6px; display: block; }
+.form-textarea { width: 100%; border: 1px solid #E4D4C0; border-radius: 12px; padding: 14px 16px; font-size: 14px; color: #2C1F14; background: #FDFAF6; resize: vertical; min-height: 160px; outline: none; font-family: inherit; line-height: 1.7; }
+.form-textarea:focus { border-color: #C4783A; }
+.form-score { width: 80px; height: 40px; border: 1px solid #E4D4C0; border-radius: 8px; padding: 0 12px; font-size: 14px; color: #2C1F14; background: #FDFAF6; outline: none; }
+.form-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.f-tag { padding: 5px 12px; border-radius: 20px; font-size: 12px; border: 1px solid #E4D4C0; background: #fff; color: #8B6B4A; cursor: pointer; }
+.f-tag.on { background: #C4783A; color: #fff; border-color: #C4783A; }
+.voice-btn { width: 56px; height: 56px; border-radius: 50%; background: #C4783A; border: none; cursor: pointer; font-size: 22px; flex-shrink: 0; }
+.sec { margin-bottom: 20px; }
+
+.chat-wrap { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; height: calc(100vh - 56px - 72px - 48px); }
+.chat-messages { flex: 1; overflow-y: auto; padding: 16px 0; display: flex; flex-direction: column; gap: 14px; min-height: 260px; max-height: 420px; }
+.sys-msg { text-align: center; font-size: 12px; color: #B89A7A; }
+.cmsg { display: flex; flex-direction: column; gap: 5px; }
+.cmsg.user { align-items: flex-end; }
+.cmsg.ai { align-items: flex-start; }
+.cbubble { max-width: 85%; padding: 11px 15px; border-radius: 16px; font-size: 14px; line-height: 1.7; }
+.cmsg.user .cbubble { background: #C4783A; color: white; border-bottom-right-radius: 4px; }
+.cmsg.ai .cbubble { background: white; border: 1px solid #E4D4C0; border-bottom-left-radius: 4px; color: #2C1F14; }
+.chat-input-area { border-top: 1px solid #E4D4C0; padding: 12px 0 4px; display: flex; flex-direction: column; gap: 8px; }
+.quick-prompts { display: flex; flex-wrap: wrap; gap: 6px; }
+.qbtn { font-size: 12px; padding: 4px 11px; border-radius: 20px; border: 1px solid #E4D4C0; background: white; color: #8B6B4A; cursor: pointer; }
+.chat-row { display: flex; gap: 8px; align-items: flex-end; }
+.chat-box { flex: 1; min-height: 42px; padding: 9px 13px; border: 1px solid #E4D4C0; border-radius: 12px; font-size: 14px; font-family: inherit; resize: none; outline: none; background: white; }
+.send-btn { width: 42px; height: 42px; border-radius: 12px; border: none; background: #C4783A; color: white; font-size: 18px; cursor: pointer; }
+
+#page-login { margin-top: 0; max-width: 100%; }
+.login-wrap { display: flex; min-height: 100vh; }
+.login-left { flex: 1; background: #F5EDE0; padding: 64px 56px; display: flex; flex-direction: column; justify-content: center; }
+.login-right { width: 460px; background: #FDFAF6; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 56px 48px; }
+.login-badge { font-size: 11px; letter-spacing: 2px; color: #C4783A; text-transform: uppercase; font-weight: 600; margin-bottom: 16px; }
+.login-h1 { font-size: 44px; font-weight: 700; color: #2C1F14; line-height: 1.2; margin-bottom: 36px; }
+.login-entries { display: flex; flex-direction: column; gap: 10px; }
+.login-entry { background: #FDFAF6; border-radius: 10px; padding: 14px 18px; display: flex; align-items: center; gap: 16px; }
+.login-entry-date { font-size: 14px; font-weight: 600; color: #C4783A; width: 36px; }
+.login-entry-text { font-size: 14px; color: #4A3324; }
+.login-title { font-size: 26px; font-weight: 700; color: #2C1F14; margin-bottom: 8px; }
+.login-sub { font-size: 14px; color: #8B6B4A; margin-bottom: 32px; }
+.access-note { font-size: 12px; color: #C4A98A; text-align: center; margin-top: 14px; }
+
+.m-group { margin-bottom: 32px; }
+.m-label { font-size: 14px; font-weight: 600; color: #2C1F14; margin-bottom: 12px; }
+.m-label span { font-size: 12px; color: #8B6B4A; font-weight: 400; }
+.filter-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px; }
+.f-btn { padding: 4px 12px; border-radius: 20px; font-size: 12px; border: 1px solid #E4D4C0; background: #fff; color: #8B6B4A; cursor: pointer; }
+.f-btn.active { background: #2C1F14; color: #fff; border-color: #2C1F14; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="page-login" class="page active">
+  <div class="login-wrap">
+    <div class="login-left">
+      <div style="max-width:500px">
+        <div style="font-size:20px;font-weight:700;color:#2C1F14;margin-bottom:36px">✍️ <span style="color:#C4783A">Hand</span>Log</div>
+        <div class="login-badge">Every day worth remembering</div>
+        <div class="login-h1">Turn messy days into<br>meaningful memories</div>
+        <div class="login-entries">
+          <div class="login-entry"><div class="login-entry-date">5.28</div><div class="login-entry-text">Saw my own potential in someone else's story.</div></div>
+          <div class="login-entry"><div class="login-entry-date">5.27</div><div class="login-entry-text">Gave myself a quiet hour — completely worth it.</div></div>
+          <div class="login-entry"><div class="login-entry-date">5.26</div><div class="login-entry-text">Tired, but being present was the answer.</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="login-right">
+      <div style="width:100%;max-width:340px">
+        <div class="login-title">Welcome back</div>
+        <div class="login-sub">Sign in to view your journal reviews</div>
+        <button class="btn-google">
+          <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Sign in with Google
+        </button>
+        <button class="btn-demo-lg" onclick="enterDemo()">✨ Try Demo</button>
+        <div class="access-note">Access limited to authorized accounts</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- APP SHELL -->
+<div id="app-shell" style="display:none">
+
+<nav class="topnav">
+  <div class="nav-logo">✍️ <span>Hand</span>Log</div>
+  <div class="nav-links">
+    <div class="nav-item active" onclick="showPage('capture',this)">📝 Capture</div>
+    <div class="nav-item" onclick="showPage('review',this)">🔍 Review</div>
+    <div class="nav-item" onclick="showPage('dashboard',this)">📊 Dashboard</div>
+    <div class="nav-item" onclick="showPage('timeline',this)">🗂 Timeline</div>
+    <div class="nav-item" onclick="showPage('chat',this)">💬 Chat</div>
+  </div>
+  <div class="nav-demo"><strong>Demo</strong> · sample data</div>
+</nav>
+
+<!-- CAPTURE -->
+<div id="page-capture" class="main page active">
+  <div class="ptitle">Capture</div>
+  <div class="psub">Thursday, May 28, 2026</div>
+  <div class="cap-wrap">
+    <div class="sec">
+      <label class="form-label">Today's journal entry</label>
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <textarea class="form-textarea">Morning run 5km along the river — felt clear-headed after. Spent the afternoon deep in the API integration, finally got the Notion webhook working. Evening read a chapter of Atomic Habits: "Every action is a vote for the person you want to become." That line really stayed with me.</textarea>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+          <button class="voice-btn">🎙</button>
+          <span style="font-size:11px;color:#8B6B4A">Voice input</span>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <label class="form-label">Today's score</label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input class="form-score" type="number" value="8" min="1" max="10">
+        <span style="font-size:13px;color:#8B6B4A">/10</span>
+      </div>
+    </div>
+    <div class="sec">
+      <label class="form-label">Tags</label>
+      <div class="form-tags">
+        <div class="f-tag on">Learning</div><div class="f-tag on">Reading</div><div class="f-tag on">Exercise</div>
+        <div class="f-tag">Work</div><div class="f-tag">Social</div><div class="f-tag">Creative</div><div class="f-tag">Reflection</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" onclick="toggleResult()">✨ Generate Review</button>
+    </div>
+
+    <div id="daily-result" style="display:none;margin-top:28px">
+      <div style="font-size:15px;font-weight:600;border-bottom:1px solid #E4D4C0;padding-bottom:10px;margin-bottom:16px">Daily Review</div>
+      <div class="card-grid">
+        <div class="card warm full">
+          <div class="lbl"><div class="lbl-main">💡 Daily insight</div></div>
+          <div class="quote">"Every small action is a vote for who you're becoming — today cast eight good ones."</div>
+        </div>
+        <div class="card">
+          <div class="lbl"><div class="lbl-main">⭐ Score</div></div>
+          <div class="big-score">8</div><div class="score-sub">/10 · Fulfilling and meaningful</div>
+        </div>
+        <div class="card">
+          <div class="lbl"><div class="lbl-main">🌊 Emotions</div></div>
+          <div class="tags"><span class="tag">motivated</span><span class="tag">clear-headed</span><span class="tag">curious</span><span class="tag">calm</span></div>
+        </div>
+        <div class="card">
+          <div class="lbl"><div class="lbl-main">👥 People</div></div>
+          <div class="people-list">
+            <div class="p-row"><span class="p-name">Mia</span><span class="p-desc">Quick catch-up over coffee, energizing</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="lbl"><div class="lbl-main">📚 Currently reading</div></div>
+          <div class="tags"><span class="tag">Atomic Habits — Ch. 4</span></div>
+        </div>
+        <div class="card">
+          <div class="lbl"><div class="lbl-main">💪 Health</div></div>
+          <div class="tags"><span class="tag">Morning run 5km</span><span class="tag">Feeling light</span></div>
+        </div>
+        <div class="card full">
+          <div class="lbl"><div class="lbl-main">🧠 What I learned</div></div>
+          <div class="tags"><span class="tag">Identity-based habit change</span><span class="tag">Notion API block nesting</span></div>
+        </div>
+        <div class="card full">
+          <div class="lbl"><div class="lbl-main">🪞 Reflection</div></div>
+          <p style="font-size:15px;color:#4A3324;line-height:1.8">Today had a quiet kind of fullness to it. The morning run cleared my head in a way that made the afternoon's work feel effortless — I finally cracked the API integration I've been stuck on. That passage from Atomic Habits really landed: change isn't a single breakthrough, it's the accumulation of small votes. I want to keep casting them.</p>
+        </div>
+        <div class="card full">
+          <div class="lbl"><div class="lbl-main">🎯 Next steps</div></div>
+          <div>
+            <div class="check-row"><div class="checkbox"></div><span>Keep reading Atomic Habits, note 3 immediately actionable habits</span></div>
+            <div class="check-row"><div class="checkbox"></div><span>Write up the API integration notes while they're fresh</span></div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:10px">
+        <button class="btn btn-outline">💾 Save to Notion</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REVIEW -->
+<div id="page-review" class="main page">
+  <div class="tab-bar">
+    <div class="tab" onclick="showTab('daily',this)">Daily</div>
+    <div class="tab active" onclick="showTab('weekly',this)">Weekly</div>
+    <div class="tab" onclick="showTab('monthly',this)">Monthly</div>
+  </div>
+
+  <!-- DAILY TAB -->
+  <div id="tab-daily" style="display:none">
+    <div class="ptitle">Daily Review</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+      <span style="font-size:13px;color:#8B6B4A">Date</span>
+      <input type="text" value="2026-05-28" style="width:140px;height:34px;padding:0 12px;border:1px solid #E4D4C0;border-radius:8px;font-size:13px;background:#fff;outline:none">
+      <button class="btn btn-primary">✨ Generate</button>
+    </div>
+    <div class="card-grid">
+      <div class="card warm full">
+        <div class="lbl"><div class="lbl-main">💡 Daily insight</div></div>
+        <div class="quote">"Every small action is a vote for who you're becoming — today cast eight good ones."</div>
+      </div>
+      <div class="card"><div class="lbl"><div class="lbl-main">⭐ Score</div></div><div class="big-score">8</div><div class="score-sub">/10 · Fulfilling and meaningful</div></div>
+      <div class="card"><div class="lbl"><div class="lbl-main">🌊 Emotions</div></div><div class="tags"><span class="tag">motivated</span><span class="tag">clear-headed</span><span class="tag">curious</span></div></div>
+      <div class="card"><div class="lbl"><div class="lbl-main">💪 Health</div></div><div class="tags"><span class="tag">Morning run 5km</span><span class="tag">Good sleep</span></div></div>
+      <div class="card"><div class="lbl"><div class="lbl-main">📚 Reading</div></div><div class="tags"><span class="tag">Atomic Habits</span></div></div>
+      <div class="card"><div class="lbl"><div class="lbl-main">🧠 Learning</div></div><div class="tags"><span class="tag">Notion API integration</span></div></div>
+    </div>
+  </div>
+
+  <!-- WEEKLY TAB -->
+  <div id="tab-weekly">
+    <div class="ptitle">Weekly Review</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px;flex-wrap:wrap">
+      <span style="font-size:13px;color:#8B6B4A">Week</span>
+      <input type="text" value="5-25-31" style="width:110px;height:34px;padding:0 12px;border:1px solid #E4D4C0;border-radius:8px;font-size:13px;background:#fff;outline:none">
+      <button class="btn btn-primary">✨ Generate</button>
+      <button class="btn btn-saved">✓ Saved to Notion</button>
+    </div>
+    <div class="card-grid">
+      <div class="card warm full">
+        <div class="lbl"><div class="lbl-main">💡 Weekly insight</div></div>
+        <div class="quote">"A week of building quietly — code, morning runs, and the courage to stop seeking approval."</div>
+      </div>
+      <div class="card">
+        <div class="lbl"><div class="lbl-main">📈 Score trend</div></div>
+        <div class="big-score">7.8</div><div class="score-sub">/10 · Steady and fulfilling</div>
+        <p style="font-size:13px;color:#2C1F14;margin-top:10px">7 → 8 → 6 → 9 → 8 → 8 → 8</p>
+      </div>
+      <div class="card">
+        <div class="lbl"><div class="lbl-main">👥 People</div></div>
+        <div class="people-list">
+          <div class="p-row"><span class="p-name">Chloe</span><span class="p-desc">Deep coffee chat, felt energizing</span></div>
+          <div class="p-row"><span class="p-name">Mia</span><span class="p-desc">Colleague, great collaboration this week</span></div>
+          <div class="p-row"><span class="p-name">Jay</span><span class="p-desc">Project partner, smooth progress</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="lbl"><div class="lbl-main">🌊 Emotions</div></div>
+        <div class="tags"><span class="tag">calm</span><span class="tag">fulfilled</span><span class="tag">occasional anxiety</span><span class="tag">light</span></div>
+      </div>
+      <div class="card">
+        <div class="lbl"><div class="lbl-main">📍 Places</div></div>
+        <div class="tags"><span class="tag">riverside path ×4</span><span class="tag">coffee shop ×2</span><span class="tag">home office</span></div>
+      </div>
+      <div class="card">
+        <div class="lbl"><div class="lbl-main">🧠 What I learned</div></div>
+        <div class="tags"><span class="tag">Next.js API Route internals</span><span class="tag">Identity-based habit change</span></div>
+      </div>
+      <div class="card">
+        <div class="lbl"><div class="lbl-main">📚 Reading</div></div>
+        <div class="tags"><span class="tag">Atomic Habits — Ch. 3</span></div>
+      </div>
+      <div class="card">
+        <div class="lbl"><div class="lbl-main">💪 Health</div></div>
+        <div class="tags"><span class="tag">Runs ×4</span><span class="tag">Avg sleep 7h</span><span class="tag">Migraine on Wed</span></div>
+      </div>
+      <div class="card">
+        <div class="lbl"><div class="lbl-main">⚡ Energy Distribution</div></div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+          <div><div style="display:flex;justify-content:space-between;font-size:12px;color:#8B6B4A;margin-bottom:4px"><span>Learning & coding</span><span>35%</span></div><div class="prog-track"><div class="prog-fill" style="width:35%"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;font-size:12px;color:#8B6B4A;margin-bottom:4px"><span>Deep work</span><span>30%</span></div><div class="prog-track"><div class="prog-fill" style="width:30%"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;font-size:12px;color:#8B6B4A;margin-bottom:4px"><span>Health & exercise</span><span>20%</span></div><div class="prog-track"><div class="prog-fill" style="width:20%"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;font-size:12px;color:#8B6B4A;margin-bottom:4px"><span>Social</span><span>15%</span></div><div class="prog-track"><div class="prog-fill" style="width:15%"></div></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="lbl"><div class="lbl-main">🌱 Progress zones</div></div>
+        <div class="zone-row">🟢 <strong>Breakthrough:</strong> First self-built Next.js API route working end-to-end</div>
+        <div class="zone-row">🟡 <strong>Practicing:</strong> Reducing dependence on external validation</div>
+        <div class="zone-row">🔵 <strong>Planted:</strong> Identity-based habit formation</div>
+      </div>
+      <div class="card">
+        <div class="lbl"><div class="lbl-main">🌊 Emotion pattern</div></div>
+        <p style="font-size:14px;color:#2C1F14">Afternoon slumps are real — exercise reliably lifts mood. Most at peace during solo reading or deep focus sessions.</p>
+      </div>
+      <div class="card">
+        <div class="lbl"><div class="lbl-main">🔍 Core challenge</div></div>
+        <p style="font-size:14px;color:#2C1F14">The habit of seeking approval is still consuming energy — internal anchor not strong enough yet.</p>
+      </div>
+      <div class="card full">
+        <div class="lbl"><div class="lbl-main">📌 Due dates</div></div>
+        <div class="due-list">
+          <div class="due-row"><span class="due-date">2026-06-02</span><span class="due-title">Submit project proposal</span><span class="due-note">Need deck ready by Mon</span></div>
+          <div class="due-row"><span class="due-date">2026-06-05</span><span class="due-title">Product review meeting</span><span class="due-note">Prepare PRD first</span></div>
+        </div>
+      </div>
+      <div class="card full">
+        <div class="lbl"><div class="lbl-main">🎯 Next week</div></div>
+        <div>
+          <div class="check-row"><div class="checkbox"></div><span>Finish HandLog monthly review feature and test end-to-end</span></div>
+          <div class="check-row"><div class="checkbox"></div><span>Finish Atomic Habits</span></div>
+          <div class="check-row"><div class="checkbox"></div><span>Maintain 4 runs per week</span></div>
+        </div>
+      </div>
+      <div class="card full">
+        <div class="lbl"><div class="lbl-main">🪞 Weekly reflection</div></div>
+        <p style="font-size:15px;color:#4A3324;line-height:1.8">This week had a quiet, fulfilling quality to it. Getting the API working end-to-end gave me a real sense of accomplishment — that "oh, so that's how it works" moment kept me energized for the rest of the day. The coffee chat with Chloe made me look at my need for external validation more honestly. Still working on it. The core challenge remains, but I have more words for it now.</p>
+      </div>
+      <div class="card full warm">
+        <div class="lbl"><div class="lbl-main">🧘 A note for you</div></div>
+        <p style="font-size:14px;color:#8B6B4A;line-height:1.8;font-style:italic">You're quietly completing a shift — from "need to prove yourself to others" to "I know what I'm building and why." This isn't an overnight thing. It's daily practice. Every time you choose to focus on your own rhythm instead of someone else's opinion, that's real growth.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MONTHLY TAB -->
+  <div id="tab-monthly" style="display:none">
+    <div class="ptitle">Monthly Review</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px;flex-wrap:wrap">
+      <span style="font-size:13px;color:#8B6B4A">Month</span>
+      <select style="height:34px;padding:0 12px;border:1px solid #E4D4C0;border-radius:8px;font-size:13px;background:#fff;outline:none"><option>2026</option></select>
+      <select style="height:34px;padding:0 12px;border:1px solid #E4D4C0;border-radius:8px;font-size:13px;background:#fff;outline:none"><option>May</option></select>
+      <button class="btn btn-primary">✨ Generate</button>
+      <button class="btn btn-saved">✓ Saved to Notion</button>
+    </div>
+    <div class="card-grid">
+      <div class="card warm full">
+        <div class="lbl"><div class="lbl-main">💡 Monthly insight</div></div>
+        <div class="quote">"A month of quiet exploration — building a life centered on learning, craft, and creative curiosity rather than seeking outward validation."</div>
+      </div>
+      <div class="card"><div class="lbl"><div class="lbl-main">⭐ Score</div></div><div class="big-score">8</div><div class="score-sub">/10 · Fulfilling, emotionally stable</div></div>
+      <div class="card">
+        <div class="lbl"><div class="lbl-main">👥 People</div></div>
+        <div class="people-list">
+          <div class="p-row"><span class="p-name">Chloe</span><span class="p-desc">Deep conversations, emotional support</span></div>
+          <div class="p-row"><span class="p-name">Mia</span><span class="p-desc">Colleague, steady collaboration</span></div>
+          <div class="p-row"><span class="p-name">Jay</span><span class="p-desc">Project partner, good energy</span></div>
+        </div>
+      </div>
+      <div class="card"><div class="lbl"><div class="lbl-main">🌊 Emotions</div></div><div class="tags"><span class="tag">mostly calm</span><span class="tag">fulfillment up</span><span class="tag">anxiety down</span><span class="tag">occasional joy</span></div></div>
+      <div class="card"><div class="lbl"><div class="lbl-main">📍 Places</div></div><div class="tags"><span class="tag">riverside ×8</span><span class="tag">coffee shop ×5</span><span class="tag">watercolor class ×2</span></div></div>
+      <div class="card"><div class="lbl"><div class="lbl-main">📅 Key events</div></div><div class="tags"><span class="tag">🚀 HandLog shipped</span><span class="tag">📚 Finished two books</span><span class="tag">☕ Reconnected with Chloe</span><span class="tag">🏃 Running habit built</span></div></div>
+      <div class="card"><div class="lbl"><div class="lbl-main">🧠 What I learned</div></div><div class="tags"><span class="tag">Next.js full-stack</span><span class="tag">Notion API integration</span><span class="tag">Identity-based habit change</span></div></div>
+      <div class="card"><div class="lbl"><div class="lbl-main">📚 Reading</div></div><div class="tags"><span class="tag">Atomic Habits</span><span class="tag">Flow</span></div></div>
+      <div class="card"><div class="lbl"><div class="lbl-main">💪 Health</div></div><div class="tags"><span class="tag">Runs ×16</span><span class="tag">Avg sleep 7.2h</span><span class="tag">Migraine ×2</span></div></div>
+      <div class="card"><div class="lbl"><div class="lbl-main">✍️ Creative output</div></div><div class="tags"><span class="tag">HandLog shipped</span><span class="tag">28 journal entries</span><span class="tag">Watercolor workshop</span></div></div>
+      <div class="card full">
+        <div class="lbl"><div class="lbl-main">🪞 Monthly reflection</div></div>
+        <p style="font-size:15px;color:#4A3324;line-height:1.8">May was a month of turning inward. I gave my time to code, books, morning runs, and conversations that actually matter — and stepped back from draining social obligations. The biggest breakthrough was shipping HandLog. It's not just an app; it's proof to myself that I can learn and build. Reading Atomic Habits showed me a pattern I've had for years: I try to change with willpower rather than starting with identity. I'm practicing something different now. Still figuring it out, but at least I have a direction.</p>
+      </div>
+      <div class="card full warm">
+        <div class="lbl"><div class="lbl-main">🧘 A note for you</div></div>
+        <p style="font-size:14px;color:#8B6B4A;line-height:1.8;font-style:italic">You're quietly shifting from "proving yourself to others" to "becoming the person you want to be" — and that's a mature kind of internal growth worth cherishing. Every day you showed up to write was a real gift to yourself. You're taking your life seriously.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="page-dashboard" class="main page">
+  <div class="ptitle">Dashboard</div>
+  <div class="psub">Last 30 days · May 2026</div>
+  <div class="stat-cards">
+    <div class="stat-card"><div class="stat-label">Total entries</div><div class="stat-val">28</div><div class="stat-sub-s">journal days recorded</div></div>
+    <div class="stat-card"><div class="stat-label">Average score</div><div class="stat-val accent">7.6</div><div class="stat-sub-s">out of 10</div></div>
+    <div class="stat-card"><div class="stat-label">Current streak</div><div class="stat-val">12d</div><div class="stat-sub-s">consecutive days</div></div>
+  </div>
+  <div class="card" style="margin-bottom:12px">
+    <div style="font-size:14px;font-weight:600;margin-bottom:4px">📈 Score trend</div>
+    <div style="font-size:12px;color:#8B6B4A;margin-bottom:14px">Last 30 entries</div>
+    <svg width="100%" viewBox="0 0 760 180" xmlns="http://www.w3.org/2000/svg">
+      <line x1="40" y1="16" x2="750" y2="16" stroke="#EDE3D8" stroke-width="1"/>
+      <line x1="40" y1="52" x2="750" y2="52" stroke="#EDE3D8" stroke-width="1"/>
+      <line x1="40" y1="88" x2="750" y2="88" stroke="#EDE3D8" stroke-width="1"/>
+      <line x1="40" y1="124" x2="750" y2="124" stroke="#EDE3D8" stroke-width="1"/>
+      <line x1="40" y1="160" x2="750" y2="160" stroke="#EDE3D8" stroke-width="1"/>
+      <text x="30" y="20" text-anchor="end" font-size="10" fill="#8B6B4A">10</text>
+      <text x="30" y="56" text-anchor="end" font-size="10" fill="#8B6B4A">8</text>
+      <text x="30" y="92" text-anchor="end" font-size="10" fill="#8B6B4A">6</text>
+      <text x="30" y="128" text-anchor="end" font-size="10" fill="#8B6B4A">4</text>
+      <text x="30" y="164" text-anchor="end" font-size="10" fill="#8B6B4A">2</text>
+      <polyline fill="none" stroke="#C4783A" stroke-width="2.5" stroke-linejoin="round" points="40,88 65,70 90,88 115,52 140,70 165,88 190,52 215,70 240,88 265,70 290,52 315,70 340,88 365,52 390,70 415,52 440,88 465,70 490,52 515,88 540,70 565,52 590,70 615,52 640,70 665,52 690,70 715,52 740,70"/>
+      <circle cx="190" cy="52" r="4" fill="#C4783A"/><circle cx="365" cy="52" r="4" fill="#C4783A"/><circle cx="415" cy="52" r="4" fill="#C4783A"/>
+      <text x="40" y="176" text-anchor="middle" font-size="10" fill="#8B6B4A">5/1</text>
+      <text x="280" y="176" text-anchor="middle" font-size="10" fill="#8B6B4A">5/15</text>
+      <text x="540" y="176" text-anchor="middle" font-size="10" fill="#8B6B4A">5/26</text>
+      <text x="740" y="176" text-anchor="middle" font-size="10" fill="#8B6B4A">5/28</text>
+    </svg>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="card">
+      <div style="font-size:14px;font-weight:600;margin-bottom:12px">🏷 Top tags</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span style="color:#4A3324;font-weight:500">Learning</span><span style="color:#8B6B4A">22×</span></div><div class="prog-track"><div class="prog-fill" style="width:100%"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span style="color:#4A3324;font-weight:500">Exercise</span><span style="color:#8B6B4A">19×</span></div><div class="prog-track"><div class="prog-fill" style="width:86%;background:#8B6B4A"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span style="color:#4A3324;font-weight:500">Reading</span><span style="color:#8B6B4A">16×</span></div><div class="prog-track"><div class="prog-fill" style="width:72%;background:#D4A574"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span style="color:#4A3324;font-weight:500">Creative</span><span style="color:#8B6B4A">11×</span></div><div class="prog-track"><div class="prog-fill" style="width:50%;background:#6B8F5E"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span style="color:#4A3324;font-weight:500">Social</span><span style="color:#8B6B4A">9×</span></div><div class="prog-track"><div class="prog-fill" style="width:41%;background:#C4A98A"></div></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:14px;font-weight:600;margin-bottom:12px">📋 Recent entries</div>
+      <div style="border-top:1px solid #EDE3D8">
+        <div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #EDE3D8;align-items:center">
+          <span style="font-size:12px;color:#8B6B4A;width:74px;flex-shrink:0">2026-05-28</span>
+          <span style="font-size:13px;font-weight:600;color:#C4783A;width:28px">8</span>
+          <span style="font-size:12px;color:#8B6B4A;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Every small action is a vote for who you're becoming.</span>
+        </div>
+        <div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #EDE3D8;align-items:center">
+          <span style="font-size:12px;color:#8B6B4A;width:74px;flex-shrink:0">2026-05-27</span>
+          <span style="font-size:13px;font-weight:600;color:#C4783A;width:28px">9</span>
+          <span style="font-size:12px;color:#8B6B4A;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Breakthrough moment — the API finally worked.</span>
+        </div>
+        <div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #EDE3D8;align-items:center">
+          <span style="font-size:12px;color:#8B6B4A;width:74px;flex-shrink:0">2026-05-26</span>
+          <span style="font-size:13px;font-weight:600;color:#C4783A;width:28px">6</span>
+          <span style="font-size:12px;color:#8B6B4A;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Tired, but being present was the answer.</span>
+        </div>
+        <div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #EDE3D8;align-items:center">
+          <span style="font-size:12px;color:#8B6B4A;width:74px;flex-shrink:0">2026-05-25</span>
+          <span style="font-size:13px;font-weight:600;color:#C4783A;width:28px">8</span>
+          <span style="font-size:12px;color:#8B6B4A;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Saw my own potential in someone else's story.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TIMELINE -->
+<div id="page-timeline" class="main page">
+  <div class="ptitle">Timeline</div>
+  <input type="text" placeholder="Search journal entries..." style="width:100%;height:40px;padding:0 16px;border:1px solid #E4D4C0;border-radius:10px;background:#fff;font-size:13px;color:#2C1F14;margin-bottom:12px;outline:none">
+  <div class="filter-bar">
+    <div class="f-btn active">All</div>
+    <div class="f-btn">Learning</div><div class="f-btn">Exercise</div><div class="f-btn">Reading</div>
+    <div class="f-btn">Social</div><div class="f-btn">Creative</div><div class="f-btn">Reflection</div>
+  </div>
+  <div class="m-group">
+    <div class="m-label">May 2026 <span>· 28 entries</span></div>
+    <div class="tl-grid">
+      <div class="tl-card"><div class="tl-top" style="background:linear-gradient(135deg,#FDF0F0,#F5D8D8);color:#B86070">8</div><div class="tl-body"><div class="tl-date">May 28 · Thursday</div><div class="tl-ins">Every small action is a vote for who you're becoming.</div><div class="tl-tags"><span class="tl-tag">Reading</span><span class="tl-tag">Exercise</span><span class="tl-tag">Learning</span></div></div></div>
+      <div class="tl-card"><div class="tl-top" style="background:linear-gradient(135deg,#EEF5EE,#D4E8D4);color:#5A8A5A">9</div><div class="tl-body"><div class="tl-date">May 27 · Wednesday</div><div class="tl-ins">Breakthrough moment — the API finally worked.</div><div class="tl-tags"><span class="tl-tag">Learning</span><span class="tl-tag">Exercise</span></div></div></div>
+      <div class="tl-card"><div class="tl-top" style="background:linear-gradient(135deg,#F0EEF8,#DDD4F0);color:#7A6AB0">6</div><div class="tl-body"><div class="tl-date">May 26 · Tuesday</div><div class="tl-ins">Tired, but being present was the answer.</div><div class="tl-tags"><span class="tl-tag">Reflection</span></div></div></div>
+      <div class="tl-card"><div class="tl-top" style="background:linear-gradient(135deg,#FDF4EC,#F0E0C8);color:#B87040">8</div><div class="tl-body"><div class="tl-date">May 25 · Monday</div><div class="tl-ins">Saw my own potential in someone else's story.</div><div class="tl-tags"><span class="tl-tag">Learning</span><span class="tl-tag">Social</span></div></div></div>
+      <div class="tl-card"><div class="tl-top" style="background:linear-gradient(135deg,#EEF2F8,#D4DFF0);color:#5A6A98">8</div><div class="tl-body"><div class="tl-date">May 24 · Sunday</div><div class="tl-ins">Gave myself a quiet hour — worth it.</div><div class="tl-tags"><span class="tl-tag">Reading</span><span class="tl-tag">Creative</span></div></div></div>
+      <div class="tl-card"><div class="tl-top" style="background:linear-gradient(135deg,#FDF0F0,#F5D8D8);color:#B86070">7</div><div class="tl-body"><div class="tl-date">May 23 · Saturday</div><div class="tl-ins">Long walk reset everything.</div><div class="tl-tags"><span class="tl-tag">Exercise</span><span class="tl-tag">Reflection</span></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- CHAT -->
+<div id="page-chat" class="main page">
+  <div class="chat-wrap">
+    <div style="padding:16px 0 12px;border-bottom:1px solid #E4D4C0;margin-bottom:0">
+      <h1 style="font-size:20px;font-weight:700;">💬 Deep Chat</h1>
+      <p style="font-size:13px;color:#8B6B4A;margin-top:3px">Ask anything about your journal — patterns, trends, emotions, growth</p>
+      <div style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;background:#F5EDE0;border:1px solid #E4D4C0;border-radius:20px;padding:4px 12px;font-size:12px;color:#8B6B4A">
+        📓 Read <strong style="color:#C4783A">38 weeks</strong> of journal · Sep 2025 – May 2026
+      </div>
+    </div>
+    <div class="chat-messages">
+      <div class="sys-msg">Conversation started · AI has read your full journal</div>
+      <div class="cmsg ai">
+        <div class="cbubble">Hi! I've read your journal from September 2025 to now — 38 weeks of entries.<br><br>You can ask me anything about yourself: what you were focused on during a certain period, which themes keep coming up, how your energy patterns have changed. I'll answer based on what's actually in your notes.</div>
+      </div>
+      <div class="cmsg user">
+        <div class="cbubble">What have I been spending the most time and energy on these past few months?</div>
+      </div>
+      <div class="cmsg ai">
+        <div class="cbubble">Looking at your tags and daily entries, your energy has been concentrated in three main areas:<br><br><strong>1. Learning & building</strong> (highest frequency)<br>Almost every week — from following tutorials to solving real problems with code.<br><br><strong>2. Health & movement</strong><br>Running appears consistently. It seems to be both a physical habit and an emotional anchor for you.<br><br><strong>3. Reading & reflection</strong><br>Books and journaling appear together often — you tend to process ideas in writing.</div>
+      </div>
+      <div class="cmsg user">
+        <div class="cbubble">Any patterns around when my energy is lowest?</div>
+      </div>
+      <div class="cmsg ai" id="chat-typing">
+        <div class="cbubble"><div style="display:flex;gap:4px;align-items:center;padding:4px 0"><div style="width:7px;height:7px;border-radius:50%;background:#C4A98A;animation:bounce 1.2s infinite"></div><div style="width:7px;height:7px;border-radius:50%;background:#C4A98A;animation:bounce 1.2s .2s infinite"></div><div style="width:7px;height:7px;border-radius:50%;background:#C4A98A;animation:bounce 1.2s .4s infinite"></div></div></div>
+      </div>
+    </div>
+    <div class="chat-input-area">
+      <div class="quick-prompts">
+        <button class="qbtn">When was my energy highest?</button>
+        <button class="qbtn">What topics keep coming up?</button>
+        <button class="qbtn">What am I avoiding?</button>
+        <button class="qbtn">What have I learned this month?</button>
+      </div>
+      <div class="chat-row">
+        <textarea class="chat-box" placeholder="Ask anything about yourself..." rows="1"></textarea>
+        <button class="send-btn">↑</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<style>
+@keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+</style>
+
+<script>
+function enterDemo() {
+  document.getElementById('page-login').style.display = 'none';
+  document.getElementById('app-shell').style.display = 'block';
+}
+function showPage(name, el) {
+  document.querySelectorAll('.main.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+}
+function showTab(name, el) {
+  document.querySelectorAll('#page-review [id^="tab-"]').forEach(t => t.style.display = 'none');
+  document.getElementById('tab-' + name).style.display = 'block';
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+function toggleResult() {
+  const el = document.getElementById('daily-result');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+</script>
+</body>
+</html>

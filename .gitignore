@@ -38,3 +38,7 @@ public/font.ttf
 .claude/
 
 # local mockup files (not for repo)
+
+# podcast & speaking materials (local only)
+outputs/podcast-speaking/
+PPT-podcast-outputs/

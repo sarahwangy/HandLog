@@ -10,6 +10,11 @@ HandLog is a personal AI journaling app that turns your raw daily notes into str
 
 Every day, I voice-record what happened. HandLog transcribes it, writes it into my Notion database, then uses Claude to generate a structured review: key people, events, emotions, energy distribution, growth zones, next steps, and a hand-drawn-style summary image. At the end of the week or month, it aggregates everything into a weekly or monthly review — and now, a visual summary table.
 
+![HandLog Login Page — Sign in with Google to connect your Notion workspace](screenshot-login.png)
+*The login page. One tap with Google, and your Notion workspace connects automatically.*
+
+---
+
 **The core loop:**
 
 ```
@@ -27,6 +32,9 @@ Save back to Notion — toggle + callout blocks
       ↓
 Weekly / Monthly Table — date + bullet points summary
 ```
+
+![HandLog Flow Diagram — from voice input to structured Notion review](screenshot-flow.png)
+*The full pipeline: your voice goes in, a structured life review comes out — all saved to your own Notion.*
 
 ---
 
@@ -103,13 +111,13 @@ Every Claude call returns structured JSON, not prose. For example, the daily rev
 
 ```json
 {
-  "people": ["老公", "Sally HK"],
-  "emotions": ["充实", "有点焦虑"],
-  "events": [{"category": "学习", "items": ["完成 API 开发"]}],
+  "people": ["mentor Chloe", "colleague Mia"],
+  "emotions": ["energized", "focused"],
+  "events": [{"category": "Learning", "items": ["Finished API module"]}],
   "score": 8,
-  "scoreReason": "高产出但有点累",
-  "nextSteps": ["周四前完成 PR", "给妈妈打电话"],
-  "reviewParagraph": "今天是很充实的一天..."
+  "scoreReason": "High output, felt in flow state",
+  "nextSteps": ["Submit PR by Thursday", "Morning run streak day 5"],
+  "reviewParagraph": "Today was a productive and energizing day..."
 }
 ```
 
@@ -131,9 +139,9 @@ all weeks combined → Claude call → all bullets
 Prompts include explicit JSON schema examples so Claude always returns parseable output:
 
 ```
-以 JSON 数组格式输出，结构如下：
-[{"date": "5-4", "bullets": ["事项1", "事项2"]}]
-只输出 JSON，不要任何其他文字。
+Output as a JSON array with the following structure:
+[{"date": "5-4", "bullets": ["item 1", "item 2"]}]
+Output JSON only, no other text.
 ```
 
 ### 4. Error-Resilient JSON Parsing
@@ -208,6 +216,9 @@ Total time from description to working feature: ~45 minutes.
 
 ## App Pages
 
+![HandLog Daily Review Page — emotions, energy distribution, next steps](screenshot-review.png)
+*The Daily Review tab: AI breaks your journal entry into emotions, energy usage, people, and next steps — rendered as cards.*
+
 ### Capture (`/capture`)
 The input page. Supports:
 - Text input
@@ -228,6 +239,9 @@ Stats view: word cloud from journal content, score trends, top people and places
 ### Timeline (`/timeline`)
 A card wall showing every day of journal content, parsed from weekly entries, displayed chronologically.
 
+![HandLog Profile Page — journal stats, Notion connection, settings](screenshot-profile.png)
+*The Me page: your journaling stats (entries, weeks, average score), Notion connection status, and preferences.*
+
 ### Chat (`/chat`)
 An AI assistant that has read your Notion journal as context. Ask it questions like "What was I stressed about in May?" or "What are my patterns around energy?"
 
@@ -242,9 +256,9 @@ Review history — all previously generated reviews.
 
 **Step 1:** API reads the week page's `简短日常` field from Notion:
 ```
-一. Wheeler hills library借书看书，整理4月复盘，遇见Sally HK
-二. Bentleigh toy library办卡，完成4月复盘并获AI建议...
-三. 预定6月sewing课程，整理AI项目创意数据库...
+一. Morning run 5km, April retrospective review, coffee catchup with friend Mia
+二. Yoga session, completed April retrospective with AI suggestions, meal prep for the week
+三. Booked June watercolor workshop, organized AI project ideas database
 ```
 
 **Step 2:** Sent to Claude Haiku with prompt: *"Identify each day's content, extract 2–4 key points per day, return JSON array."*
@@ -252,8 +266,8 @@ Review history — all previously generated reviews.
 **Step 3:** Claude returns:
 ```json
 [
-  {"date": "5-4", "bullets": ["Wheeler Hills图书馆借书", "整理4月复盘", "遇见Sally HK"]},
-  {"date": "5-5", "bullets": ["Bentleigh toy library办卡", "完成复盘获AI建议"]},
+  {"date": "5-4", "bullets": ["Morning run 5km", "April retrospective review", "Coffee with Mia"]},
+  {"date": "5-5", "bullets": ["Yoga session", "Completed retrospective with AI suggestions"]},
   ...
 ]
 ```
