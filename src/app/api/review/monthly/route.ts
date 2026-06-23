@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getNotionTokenInternal, getNotionDatabaseId } from "@/lib/auth";
+import { getNotionTokenInternal, getNotionDatabaseId, getAuthSession } from "@/lib/auth";
 import { generateMonthlyReview } from "@/lib/claude";
 import { queryDatabase } from "@/lib/notion";
 
@@ -7,6 +7,11 @@ import { queryDatabase } from "@/lib/notion";
 // Body: { year: 2026, month: 5 }
 // 读取本月所有周页面的原始「简短日常」，生成月复盘 JSON（不自动写入 Notion，由前端 Save 按钮触发保存）
 export async function POST(req: NextRequest) {
+  const session = await getAuthSession();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { year, month } = await req.json() as { year: number; month: number };
   if (!year || !month) {
     return NextResponse.json({ error: "Missing year or month" }, { status: 400 });

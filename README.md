@@ -4,7 +4,16 @@
 
 🔗 **Live Demo**: [hand-log.vercel.app](https://hand-log.vercel.app)
 📄 **Static Demo**: Open [`handlog-demo.html`](./handlog-demo.html) locally to preview all pages
+📝 **Read the Story**: [I Built an AI Journal That Thinks With Me](https://medium.com/@sarahwang9/i-built-an-ai-journal-that-thinks-with-me-a-vibe-coding-story-1f62ebb31e42)
 🇨🇳 **中文文档**: [README_CN.md](./README_CN.md)
+
+---
+
+## Why I Built This
+
+I used to spend 10–15 minutes every night trying to recall what actually happened during the day — writing fragmented notes that never turned into anything useful. I wanted a tool that could take my raw, messy thoughts and turn them into something structured I could actually reflect on.
+
+HandLog was born from that frustration. You speak or type freely, and the AI does the hard work: organizing your thoughts into a daily review with mood scores, key people, events, and reflections — then saving everything to Notion automatically. At the end of the week or month, one click generates a review that shows you patterns you wouldn't have noticed on your own.
 
 ---
 

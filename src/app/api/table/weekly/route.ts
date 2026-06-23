@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getNotionTokenInternal, getNotionDatabaseId } from "@/lib/auth";
+import { getNotionTokenInternal, getNotionDatabaseId, getAuthSession } from "@/lib/auth";
 import { findOrCreateWeekPage, getPage } from "@/lib/notion";
 import { generateWeeklyTableBullets } from "@/lib/claude";
 
@@ -7,6 +7,11 @@ import { generateWeeklyTableBullets } from "@/lib/claude";
 // Body: { weekLabel: "5-4-10" }
 // 读取周页面的「简短日常」原始内容，让 Claude 解析每天内容并提取要点，生成 markdown 表格
 export async function POST(req: NextRequest) {
+  const session = await getAuthSession();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { weekLabel } = await req.json() as { weekLabel: string };
   if (!weekLabel) return NextResponse.json({ error: "Missing weekLabel" }, { status: 400 });
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
-import { getNotionTokenInternal } from "@/lib/auth";
+import { getNotionTokenInternal, getAuthSession } from "@/lib/auth";
 import { appendImageBlock } from "@/lib/notion";
 import type { DailyReview } from "@/lib/claude";
 
@@ -9,6 +9,11 @@ import type { DailyReview } from "@/lib/claude";
 // Returns: { imageUrl: string }
 // 日复盘图存入当天 Toggle 的 Callout 里（block 形式）
 export async function POST(req: NextRequest) {
+  const session = await getAuthSession();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const body = await req.json() as { review: DailyReview; calloutId?: string };
   if (!body.review) {
     return NextResponse.json({ error: "Missing review data" }, { status: 400 });

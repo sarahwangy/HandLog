@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getNotionTokenInternal, getNotionDatabaseId } from "@/lib/auth";
+import { getNotionTokenInternal, getNotionDatabaseId, getAuthSession } from "@/lib/auth";
 import { generateWeeklyReview } from "@/lib/claude";
 import { findOrCreateWeekPage, getPage } from "@/lib/notion";
 
@@ -7,6 +7,11 @@ import { findOrCreateWeekPage, getPage } from "@/lib/notion";
 // Body: { weekLabel: "5-25-31" }
 // 读取本周页面的原始「简短日常」，生成周复盘 JSON（不自动写入 Notion，由前端 Save 按钮触发保存）
 export async function POST(req: NextRequest) {
+  const session = await getAuthSession();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { weekLabel } = await req.json() as { weekLabel: string };
   if (!weekLabel) {
     return NextResponse.json({ error: "Missing weekLabel" }, { status: 400 });

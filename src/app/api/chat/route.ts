@@ -5,7 +5,7 @@
 import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { fetchWeekContexts, type WeekContext } from "@/lib/chat-context";
-import { getNotionTokenInternal, getNotionDatabaseId } from "@/lib/auth";
+import { getNotionTokenInternal, getNotionDatabaseId, getAuthSession } from "@/lib/auth";
 import { findMemoryPage, readMemoryBlocks } from "@/lib/notion";
 
 export const dynamic = "force-dynamic";
@@ -44,6 +44,11 @@ ${entries}
 }
 
 export async function POST(req: NextRequest) {
+  const session = await getAuthSession();
+  if (!session) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+  }
+
   let messages: { role: "user" | "assistant"; content: string }[];
   let mood: string | null = null;
   try {

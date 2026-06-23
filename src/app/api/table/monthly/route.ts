@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getNotionTokenInternal, getNotionDatabaseId } from "@/lib/auth";
+import { getNotionTokenInternal, getNotionDatabaseId, getAuthSession } from "@/lib/auth";
 import { queryDatabase, findOrCreateMonthlyTablePage } from "@/lib/notion";
 import { generateMonthlyTableBullets, type DayBullets } from "@/lib/claude";
 
@@ -8,6 +8,11 @@ import { generateMonthlyTableBullets, type DayBullets } from "@/lib/claude";
 // 读取该月所有周页面（"5-4-10" 格式）的「简短日常」，让 Claude 解析每天内容，生成 markdown 表格
 // 注意：和月复盘一样，数据来源是周页面（三段标题），而不是单日页面
 export async function POST(req: NextRequest) {
+  const session = await getAuthSession();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { year, month } = await req.json() as { year: number; month: number };
   if (!year || !month) return NextResponse.json({ error: "Missing year or month" }, { status: 400 });
 

@@ -4,6 +4,16 @@
 
 🔗 **Live Demo**: [hand-log.vercel.app](https://hand-log.vercel.app)
 📄 **静态演示**: 打开 [`handlog-demo.html`](./handlog-demo.html) 即可在浏览器中查看所有页面效果
+📝 **阅读更多**: [我做了一个会思考的 AI 日记 — Vibe Coding 故事](https://medium.com/@sarahwang9/i-built-an-ai-journal-that-thinks-with-me-a-vibe-coding-story-1f62ebb31e42)
+🌏 **English README**: [README.md](./README.md)
+
+---
+
+## 为什么做这个项目
+
+我过去每天晚上要花 10–15 分钟，努力回忆今天到底发生了什么——写下来的都是零散的碎片，从来没能变成有用的东西。我想要一个工具，能把我杂乱的想法整理成结构化的内容，让我真正能做复盘。
+
+HandLog 就是从这个痛点出发的。你自由地说话或打字，AI 来做繁琐的整理工作：把你的思绪变成带有情绪评分、关键人物、重要事件和反思的日复盘报告，并自动保存到 Notion。每周或每月，一键生成复盘报告，让你看到自己都不会注意到的规律。
 
 ---
 
