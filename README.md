@@ -2,9 +2,9 @@
 
 **HandLog** is an AI-powered journaling and reflection tool that transforms your daily notes into structured daily / weekly / monthly reviews, automatically saved to Notion.
 
-🔗 **Live Demo**: [hand-log.vercel.app](https://hand-log.vercel.app)
-📄 **Static Demo**: Open [`handlog-demo.html`](./handlog-demo.html) locally to preview all pages
-📝 **Read the Story**: [I Built an AI Journal That Thinks With Me](https://medium.com/@sarahwang9/i-built-an-ai-journal-that-thinks-with-me-a-vibe-coding-story-1f62ebb31e42)
+🔗 **Live Demo**: [hand-log.vercel.app](https://hand-log.vercel.app)\
+📄 **Static Demo**: Open [`handlog-demo.html`](./handlog-demo.html) locally to preview all pages\
+📝 **Read the Story**: [I Built an AI Journal That Thinks With Me](https://medium.com/@sarahwang9/i-built-an-ai-journal-that-thinks-with-me-a-vibe-coding-story-1f62ebb31e42)\
 🇨🇳 **中文文档**: [README_CN.md](./README_CN.md)
 
 ---
@@ -19,12 +19,58 @@ HandLog was born from that frustration. You speak or type freely, and the AI doe
 
 ## Features
 
-| Page | Description |
-|------|-------------|
-| **Capture** | Voice or text input, AI generates a structured daily review |
-| **Review** | One-click weekly / monthly review generation, saved to Notion |
-| **Dashboard** | Visualise mood trends and energy distribution over time |
-| **Timeline** | Browse all journal entries in chronological order |
+### ✍️ Capture
+
+Speak or type freely — HandLog handles the structure. Voice input is transcribed via Whisper, then Claude generates a structured daily review with mood score, key people, notable events, and a personal reflection. Everything auto-saves to your Notion database.
+
+- Voice recording with real-time Whisper transcription
+- AI-generated daily review: mood (1–10), energy, key people, events, reflection
+- Auto-save to Notion with one click
+- Edit any field before saving
+
+---
+
+### 📅 Review
+
+One click generates a weekly or monthly review by reading your past Notion entries. No manual summarising — Claude reads your week and surfaces patterns you wouldn't have noticed.
+
+- Weekly review: mood arc, progress highlights, next week intentions
+- Monthly review: recurring themes, energy patterns, month-in-review narrative
+- Generated reviews saved back to Notion as separate pages
+
+---
+
+### 📊 Dashboard
+
+Visual overview of your journaling data pulled live from Notion.
+
+```
+┌────────────────────────────────────────┐
+│  Your Journal                          │
+│                                        │
+│  📝 42 entries   😊 Avg mood: 7.2      │
+│                                        │
+│  Mood over time        Energy split    │
+│  ┌──────────────┐      ┌────────────┐  │
+│  │  Line chart  │      │   Donut    │  │
+│  │  (Recharts)  │      │   chart    │  │
+│  └──────────────┘      └────────────┘  │
+└────────────────────────────────────────┘
+```
+
+- Mood score line chart over time
+- Energy distribution donut chart
+- Total entry count and streaks
+
+---
+
+### 🕐 Timeline
+
+Browse every journal entry in reverse-chronological order. Each card shows the date, mood score, key people, and a preview of the reflection.
+
+- Paginated entry list
+- Click any entry to expand the full daily review
+- Filter by date range
 
 ---
 
@@ -155,3 +201,26 @@ src/
     ├── weekly-review.md    # Weekly review prompt template
     └── monthly-review.md   # Monthly review prompt template
 ```
+
+---
+
+## Roadmap
+
+- [x] AI daily review generation (Claude)
+- [x] Voice transcription (Whisper)
+- [x] Auto-save to Notion
+- [x] Weekly & monthly review generation
+- [x] Dashboard: mood chart, energy donut
+- [x] Timeline: browse all entries
+- [x] Google OAuth + email whitelist
+- [x] Auth guard on all AI API routes
+- [ ] Streak tracking and journaling reminders
+- [ ] Notion template share link for one-click setup
+- [ ] Export to PDF / markdown
+- [ ] Mobile-optimised capture flow
+
+---
+
+## License
+
+MIT
