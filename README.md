@@ -11,6 +11,8 @@
 
 ![HandLog demo](./assets/ai-journal-review.gif)
 
+> **Note:** All data shown in the screenshots and demo is mock data created for testing purposes only. All journal entries, mood scores, and people mentioned are entirely fictional.
+
 ---
 
 ## Why I Built This
