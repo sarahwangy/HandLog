@@ -9,6 +9,10 @@
 
 ---
 
+![HandLog demo](./assets/ai-journal-review.gif)
+
+---
+
 ## Why I Built This
 
 I used to spend 10–15 minutes every night trying to recall what actually happened during the day — writing fragmented notes that never turned into anything useful. I wanted a tool that could take my raw, messy thoughts and turn them into something structured I could actually reflect on.
@@ -28,6 +32,8 @@ Speak or type freely — HandLog handles the structure. Voice input is transcrib
 - Auto-save to Notion with one click
 - Edit any field before saving
 
+![Capture page](./assets/Capture.png)
+
 ---
 
 ### 📅 Review
@@ -38,29 +44,33 @@ One click generates a weekly or monthly review by reading your past Notion entri
 - Monthly review: recurring themes, energy patterns, month-in-review narrative
 - Generated reviews saved back to Notion as separate pages
 
+![Review page - Daily](./assets/Review-Daily.png)
+
+![Review page - Weekly](./assets/long-screenshots/Review-Weekly.png)
+
+---
+
+### 💬 AI Deep Chat
+
+Have a real conversation with your journal. The AI has full context of your past entries — ask it anything about your patterns, moods, or memorable moments.
+
+- Context-aware chat powered by Claude
+- References your actual journal data
+- Great for reflection prompts and self-discovery
+
+![Deep Chat](./assets/Chat-DeepChat.png)
+
 ---
 
 ### 📊 Dashboard
 
 Visual overview of your journaling data pulled live from Notion.
 
-```
-┌────────────────────────────────────────┐
-│  Your Journal                          │
-│                                        │
-│  📝 42 entries   😊 Avg mood: 7.2      │
-│                                        │
-│  Mood over time        Energy split    │
-│  ┌──────────────┐      ┌────────────┐  │
-│  │  Line chart  │      │   Donut    │  │
-│  │  (Recharts)  │      │   chart    │  │
-│  └──────────────┘      └────────────┘  │
-└────────────────────────────────────────┘
-```
-
 - Mood score line chart over time
 - Energy distribution donut chart
 - Total entry count and streaks
+
+![Dashboard](./assets/Dashboard.png)
 
 ---
 
@@ -71,6 +81,8 @@ Browse every journal entry in reverse-chronological order. Each card shows the d
 - Paginated entry list
 - Click any entry to expand the full daily review
 - Filter by date range
+
+![Timeline](./assets/Timeline.png)
 
 ---
 
