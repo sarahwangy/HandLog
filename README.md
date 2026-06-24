@@ -13,6 +13,8 @@
 
 > **Note:** All data shown in the screenshots and demo is mock data created for testing purposes only. All journal entries, mood scores, and people mentioned are entirely fictional.
 
+> **Language note:** The Notion database for this demo uses Chinese field values, so some pages display content in Chinese. The display language of each page follows the language of the user's own Notion data — if you write your journal entries in English, the pages will display in English.
+
 ---
 
 ## Why I Built This
