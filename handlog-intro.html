@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HandLog — AI Journal That Thinks With You</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ===========================================
+   CSS CUSTOM PROPERTIES — SOFT EDITORIAL THEME
+   =========================================== */
+:root {
+  --paper:    #F2EEDF;
+  --paper-2:  #ECE6D2;
+  --ink:      #2A241B;
+  --ink-soft: #5C5345;
+  --pink:     #E1A4C2;
+  --lemon:    #D6DD63;
+  --blush:    #E8C9B6;
+  --sage:     #B7C7A8;
+  --lilac:    #C9BEDC;
+  --card-fill: rgba(255,255,255,0.55);
+  --rule-soft: rgba(42,36,27,0.18);
+  --rule-med:  rgba(42,36,27,0.35);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ===========================================
+   RESET
+   =========================================== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ===========================================
+   VIEWPORT BASE — Fixed 1920×1080 stage
+   =========================================== */
+html, body { width: 100%; height: 100%; overflow: hidden; background: var(--paper); }
+.deck-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--paper); }
+.deck-stage {
+  position: absolute; left: 0; top: 0;
+  width: 1920px; height: 1080px;
+  overflow: hidden; transform-origin: 0 0;
+}
+.slide {
+  position: absolute; inset: 0;
+  width: 1920px; height: 1080px;
+  overflow: hidden; background: var(--paper);
+  visibility: hidden; opacity: 0; pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.slide.active { visibility: visible; opacity: 1; pointer-events: auto; z-index: 1; }
+img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+}
+
+/* ===========================================
+   SHARED CHROME
+   =========================================== */
+.chrome-eyebrow {
+  position: absolute; top: 60px; left: 80px;
+  font-family: 'Work Sans', sans-serif; font-size: 20px; font-weight: 400;
+  letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-soft);
+}
+.chrome-page {
+  position: absolute; top: 60px; right: 80px;
+  font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 26px;
+  color: var(--ink-soft);
+}
+.chrome-footer-left {
+  position: absolute; bottom: 50px; left: 80px;
+  font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 24px;
+  color: var(--ink-soft);
+}
+.chrome-footer-right {
+  position: absolute; bottom: 50px; right: 80px;
+  font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 24px;
+  color: var(--ink-soft);
+}
+
+/* ===========================================
+   REVEAL ANIMATIONS
+   =========================================== */
+.reveal {
+  opacity: 0; transform: translateY(22px);
+  transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out);
+}
+.slide.active .reveal { opacity: 1; transform: translateY(0); }
+.reveal.d1 { transition-delay: 0.08s; }
+.reveal.d2 { transition-delay: 0.18s; }
+.reveal.d3 { transition-delay: 0.28s; }
+.reveal.d4 { transition-delay: 0.38s; }
+.reveal.d5 { transition-delay: 0.48s; }
+.reveal.d6 { transition-delay: 0.56s; }
+.reveal.d7 { transition-delay: 0.64s; }
+
+/* ===========================================
+   CARD COMPONENTS
+   =========================================== */
+.card-soft {
+  background: var(--card-fill);
+  border-radius: 28px;
+  backdrop-filter: blur(4px);
+}
+.card-pink   { background: var(--pink);  border-radius: 28px; }
+.card-lemon  { background: var(--lemon); border-radius: 28px; }
+.card-blush  { background: var(--blush); border-radius: 28px; }
+.card-sage   { background: var(--sage);  border-radius: 28px; }
+.card-lilac  { background: var(--lilac); border-radius: 28px; }
+.pill {
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 999px; padding: 8px 22px;
+  font-family: 'Work Sans', sans-serif; font-size: 17px; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink);
+}
+.pill-sage   { background: var(--sage); }
+.pill-lemon  { background: var(--lemon); }
+.pill-blush  { background: var(--blush); }
+.pill-pink   { background: var(--pink); }
+.pill-lilac  { background: var(--lilac); }
+
+/* ===========================================
+   SLIDE 1 — TITLE
+   =========================================== */
+#slide-1 .paper-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 110% 90% at 65% 35%, var(--paper-2) 0%, var(--paper) 60%);
+}
+#slide-1 .swatch-row {
+  position: absolute; top: 80px; left: 80px;
+  display: flex; gap: 16px;
+}
+#slide-1 .swatch {
+  width: 56px; height: 56px; border-radius: 50%;
+}
+#slide-1 .main-block {
+  position: absolute; left: 80px; top: 190px; right: 80px; bottom: 140px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+#slide-1 .hero-title {
+  font-family: 'Cormorant Garamond', serif; font-weight: 500;
+  font-size: 260px; line-height: 0.88; letter-spacing: -0.025em;
+  color: var(--ink); margin-bottom: 56px;
+}
+#slide-1 .hero-title em { font-style: italic; font-weight: 400; color: var(--ink-soft); }
+#slide-1 .subtitle-card {
+  display: inline-block; padding: 36px 48px; border-radius: 24px;
+  background: var(--card-fill); max-width: 920px;
+}
+#slide-1 .subtitle-card p {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 38px; line-height: 1.5; color: var(--ink-soft);
+}
+#slide-1 .pill-row {
+  position: absolute; right: 80px; bottom: 140px;
+  display: flex; gap: 16px;
+}
+/* big ornamental letter */
+#slide-1 .ornament {
+  position: absolute; right: -20px; bottom: -60px;
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 580px; color: var(--ink); opacity: 0.04;
+  line-height: 1; user-select: none; pointer-events: none;
+}
+
+/* ===========================================
+   SLIDE 2 — WHO IS THIS FOR
+   =========================================== */
+#slide-2-who .personas-grid {
+  position: absolute; left: 80px; right: 80px; top: 160px; bottom: 90px;
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 32px;
+}
+#slide-2-who .persona-card {
+  padding: 52px 44px; border-radius: 32px;
+  display: flex; flex-direction: column; gap: 20px;
+}
+#slide-2-who .persona-icon {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 80px; line-height: 1; color: var(--ink);
+}
+#slide-2-who .persona-name {
+  font-family: 'Cormorant Garamond', serif; font-weight: 500;
+  font-size: 54px; line-height: 1; color: var(--ink);
+}
+#slide-2-who .persona-desc {
+  font-family: 'Work Sans', sans-serif; font-size: 25px;
+  color: var(--ink-soft); line-height: 1.5; flex: 1;
+}
+#slide-2-who .persona-quote {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 28px; color: var(--ink-soft); line-height: 1.5;
+  border-top: 1px dashed var(--rule-soft); padding-top: 16px;
+}
+#slide-2-who .title-block {
+  position: absolute; left: 80px; top: 68px;
+}
+#slide-2-who .title-block h2 {
+  font-family: 'Cormorant Garamond', serif; font-weight: 500;
+  font-size: 72px; line-height: 1; letter-spacing: -0.01em; color: var(--ink);
+}
+#slide-2-who .title-block h2 em { font-style: italic; font-weight: 400; color: var(--ink-soft); }
+
+/* ===========================================
+   SLIDE 5 — SCREENSHOTS DEMO
+   =========================================== */
+#slide-demo .demo-layout {
+  position: absolute; left: 80px; right: 80px; top: 150px; bottom: 90px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: center;
+}
+#slide-demo .demo-left { display: flex; flex-direction: column; justify-content: center; gap: 32px; }
+#slide-demo .demo-left h2 {
+  font-family: 'Cormorant Garamond', serif; font-weight: 500;
+  font-size: 96px; line-height: 0.95; letter-spacing: -0.01em; color: var(--ink);
+}
+#slide-demo .demo-left h2 em { font-style: italic; font-weight: 400; color: var(--ink-soft); }
+#slide-demo .demo-left p {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 36px; line-height: 1.55; color: var(--ink-soft);
+}
+#slide-demo .screen-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+}
+#slide-demo .screen-wrap {
+  border-radius: 20px; overflow: hidden;
+  background: var(--card-fill);
+  box-shadow: 0 4px 24px rgba(42,36,27,0.1);
+}
+#slide-demo .screen-wrap img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+#slide-demo .screen-label {
+  font-family: 'Work Sans', sans-serif; font-size: 18px; font-weight: 400;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft);
+  text-align: center; padding: 12px 0 4px;
+}
+
+/* ===========================================
+   SLIDE 9 — AHA MOMENT
+   =========================================== */
+#slide-aha .quote-block {
+  position: absolute; left: 80px; right: 80px; top: 140px; bottom: 120px;
+  display: flex; flex-direction: column; justify-content: center; align-items: flex-start;
+  gap: 0;
+}
+#slide-aha .big-quote-mark {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 220px; line-height: 0.7; color: var(--sage);
+  margin-bottom: -30px;
+}
+#slide-aha .quote-text {
+  font-family: 'Cormorant Garamond', serif; font-weight: 500;
+  font-size: 72px; line-height: 1.12; color: var(--ink);
+  max-width: 1400px; margin-bottom: 52px;
+}
+#slide-aha .quote-text em { font-style: italic; font-weight: 400; color: var(--ink-soft); }
+#slide-aha .quote-attr {
+  display: flex; align-items: center; gap: 24px;
+}
+#slide-aha .attr-dot {
+  width: 48px; height: 48px; border-radius: 50%; background: var(--sage); flex-shrink: 0;
+}
+#slide-aha .attr-text {
+  font-family: 'Work Sans', sans-serif; font-size: 26px;
+  color: var(--ink-soft); line-height: 1.4;
+}
+#slide-aha .scene-card {
+  position: absolute; right: 80px; top: 140px;
+  width: 580px; padding: 48px; border-radius: 28px;
+  display: flex; flex-direction: column; gap: 24px;
+}
+#slide-aha .scene-title {
+  font-family: 'Cormorant Garamond', serif; font-weight: 500;
+  font-size: 44px; color: var(--ink); margin-bottom: 4px;
+}
+#slide-aha .scene-step {
+  font-family: 'Work Sans', sans-serif; font-size: 24px;
+  color: var(--ink-soft); line-height: 1.45;
+  padding-left: 20px; border-left: 2px solid var(--rule-soft);
+}
+
+/* ===========================================
+   SLIDE 10 — WHAT I BUILT & WHY
+   =========================================== */
+#slide-why .split-grid {
+  position: absolute; left: 80px; right: 80px; top: 120px; bottom: 260px;
+  display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; align-items: start;
+}
+#slide-why .left-story { display: flex; flex-direction: column; justify-content: flex-start; padding-top: 20px; }
+#slide-why .left-story h2 {
+  font-family: 'Cormorant Garamond', serif; font-weight: 500;
+  font-size: 100px; line-height: 0.92; letter-spacing: -0.01em; color: var(--ink);
+  margin-bottom: 36px;
+}
+#slide-why .left-story h2 em { font-style: italic; font-weight: 400; color: var(--ink-soft); }
+#slide-why .left-story p {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 38px; line-height: 1.6; color: var(--ink-soft);
+}
+#slide-why .tech-col { display: flex; flex-direction: column; gap: 20px; padding-top: 20px; }
+#slide-why .tech-item {
+  padding: 28px 36px; border-radius: 24px;
+  display: flex; align-items: center; gap: 28px;
+}
+#slide-why .tech-name {
+  font-family: 'Cormorant Garamond', serif; font-weight: 500;
+  font-size: 40px; color: var(--ink); min-width: 220px;
+}
+#slide-why .tech-role {
+  font-family: 'Work Sans', sans-serif; font-size: 22px;
+  color: var(--ink-soft); line-height: 1.4;
+}
+#slide-why .built-tag {
+  display: inline-flex; align-items: center; gap: 10px;
+  margin-top: 36px; padding: 14px 28px; border-radius: 999px;
+  background: var(--lemon);
+}
+#slide-why .built-tag span {
+  font-family: 'Work Sans', sans-serif; font-size: 20px; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink);
+}
+
+/* ===========================================
+   SLIDE 3 — THE PROBLEM (original, keep id)
+   =========================================== */
+#slide-2 .main-grid {
+  position: absolute; left: 80px; right: 80px; top: 150px; bottom: 100px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: start;
+}
+#slide-2 .left-col { display: flex; flex-direction: column; justify-content: center; height: 100%; }
+#slide-2 .section-title {
+  font-family: 'Cormorant Garamond', serif; font-weight: 500;
+  font-size: 100px; line-height: 0.95; letter-spacing: -0.01em; color: var(--ink);
+  margin-bottom: 40px;
+}
+#slide-2 .section-title em { font-style: italic; font-weight: 400; color: var(--ink-soft); }
+#slide-2 .opener-text {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 40px; line-height: 1.55; color: var(--ink-soft); max-width: 680px;
+}
+#slide-2 .right-col { display: flex; flex-direction: column; gap: 24px; padding-top: 20px; }
+#slide-2 .pain-card {
+  padding: 36px 40px; border-radius: 28px;
+  display: flex; align-items: flex-start; gap: 28px;
+}
+#slide-2 .pain-num {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 72px; line-height: 0.9; color: var(--ink); flex-shrink: 0;
+}
+#slide-2 .pain-text h3 {
+  font-family: 'Cormorant Garamond', serif; font-weight: 500;
+  font-size: 44px; color: var(--ink); margin-bottom: 8px;
+}
+#slide-2 .pain-text p {
+  font-family: 'Work Sans', sans-serif; font-size: 24px;
+  color: var(--ink-soft); line-height: 1.45;
+}
+
+/* ===========================================
+   SLIDE 3 — HOW IT WORKS
+   =========================================== */
+#slide-3 .title-block {
+  position: absolute; left: 80px; top: 140px;
+}
+#slide-3 .title-block h2 {
+  font-family: 'Cormorant Garamond', serif; font-weight: 500;
+  font-size: 108px; line-height: 0.95; letter-spacing: -0.01em; color: var(--ink);
+}
+#slide-3 .title-block h2 em { font-style: italic; font-weight: 400; color: var(--ink-soft); }
+#slide-3 .steps-row {
+  position: absolute; left: 80px; right: 80px; top: 380px; bottom: 100px;
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 36px;
+}
+#slide-3 .step-card { padding: 52px 48px; border-radius: 32px; display: flex; flex-direction: column; }
+#slide-3 .step-num {
+  font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500;
+  font-size: 100px; line-height: 0.9; color: var(--ink); margin-bottom: 24px;
+}
+#slide-3 .step-title {
+  font-family: 'Cormorant Garamond', serif; font-weight: 500;
+  font-size: 56px; line-height: 1; color: var(--ink); margin-bottom: 20px;
+}
+#slide-3 .step-body {
+  font-family: 'Work Sans', sans-serif; font-size: 26px;
+  color: var(--ink-soft); line-height: 1.5; flex: 1;
+}
+#slide-3 .arrow {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  font-family: 'Cormorant Garamond', serif; font-size: 60px; color: var(--rule-med);
+}
+
+/* ===========================================
+   SLIDE 4 — KEY FEATURES
+   =========================================== */
+#slide-4 .title-block {
+  position: absolute; left: 80px; top: 130px;
+}
+#slide-4 .title-block h2 {
+  font-family: 'Cormorant Garamond', serif; font-weight: 500;
+  font-size: 108px; line-height: 0.95; letter-spacing: -0.01em; color: var(--ink);
+}
+#slide-4 .title-block h2 em { font-style: italic; font-weight: 400; color: var(--ink-soft); }
+#slide-4 .features-grid {
+  position: absolute; left: 80px; right: 80px; top: 360px; bottom: 90px;
+  display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr;
+  gap: 28px;
+}
+#slide-4 .feat-card { padding: 40px 40px; border-radius: 28px; display: flex; flex-direction: column; }
+#slide-4 .feat-title {
+  font-family: 'Cormorant Garamond', serif; font-weight: 500;
+  font-size: 50px; line-height: 1; color: var(--ink); margin-bottom: 14px;
+}
+#slide-4 .feat-body {
+  font-family: 'Work Sans', sans-serif; font-size: 23px;
+  color: var(--ink-soft); line-height: 1.45;
+}
+
+/* ===========================================
+   SLIDE 5 — DEEP CHAT
+   =========================================== */
+#slide-5 .left-block {
+  position: absolute; left: 80px; top: 140px; width: 680px; bottom: 100px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+#slide-5 .left-block h2 {
+  font-family: 'Cormorant Garamond', serif; font-weight: 500;
+  font-size: 108px; line-height: 0.92; letter-spacing: -0.01em;
+  color: var(--ink); margin-bottom: 32px;
+}
+#slide-5 .left-block h2 em { font-style: italic; font-weight: 400; color: var(--ink-soft); }
+#slide-5 .left-block p {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 38px; line-height: 1.55; color: var(--ink-soft); margin-bottom: 44px;
+}
+#slide-5 .pill-stack { display: flex; flex-wrap: wrap; gap: 14px; }
+#slide-5 .right-block {
+  position: absolute; right: 80px; top: 120px; width: 940px; bottom: 80px;
+  display: flex; flex-direction: column; gap: 20px; justify-content: center;
+}
+#slide-5 .chat-bubble {
+  padding: 30px 40px; border-radius: 24px;
+  font-family: 'Cormorant Garamond', serif; font-size: 32px; line-height: 1.55;
+  color: var(--ink); max-width: 860px;
+}
+#slide-5 .chat-user { background: var(--lemon); align-self: flex-end; border-bottom-right-radius: 6px; }
+#slide-5 .chat-ai   { background: var(--card-fill); border-bottom-left-radius: 6px; }
+#slide-5 .chat-label {
+  font-family: 'Work Sans', sans-serif; font-size: 16px; font-weight: 400;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+
+/* ===========================================
+   SLIDE 6 — DASHBOARD & TIMELINE
+   =========================================== */
+#slide-6 .title-block {
+  position: absolute; left: 80px; top: 130px;
+}
+#slide-6 .title-block h2 {
+  font-family: 'Cormorant Garamond', serif; font-weight: 500;
+  font-size: 108px; line-height: 0.95; letter-spacing: -0.01em; color: var(--ink);
+}
+#slide-6 .title-block h2 em { font-style: italic; font-weight: 400; color: var(--ink-soft); }
+#slide-6 .cards-row {
+  position: absolute; left: 80px; right: 80px; top: 370px; bottom: 90px;
+  display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 28px;
+}
+#slide-6 .stat-card { padding: 44px 40px; border-radius: 28px; display: flex; flex-direction: column; }
+#slide-6 .stat-num {
+  font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500;
+  font-size: 120px; line-height: 0.88; color: var(--ink); margin-bottom: 16px;
+}
+#slide-6 .stat-label {
+  font-family: 'Work Sans', sans-serif; font-size: 24px; font-weight: 500;
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft);
+  margin-bottom: 10px;
+}
+#slide-6 .stat-desc {
+  font-family: 'Work Sans', sans-serif; font-size: 22px;
+  color: var(--ink-soft); line-height: 1.4;
+}
+/* mood bar */
+#slide-6 .mood-bar {
+  position: absolute; left: 80px; right: 80px; top: 290px;
+  height: 40px; border-radius: 20px; overflow: hidden;
+  display: flex;
+}
+#slide-6 .mood-seg { height: 100%; }
+
+/* ===========================================
+   SLIDE 7 — CLOSER / CTA
+   =========================================== */
+#slide-7 {
+  background: var(--pink) !important;
+}
+#slide-7 .center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center;
+  padding: 0 200px;
+}
+#slide-7 .closing-eyebrow {
+  font-family: 'Work Sans', sans-serif; font-size: 22px; font-weight: 400;
+  letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-soft);
+  margin-bottom: 40px;
+}
+#slide-7 .closing-title {
+  font-family: 'Cormorant Garamond', serif; font-weight: 500;
+  font-size: 180px; line-height: 0.9; letter-spacing: -0.02em; color: var(--ink);
+  margin-bottom: 52px;
+}
+#slide-7 .closing-title em { font-style: italic; font-weight: 400; }
+#slide-7 .closing-sub {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 44px; color: var(--ink-soft); line-height: 1.55;
+  max-width: 900px; margin-bottom: 64px;
+}
+#slide-7 .cta-links { display: flex; gap: 32px; flex-wrap: wrap; justify-content: center; }
+#slide-7 .cta-btn {
+  padding: 20px 52px; border-radius: 999px;
+  font-family: 'Work Sans', sans-serif; font-size: 22px; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none;
+  color: var(--ink); border: 1.5px solid var(--ink);
+  background: transparent; cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+#slide-7 .cta-btn:hover { background: var(--ink); color: var(--paper); }
+#slide-7 .cta-btn.filled { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+#slide-7 .cta-btn.filled:hover { background: transparent; color: var(--ink); }
+#slide-7 .chrome-footer-left { color: var(--ink-soft); }
+#slide-7 .chrome-footer-right { color: var(--ink-soft); }
+
+/* ===========================================
+   PROGRESS DOTS
+   =========================================== */
+.progress-dots {
+  position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+  z-index: 1000; display: flex; gap: 10px;
+}
+.dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--rule-med); transition: background 0.3s, transform 0.3s;
+  cursor: pointer;
+}
+.dot.active { background: var(--ink); transform: scale(1.35); }
+
+/* ===========================================
+   EDIT MODE
+   =========================================== */
+.edit-hotzone {
+  position: fixed; top: 0; left: 0; width: 80px; height: 80px; z-index: 10000;
+}
+.edit-toggle {
+  position: fixed; top: 18px; left: 18px; z-index: 10001;
+  background: var(--ink); color: var(--paper); border: none; border-radius: 999px;
+  padding: 8px 20px; font-family: 'Work Sans', sans-serif; font-size: 15px;
+  cursor: pointer; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+.edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+[contenteditable="true"] { outline: 2px dashed var(--rule-med) !important; border-radius: 4px; }
+
+/* ===========================================
+   SLIDE-IN FROM LEFT (Michelle & Doris)
+   =========================================== */
+.slide-in-left {
+  opacity: 0;
+  transform: translateX(-60px);
+  transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+  transition-delay: 0.25s;
+}
+.slide-in-delay {
+  transition-delay: 0.45s;
+}
+.slide.active .slide-in-left {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Source link cards */
+.source-link {
+  display: block;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.source-link:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(42,36,27,0.12);
+}
+</style>
+</head>
+<body>
+<div class="deck-viewport">
+<main class="deck-stage" id="deckStage">
+
+  <!-- ===================== SLIDE 1: TITLE ===================== -->
+  <section class="slide active" id="slide-1">
+    <div class="paper-bg"></div>
+    <div class="ornament">H</div>
+
+    <!-- Swatch dots -->
+    <div class="swatch-row reveal d1">
+      <div class="swatch" style="background:var(--sage)"></div>
+      <div class="swatch" style="background:var(--pink)"></div>
+      <div class="swatch" style="background:var(--lemon)"></div>
+      <div class="swatch" style="background:var(--blush)"></div>
+      <div class="swatch" style="background:var(--lilac)"></div>
+    </div>
+
+    <div class="main-block">
+      <div class="hero-title reveal d2">Hand<em>Log</em></div>
+      <div class="subtitle-card reveal d3">
+        <p>An AI journal that thinks with you —<br>capture your day by voice or text, get weekly reviews written back to you.</p>
+      </div>
+    </div>
+
+    <!-- Feature pills bottom right -->
+    <div class="pill-row reveal d4">
+      <span class="pill pill-sage">Voice Input</span>
+      <span class="pill pill-lemon">AI Review</span>
+      <span class="pill pill-blush">Notion Sync</span>
+      <span class="pill pill-pink">Mood Score</span>
+    </div>
+
+    <div class="chrome-footer-right">handlog.app</div>
+  </section>
+
+  <!-- ===================== SLIDE 2: WHO IS THIS FOR ===================== -->
+  <section class="slide" id="slide-2-who">
+    <div class="chrome-eyebrow reveal d1">Who Is This For</div>
+    <div class="chrome-page reveal d1">02</div>
+
+    <div class="title-block">
+      <h2 class="reveal d1">People who want to <em>remember their lives.</em></h2>
+    </div>
+
+    <div class="personas-grid">
+      <div class="persona-card card-sage reveal d2">
+        <div class="persona-icon">✦</div>
+        <div class="persona-name">The Reflective One</div>
+        <div class="persona-desc">Journals occasionally but never goes back to read it. Wants to understand their own patterns — emotions, energy, relationships — without the effort of a therapist.</div>
+        <div class="persona-quote">"I write a lot but I never know what it all means."</div>
+      </div>
+      <div class="persona-card card-blush reveal d3">
+        <div class="persona-icon">✦</div>
+        <div class="persona-name">The Busy Person</div>
+        <div class="persona-desc">Life moves fast. Meetings, family, decisions. Wants to capture the day in 2 minutes — voice note on the way home — and have something meaningful to look back on.</div>
+        <div class="persona-quote">"I forget what happened last week, let alone last year."</div>
+      </div>
+      <div class="persona-card card-lilac reveal d4">
+        <div class="persona-icon">✦</div>
+        <div class="persona-name">The Self-Builder</div>
+        <div class="persona-desc">Tracks habits, reads self-improvement books, wants data on themselves. Mood scores, people patterns, energy trends — they want the dashboard of their own life.</div>
+        <div class="persona-quote">"I want to see myself the way data sees me."</div>
+      </div>
+    </div>
+
+    <div class="chrome-footer-left">HandLog</div>
+    <div class="chrome-footer-right">handlog.app</div>
+  </section>
+
+  <!-- ===================== SLIDE 3: THE PROBLEM ===================== -->
+  <section class="slide" id="slide-2">
+    <div class="chrome-eyebrow reveal d1">The Problem</div>
+    <div class="chrome-page reveal d1">03</div>
+
+    <div class="main-grid">
+      <div class="left-col">
+        <h2 class="section-title reveal d2">Most journals<br><em>never get read</em><br>again.</h2>
+        <p class="opener-text reveal d3">
+          We write, we forget. There's no structure, no reflection, no way to see the patterns in your own life — until now.
+        </p>
+      </div>
+      <div class="right-col">
+        <div class="pain-card card-blush reveal d2">
+          <div class="pain-num">1</div>
+          <div class="pain-text">
+            <h3>No structure</h3>
+            <p>Free-form notes pile up with no summary, no themes, no meaningful takeaways.</p>
+          </div>
+        </div>
+        <div class="pain-card card-lemon reveal d3">
+          <div class="pain-num">2</div>
+          <div class="pain-text">
+            <h3>Too much friction</h3>
+            <p>Opening an app, typing a full entry — it feels like homework. Most people stop within a week.</p>
+          </div>
+        </div>
+        <div class="pain-card card-lilac reveal d4">
+          <div class="pain-num">3</div>
+          <div class="pain-text">
+            <h3>No reflection</h3>
+            <p>Without review, journaling is just venting. The growth comes from looking back — but nobody does.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chrome-footer-left">HandLog</div>
+    <div class="chrome-footer-right">handlog.app</div>
+  </section>
+
+  <!-- ===================== SLIDE 3: HOW IT WORKS ===================== -->
+  <section class="slide" id="slide-3">
+    <div class="chrome-eyebrow reveal d1">How It Works</div>
+    <div class="chrome-page reveal d1">04</div>
+
+    <div class="title-block">
+      <h2 class="reveal d2">Three steps.<br><em>Effortless habit.</em></h2>
+    </div>
+
+    <div class="steps-row">
+      <div class="step-card card-sage reveal d2">
+        <div class="step-num">1</div>
+        <div class="step-title">Capture</div>
+        <div class="step-body">Speak or type freely — what happened, who you saw, how you felt. No format required. Voice transcription included.</div>
+      </div>
+      <div class="step-card card-lemon reveal d3">
+        <div class="step-num">2</div>
+        <div class="step-title">AI Reviews</div>
+        <div class="step-body">Every week, AI reads your entries and writes a structured review — key events, mood score, themes, and personal reflections.</div>
+      </div>
+      <div class="step-card card-pink reveal d4">
+        <div class="step-num">3</div>
+        <div class="step-title">Auto-Saved</div>
+        <div class="step-body">Everything syncs to your Notion workspace automatically. Your memories, organised exactly the way you like them.</div>
+      </div>
+    </div>
+
+    <div class="chrome-footer-left">HandLog</div>
+    <div class="chrome-footer-right">handlog.app</div>
+  </section>
+
+  <!-- ===================== SLIDE 5: DASHBOARD ===================== -->
+  <section class="slide" id="slide-6">
+    <div class="chrome-eyebrow reveal d1">Dashboard &amp; Timeline</div>
+    <div class="chrome-page reveal d1">05</div>
+
+    <div class="title-block">
+      <h2 class="reveal d2">Your life, <em>visualised.</em></h2>
+    </div>
+
+    <div class="mood-bar reveal d3">
+      <div class="mood-seg" style="width:12%; background:var(--blush)"></div>
+      <div class="mood-seg" style="width:18%; background:var(--lemon)"></div>
+      <div class="mood-seg" style="width:8%;  background:var(--blush)"></div>
+      <div class="mood-seg" style="width:22%; background:var(--sage)"></div>
+      <div class="mood-seg" style="width:15%; background:var(--lemon)"></div>
+      <div class="mood-seg" style="width:10%; background:var(--pink)"></div>
+      <div class="mood-seg" style="width:15%; background:var(--sage)"></div>
+    </div>
+
+    <div class="cards-row">
+      <div class="stat-card card-sage reveal d2">
+        <div class="stat-num">8.2</div>
+        <div class="stat-label">Avg Mood Score</div>
+        <div class="stat-desc">Daily, weekly &amp; monthly mood tracked from 1–10.</div>
+      </div>
+      <div class="stat-card card-lemon reveal d3">
+        <div class="stat-num">47</div>
+        <div class="stat-label">Entries This Month</div>
+        <div class="stat-desc">Voice + text. Short is fine. Consistency is everything.</div>
+      </div>
+      <div class="stat-card card-blush reveal d4">
+        <div class="stat-num">12</div>
+        <div class="stat-label">People Mentioned</div>
+        <div class="stat-desc">Timeline tracks every person in your life story.</div>
+      </div>
+      <div class="stat-card card-lilac reveal d5">
+        <div class="stat-num">3×</div>
+        <div class="stat-label">Review Types</div>
+        <div class="stat-desc">Daily · Weekly · Monthly — all AI-generated, all in Notion.</div>
+      </div>
+    </div>
+
+    <div class="chrome-footer-left">HandLog</div>
+    <div class="chrome-footer-right">handlog.app</div>
+  </section>
+
+  <!-- ===================== SLIDE 6: KEY FEATURES ===================== -->
+  <section class="slide" id="slide-4">
+    <div class="chrome-eyebrow reveal d1">Features</div>
+    <div class="chrome-page reveal d1">06</div>
+
+    <div class="title-block">
+      <h2 class="reveal d2">Everything you need,<br><em>nothing you don't.</em></h2>
+    </div>
+
+    <div class="features-grid">
+      <div class="feat-card card-soft reveal d2">
+        <div class="feat-title">Voice Capture</div>
+        <div class="feat-body">Record a voice note, and Whisper AI transcribes it instantly. Log your day in under 60 seconds.</div>
+      </div>
+      <div class="feat-card card-sage reveal d2">
+        <div class="feat-title">Weekly Review</div>
+        <div class="feat-body">AI reads your week and generates a full narrative review — with highlights, patterns, and a mood score.</div>
+      </div>
+      <div class="feat-card card-lemon reveal d3">
+        <div class="feat-title">Deep Chat</div>
+        <div class="feat-body">Ask your AI about your own life. "Who did I see most this month?" "What made me stressed in November?"</div>
+      </div>
+      <div class="feat-card card-blush reveal d3">
+        <div class="feat-title">Mood Dashboard</div>
+        <div class="feat-body">Visual mood tracking across weeks and months. See your emotional patterns at a glance.</div>
+      </div>
+      <div class="feat-card card-lilac reveal d4">
+        <div class="feat-title">Timeline</div>
+        <div class="feat-body">Browse your life story chronologically — every entry, every review, every person you mentioned.</div>
+      </div>
+      <div class="feat-card card-pink reveal d4">
+        <div class="feat-title">Notion Sync</div>
+        <div class="feat-body">All your notes and reviews auto-save to Notion. Your data, in your workspace, always.</div>
+      </div>
+    </div>
+
+    <div class="chrome-footer-left">HandLog</div>
+    <div class="chrome-footer-right">handlog.app</div>
+  </section>
+
+  <!-- ===================== SLIDE 5: DEEP CHAT ===================== -->
+  <section class="slide" id="slide-5">
+    <div class="chrome-eyebrow reveal d1">Deep Chat</div>
+    <div class="chrome-page reveal d1">07</div>
+
+    <div class="left-block">
+      <h2 class="reveal d2">Ask your AI<br><em>about your life.</em></h2>
+      <p class="reveal d3">Your journal knows you. Ask it anything — your AI has read every entry and can surface insights you never noticed yourself.</p>
+      <div class="pill-stack reveal d4">
+        <span class="pill pill-sage">Personal Memory</span>
+        <span class="pill pill-lemon">Pattern Detection</span>
+        <span class="pill pill-blush">Context-Aware</span>
+      </div>
+    </div>
+
+    <div class="right-block">
+      <div class="reveal d2">
+        <div class="chat-label">You</div>
+        <div class="chat-bubble chat-user">"Who did I spend the most time with in May?"</div>
+      </div>
+      <div class="reveal d3">
+        <div class="chat-label">HandLog AI</div>
+        <div class="chat-bubble chat-ai">"Based on your May entries, you mentioned Sarah 11 times — mostly around work projects and two weekend brunches. You also spent significant time with your sister during the 18th–22nd."</div>
+      </div>
+      <div class="reveal d4">
+        <div class="chat-label">You</div>
+        <div class="chat-bubble chat-user">"What's been making me stressed lately?"</div>
+      </div>
+      <div class="reveal d5">
+        <div class="chat-label">HandLog AI</div>
+        <div class="chat-bubble chat-ai">"Your last 3 weeks show a recurring theme around deadlines and sleep quality. Mood scores dip noticeably on Sunday evenings — you mentioned work pressure 8 times this month."</div>
+      </div>
+    </div>
+
+    <div class="chrome-footer-left">HandLog</div>
+    <div class="chrome-footer-right">handlog.app</div>
+  </section>
+
+  <!-- ===================== SLIDE 8: AHA MOMENT ===================== -->
+  <section class="slide" id="slide-aha">
+    <div class="chrome-eyebrow reveal d1">A Real Moment</div>
+    <div class="chrome-page reveal d1">08</div>
+
+    <div class="quote-block">
+      <div class="big-quote-mark reveal d1">"</div>
+      <div class="quote-text reveal d2">
+        It was a Sunday morning. I asked HandLog<br>
+        <em>"What made me happy this month?"</em><br>
+        It came back with three things I had completely forgotten.
+      </div>
+      <div class="quote-attr reveal d3">
+        <div class="attr-dot"></div>
+        <div class="attr-text">That's the moment I understood what this tool is for.<br>Not productivity. Not habit tracking. <strong>Memory.</strong></div>
+      </div>
+    </div>
+
+    <div class="scene-card card-lemon reveal d4">
+      <div class="scene-title">The Sunday Ritual</div>
+      <div class="scene-step">☀ 9am — open HandLog on your phone</div>
+      <div class="scene-step">🎤 Voice note — 2 mins about your week</div>
+      <div class="scene-step">✨ AI generates your weekly review</div>
+      <div class="scene-step">💬 Ask it anything about your month</div>
+      <div class="scene-step">📓 Everything saved to Notion, forever</div>
+    </div>
+
+    <div class="chrome-footer-left">HandLog</div>
+    <div class="chrome-footer-right">handlog.app</div>
+  </section>
+
+  <!-- ===================== SLIDE 9: SCREENSHOTS DEMO ===================== -->
+  <section class="slide" id="slide-demo">
+    <div class="chrome-eyebrow reveal d1">In Action</div>
+    <div class="chrome-page reveal d1">09</div>
+
+    <div class="demo-layout">
+      <div class="demo-left">
+        <h2 class="reveal d2">See it<br><em>working.</em></h2>
+        <p class="reveal d3">Every page has one job — capture, review, reflect, or explore. Daily, weekly &amp; monthly reviews, all AI-generated.</p>
+        <div class="reveal d4">
+          <span class="pill pill-sage" style="margin-right:12px">Real app</span>
+          <span class="pill pill-lemon">Live on Vercel</span>
+        </div>
+      </div>
+      <div class="screen-grid reveal d2">
+        <div>
+          <div class="screen-wrap" style="height:320px">
+            <img src="assets/Capture.png" alt="Capture page">
+          </div>
+          <div class="screen-label">Capture</div>
+        </div>
+        <div>
+          <div class="screen-wrap" style="height:320px">
+            <img src="assets/Review-Daily.png" alt="Daily Review">
+          </div>
+          <div class="screen-label">Daily Review</div>
+        </div>
+        <div>
+          <div class="screen-wrap" style="height:320px">
+            <img src="assets/Chat-DeepChat.png" alt="Deep Chat">
+          </div>
+          <div class="screen-label">Deep Chat</div>
+        </div>
+        <div>
+          <div class="screen-wrap" style="height:320px">
+            <img src="assets/Dashboard.png" alt="Dashboard">
+          </div>
+          <div class="screen-label">Dashboard</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chrome-footer-left">HandLog</div>
+    <div class="chrome-footer-right">handlog.app</div>
+  </section>
+
+  <!-- ===================== SLIDE 10: WHAT I BUILT & WHY ===================== -->
+  <section class="slide" id="slide-why">
+    <div class="chrome-eyebrow reveal d1">Behind The Build</div>
+    <div class="chrome-page reveal d1">10</div>
+
+    <div class="split-grid">
+      <div class="left-story">
+        <h2 class="reveal d2">Built in <em>7 days.</em><br>Shipped to the world.</h2>
+        <p class="reveal d3">
+          Solo, from scratch. No prior AI experience — just Claude Code and curiosity. Generates daily, weekly, and monthly reviews automatically. The whole workflow runs on AI-first tools from day one.
+        </p>
+      </div>
+      <div class="tech-col">
+        <div class="tech-item card-sage reveal d2">
+          <div class="tech-name">Claude Code</div>
+          <div class="tech-role">AI coding assistant — wrote, debugged, and shipped the whole app</div>
+        </div>
+        <div class="tech-item card-lemon reveal d3">
+          <div class="tech-name">Claude API</div>
+          <div class="tech-role">Reviews, mood scores, deep chat — all powered by Anthropic</div>
+        </div>
+        <div class="tech-item card-blush reveal d4">
+          <div class="tech-name">OpenAI Whisper</div>
+          <div class="tech-role">Speech-to-text — voice notes transcribed in seconds</div>
+        </div>
+        <div class="tech-item card-lilac reveal d5">
+          <div class="tech-name">Notion API</div>
+          <div class="tech-role">Auto-saves every entry and review to your Notion workspace</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Skills section — prominent bottom band -->
+    <div class="reveal d5" style="position:absolute;left:80px;right:80px;bottom:90px;">
+      <div style="font-family:'Work Sans',sans-serif;font-size:18px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:16px;padding-top:28px;border-top:1px dashed rgba(42,36,27,0.18);">Claude Code Skills Used</div>
+      <div style="display:flex;gap:20px;">
+        <div style="flex:1;padding:28px 36px;border-radius:24px;background:var(--pink);display:flex;flex-direction:column;gap:8px;">
+          <div style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:44px;color:var(--ink);line-height:1;">Anthropic Frontend Design Skills</div>
+          <div style="font-family:'Work Sans',sans-serif;font-size:20px;color:var(--ink-soft);">UI generation · slide decks · design systems</div>
+          <div style="font-family:'Work Sans',sans-serif;font-size:17px;color:var(--ink-soft);opacity:0.7;">skills.sh/anthropics/skills</div>
+        </div>
+        <div style="flex:1;padding:28px 36px;border-radius:24px;background:var(--lemon);display:flex;flex-direction:column;gap:8px;">
+          <div style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:44px;color:var(--ink);line-height:1;">Superpowers</div>
+          <div style="font-family:'Work Sans',sans-serif;font-size:20px;color:var(--ink-soft);">Persistent memory · cross-session context</div>
+          <div style="font-family:'Work Sans',sans-serif;font-size:17px;color:var(--ink-soft);opacity:0.7;">github.com/obra/superpowers</div>
+        </div>
+        <div style="flex:1;padding:28px 36px;border-radius:24px;background:var(--sage);display:flex;flex-direction:column;gap:8px;">
+          <div style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:44px;color:var(--ink);line-height:1;">Playwright</div>
+          <div style="font-family:'Work Sans',sans-serif;font-size:20px;color:var(--ink-soft);">Browser automation · end-to-end testing</div>
+          <div style="font-family:'Work Sans',sans-serif;font-size:17px;color:var(--ink-soft);opacity:0.7;">github.com/microsoft/playwright</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chrome-footer-left">HandLog</div>
+    <div class="chrome-footer-right">handlog.app</div>
+  </section>
+
+  <!-- ===================== SLIDE 11: VIBE CODE YOUR LIFE ===================== -->
+  <section class="slide" id="slide-vibe">
+    <div class="chrome-eyebrow reveal d1">You Can Do This Too</div>
+    <div class="chrome-page reveal d1">11</div>
+
+    <div style="position:absolute;left:80px;right:80px;top:150px;bottom:90px;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;">
+      <!-- Left: message -->
+      <div style="display:flex;flex-direction:column;justify-content:center;height:100%;gap:32px;">
+        <h2 class="reveal d2" style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:96px;line-height:0.92;letter-spacing:-0.01em;color:var(--ink);">
+          Vibe code<br><em>your life.</em>
+        </h2>
+        <p class="reveal d3" style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:36px;line-height:1.6;color:var(--ink-soft);">
+          You don't need to be a developer.<br>
+          You just need a problem worth solving<br>and the curiosity to try.
+        </p>
+        <div class="reveal d4" style="display:flex;gap:14px;flex-wrap:wrap;">
+          <span class="pill pill-sage">Technical</span>
+          <span class="pill pill-blush">Non-Technical</span>
+          <span class="pill pill-lemon">Everyone</span>
+        </div>
+        <div class="reveal d5" style="padding:28px 36px;border-radius:24px;background:var(--card-fill);max-width:640px;">
+          <p style="font-family:'Work Sans',sans-serif;font-size:24px;color:var(--ink-soft);line-height:1.5;">
+            I keep a Notion table of ideas — problems I notice in my daily life that don't have good solutions yet. When I have time, I pick one and vibe code it into existence.
+          </p>
+        </div>
+      </div>
+      <!-- Right: Notion screenshot + action steps -->
+      <div style="display:flex;flex-direction:column;gap:20px;padding-top:10px;">
+        <!-- Notion screenshot -->
+        <div class="reveal d2" style="border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(42,36,27,0.12);background:var(--card-fill);">
+          <div style="padding:14px 20px;background:var(--lemon);font-family:'Work Sans',sans-serif;font-size:18px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink);">My AI Idea Table — Notion</div>
+          <img src="assets/vibe-idea.png" alt="Notion AI Idea Table" style="width:100%;display:block;max-height:430px;object-fit:cover;object-position:top;">
+        </div>
+        <div class="reveal d3" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div style="padding:24px 28px;border-radius:20px;background:var(--sage);">
+            <div style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:32px;color:var(--ink);margin-bottom:6px;">Start small</div>
+            <div style="font-family:'Work Sans',sans-serif;font-size:19px;color:var(--ink-soft);line-height:1.4;">One problem. One weekend.</div>
+          </div>
+          <div style="padding:24px 28px;border-radius:20px;background:var(--blush);">
+            <div style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:32px;color:var(--ink);margin-bottom:6px;">Use AI tools</div>
+            <div style="font-family:'Work Sans',sans-serif;font-size:19px;color:var(--ink-soft);line-height:1.4;">Claude Code does the coding.</div>
+          </div>
+          <div style="padding:24px 28px;border-radius:20px;background:var(--lilac);">
+            <div style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:32px;color:var(--ink);margin-bottom:6px;">Ship it</div>
+            <div style="font-family:'Work Sans',sans-serif;font-size:19px;color:var(--ink-soft);line-height:1.4;">Vercel free. Share it.</div>
+          </div>
+          <div style="padding:24px 28px;border-radius:20px;background:var(--pink);">
+            <div style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:32px;color:var(--ink);margin-bottom:6px;">Keep going</div>
+            <div style="font-family:'Work Sans',sans-serif;font-size:19px;color:var(--ink-soft);line-height:1.4;">Next idea. Next weekend.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chrome-footer-left">HandLog</div>
+    <div class="chrome-footer-right">handlog.app</div>
+  </section>
+
+  <!-- ===================== SLIDE 12: THANKS & SOURCES ===================== -->
+  <section class="slide" id="slide-thanks">
+    <div class="chrome-eyebrow reveal d1">Thank You</div>
+    <div class="chrome-page reveal d1">12</div>
+
+    <div style="position:absolute;left:80px;right:80px;top:140px;bottom:90px;display:grid;grid-template-columns:1.15fr 0.85fr;gap:44px;">
+      <!-- Left: thank you -->
+      <div style="display:flex;flex-direction:column;gap:22px;">
+        <h2 class="reveal d1" style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:84px;line-height:0.92;letter-spacing:-0.01em;color:var(--ink);">
+          Thank you <em>for being here.</em>
+        </h2>
+        <!-- Michelle — slides in from left -->
+        <div class="slide-in-left" style="padding:32px 40px;border-radius:28px;background:var(--sage);">
+          <div style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:38px;color:var(--ink);margin-bottom:8px;">Michelle ✦</div>
+          <div style="font-family:'Work Sans',sans-serif;font-size:22px;color:var(--ink-soft);line-height:1.5;">For building this community and creating the space for all of us to learn, share, and grow in AI together.</div>
+        </div>
+        <!-- Doris — slides in from left with delay -->
+        <div class="slide-in-left slide-in-delay" style="padding:32px 40px;border-radius:28px;background:var(--blush);">
+          <div style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:38px;color:var(--ink);margin-bottom:8px;">Doris ✦</div>
+          <div style="font-family:'Work Sans',sans-serif;font-size:22px;color:var(--ink-soft);line-height:1.5;">For believing in my potential, encouraging me to show up, and recommending Zara Zhang's channel — which inspired this very PPT.</div>
+        </div>
+        <div class="reveal d5" style="padding:24px 36px;border-radius:22px;background:var(--card-fill);">
+          <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:26px;color:var(--ink-soft);line-height:1.6;">
+            This PPT was made with <a href="https://github.com/zarazhangrui/frontend-slides" target="_blank" style="color:var(--ink);font-style:normal;font-weight:500;text-decoration:underline;">Zara Zhang's frontend-slides</a>.<br>
+            Try it yourself — it's free and open source.
+          </div>
+        </div>
+      </div>
+      <!-- Right: sources with links -->
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="reveal d2" style="font-family:'Work Sans',sans-serif;font-size:18px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:2px;">Tools &amp; Sources</div>
+        <a href="https://anthropic.com" target="_blank" class="reveal d2 source-link" style="padding:18px 26px;border-radius:18px;background:var(--lemon);">
+          <div style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:24px;color:var(--ink);line-height:1.25;">Claude Code + Claude API + Skills + Hooks + Plugins</div>
+          <div style="font-family:'Work Sans',sans-serif;font-size:17px;color:var(--ink-soft);margin-top:4px;">anthropic.com</div>
+        </a>
+        <a href="https://platform.openai.com/docs/guides/speech-to-text" target="_blank" class="reveal d3 source-link" style="padding:18px 26px;border-radius:18px;background:var(--sage);">
+          <div style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:28px;color:var(--ink);">OpenAI Whisper API</div>
+          <div style="font-family:'Work Sans',sans-serif;font-size:17px;color:var(--ink-soft);margin-top:2px;">platform.openai.com</div>
+        </a>
+        <a href="https://developers.notion.com" target="_blank" class="reveal d3 source-link" style="padding:18px 26px;border-radius:18px;background:var(--blush);">
+          <div style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:28px;color:var(--ink);">Notion API</div>
+          <div style="font-family:'Work Sans',sans-serif;font-size:17px;color:var(--ink-soft);margin-top:2px;">developers.notion.com</div>
+        </a>
+        <a href="https://www.skills.sh/anthropics/skills" target="_blank" class="reveal d4 source-link" style="padding:18px 26px;border-radius:18px;background:var(--lilac);">
+          <div style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:28px;color:var(--ink);">Anthropic Frontend Design Skills</div>
+          <div style="font-family:'Work Sans',sans-serif;font-size:17px;color:var(--ink-soft);margin-top:2px;">skills.sh/anthropics/skills</div>
+        </a>
+        <a href="https://github.com/obra/superpowers" target="_blank" class="reveal d4 source-link" style="padding:18px 26px;border-radius:18px;background:var(--card-fill);">
+          <div style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:28px;color:var(--ink);">Superpowers</div>
+          <div style="font-family:'Work Sans',sans-serif;font-size:17px;color:var(--ink-soft);margin-top:2px;">github.com/obra/superpowers</div>
+        </a>
+        <a href="https://github.com/microsoft/playwright" target="_blank" class="reveal d5 source-link" style="padding:18px 26px;border-radius:18px;background:var(--card-fill);">
+          <div style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:28px;color:var(--ink);">Playwright</div>
+          <div style="font-family:'Work Sans',sans-serif;font-size:17px;color:var(--ink-soft);margin-top:2px;">github.com/microsoft/playwright</div>
+        </a>
+        <a href="https://github.com/zarazhangrui/frontend-slides" target="_blank" class="reveal d5 source-link" style="padding:18px 26px;border-radius:18px;background:var(--pink);">
+          <div style="font-family:'Cormorant Garamond',serif;font-weight:500;font-size:28px;color:var(--ink);">frontend-slides — Zara Zhang</div>
+          <div style="font-family:'Work Sans',sans-serif;font-size:17px;color:var(--ink-soft);margin-top:2px;">github.com/zarazhangrui/frontend-slides</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="chrome-footer-left">HandLog — by Sarah</div>
+    <div class="chrome-footer-right">hand-log.vercel.app</div>
+  </section>
+
+  <!-- ===================== SLIDE 13: CLOSER ===================== -->
+  <section class="slide" id="slide-7">
+    <div class="center">
+      <div class="closing-eyebrow reveal d1">Start your journey</div>
+      <div class="closing-title reveal d2">Your story,<br><em>remembered.</em></div>
+      <div class="closing-sub reveal d3">
+        Capture today. Let AI make sense of your week.<br>
+        Your memories, structured and searchable — forever.
+      </div>
+      <div class="cta-links reveal d4">
+        <a href="https://hand-log.vercel.app" class="cta-btn filled" target="_blank">Try HandLog Free</a>
+        <a href="https://github.com/sarahwangy/HandLog" class="cta-btn" target="_blank">View on GitHub</a>
+      </div>
+    </div>
+    <div class="chrome-footer-left">HandLog — AI Journal</div>
+    <div class="chrome-footer-right">hand-log.vercel.app</div>
+  </section>
+
+</main>
+</div>
+
+<!-- Progress dots -->
+<div class="progress-dots" id="progressDots"></div>
+
+<!-- Inline edit -->
+<div class="edit-hotzone" id="editHotzone"></div>
+<button class="edit-toggle" id="editToggle">✏ Edit</button>
+
+<script>
+/* ===========================================
+   PRESENTATION CONTROLLER
+   =========================================== */
+class SlidePresentation {
+  constructor() {
+    this.slides = Array.from(document.querySelectorAll('.slide'));
+    this.current = 0;
+    this.stage = document.getElementById('deckStage');
+    this.dotsContainer = document.getElementById('progressDots');
+    this.total = this.slides.length;
+    this.isEditing = false;
+
+    this.setupScale();
+    this.buildDots();
+    this.setupKeyboard();
+    this.setupTouch();
+    this.setupWheel();
+    this.setupEditMode();
+    this.show(0);
+  }
+
+  setupScale() {
+    const scale = () => {
+      const f = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+      const x = (window.innerWidth  - 1920 * f) / 2;
+      const y = (window.innerHeight - 1080 * f) / 2;
+      this.stage.style.transform = `translate(${x}px,${y}px) scale(${f})`;
+    };
+    scale();
+    window.addEventListener('resize', scale);
+  }
+
+  buildDots() {
+    this.dots = [];
+    for (let i = 0; i < this.total; i++) {
+      const d = document.createElement('div');
+      d.className = 'dot';
+      d.addEventListener('click', () => this.show(i));
+      this.dotsContainer.appendChild(d);
+      this.dots.push(d);
+    }
+  }
+
+  show(idx) {
+    idx = Math.max(0, Math.min(idx, this.total - 1));
+    this.slides[this.current].classList.remove('active');
+    this.dots[this.current].classList.remove('active');
+    this.current = idx;
+    this.slides[idx].classList.add('active');
+    this.dots[idx].classList.add('active');
+  }
+
+  next() { this.show(this.current + 1); }
+  prev() { this.show(this.current - 1); }
+
+  setupKeyboard() {
+    document.addEventListener('keydown', e => {
+      if (e.target.getAttribute('contenteditable')) return;
+      if (['ArrowRight','ArrowDown','Space',' ','PageDown'].includes(e.key)) { e.preventDefault(); this.next(); }
+      if (['ArrowLeft','ArrowUp','PageUp'].includes(e.key)) { e.preventDefault(); this.prev(); }
+      if ((e.key === 'e' || e.key === 'E') && !e.target.getAttribute('contenteditable')) this.toggleEdit();
+    });
+  }
+
+  setupTouch() {
+    let tx = 0;
+    this.stage.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+    this.stage.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - tx;
+      if (Math.abs(dx) > 50) dx < 0 ? this.next() : this.prev();
+    });
+  }
+
+  setupWheel() {
+    let t = 0;
+    window.addEventListener('wheel', e => {
+      const now = Date.now();
+      if (now - t < 600) return;
+      t = now;
+      e.deltaY > 0 ? this.next() : this.prev();
+    }, { passive: true });
+  }
+
+  setupEditMode() {
+    const toggle = document.getElementById('editToggle');
+    const hotzone = document.getElementById('editHotzone');
+    let hideT = null;
+    const show = () => { clearTimeout(hideT); toggle.classList.add('show'); };
+    const hide = () => { hideT = setTimeout(() => { if (!this.isEditing) toggle.classList.remove('show'); }, 400); };
+    hotzone.addEventListener('mouseenter', show);
+    hotzone.addEventListener('mouseleave', hide);
+    toggle.addEventListener('mouseenter', show);
+    toggle.addEventListener('mouseleave', hide);
+    hotzone.addEventListener('click', () => this.toggleEdit());
+    toggle.addEventListener('click', () => this.toggleEdit());
+  }
+
+  toggleEdit() {
+    this.isEditing = !this.isEditing;
+    const toggle = document.getElementById('editToggle');
+    toggle.textContent = this.isEditing ? '✓ Done' : '✏ Edit';
+    toggle.classList.toggle('active', this.isEditing);
+    document.querySelectorAll('.slide h1,.slide h2,.slide h3,.slide p,.slide .feat-title,.slide .feat-body,.slide .step-body,.slide .step-title,.slide .stat-num,.slide .stat-label,.slide .stat-desc,.slide .closing-title,.slide .closing-sub,.slide .pain-text h3,.slide .pain-text p,.slide .chat-bubble,.slide .opener-text').forEach(el => {
+      el.contentEditable = this.isEditing ? 'true' : 'false';
+    });
+    if (!this.isEditing) {
+      localStorage.setItem('handlog-ppt', document.getElementById('deckStage').innerHTML);
+    }
+  }
+}
+
+// Restore saved edits
+const saved = localStorage.getItem('handlog-ppt');
+if (saved) document.getElementById('deckStage').innerHTML = saved;
+
+new SlidePresentation();
+</script>
+</body>
+</html>
