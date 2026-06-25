@@ -5,6 +5,7 @@
 🔗 **Live Demo**: [hand-log.vercel.app](https://hand-log.vercel.app)\
 📄 **Static Demo**: Open [`handlog-demo.html`](./handlog-demo.html) locally to preview all pages\
 📝 **Read the Story**: [I Built an AI Journal That Thinks With Me](https://medium.com/@sarahwang9/i-built-an-ai-journal-that-thinks-with-me-a-vibe-coding-story-1f62ebb31e42)\
+🎞️ **Intro Slides**: [handlog-ppt-deploy.vercel.app](https://handlog-ppt-deploy.vercel.app) · [PDF](./handlog-intro.pdf)\
 🇨🇳 **中文文档**: [README_CN.md](./README_CN.md)
 
 ---
