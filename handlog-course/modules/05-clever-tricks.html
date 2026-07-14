@@ -1,0 +1,404 @@
+<section class="module" id="module-5" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">聪明的工程技巧——一个精明管家的省钱哲学</h1>
+      <p class="module-subtitle">好管家不会每件事都用最贵的方式做——HandLog 的代码里，藏着好几个这样的小聪明</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Hook + metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">想象一个精明的管家</h2>
+        <p>一个好管家不会每次都请最贵的师傅办事——日常小事交给便宜的帮手，重要场合才请真正的高手。东西太多一次搬不完，就分几趟搬；不同东西也有不同的"保质期"。</p>
+
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">一个真实的数字</strong>
+            <p>HandLog 生成"月复盘"的时候，并没有把整整 30 天的日记一天天喂给 Claude——这个设计选择，一年能省下不少
+              <span class="term" data-definition="Token 是 AI 模型处理文字的最小计费单位，大致相当于半个到一个汉字。你发给模型的文字和模型回复的文字都要按 token 计费——越啰嗦、调用次数越多，花的钱就越多。">token</span>
+              费用。这一模块就来拆解这些"管家智慧"。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Pattern cards -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">四张"管家的小聪明"卡片</h2>
+        <p>好工程不是"能跑就行"，而是在成本、速度、可靠性之间做出刻意的权衡。下面这四张卡片，就是 HandLog 里最典型的四个权衡。</p>
+
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🎩</div>
+            <h4 class="pattern-title">模型分级</h4>
+            <p class="pattern-desc">重要的日/周复盘请贵一点的
+              <span class="term" data-definition="模型（model）指的是具体某一版本的 AI，比如 Claude Sonnet 或 Claude Haiku。同一家公司的不同模型，理解能力和价格都不一样，就像同一个团队里有资深师傅也有学徒。">模型</span>
+              帮忙，简单的提取小任务交给便宜的模型——省钱。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">📦</div>
+            <h4 class="pattern-title">整月一次打包</h4>
+            <p class="pattern-desc">不是每天叫一次 AI，而是把一整月的内容打包成一次
+              <span class="term" data-definition="API 调用指程序向另一个服务（比如 Claude）发送一次请求并等待返回结果的过程。每调用一次通常都要单独计费或消耗额度。">API 调用</span>
+              ——省钱效果更明显。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🚚</div>
+            <h4 class="pattern-title">分批搬运</h4>
+            <p class="pattern-desc">Notion 一次最多只肯收 100 件"包裹"，东西多的话就分几趟搬，一次超限报错都不会有。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">⏳</div>
+            <h4 class="pattern-title">双保质期缓存</h4>
+            <p class="pattern-desc">草稿留 7 天防止你没保存就白写，
+              <span class="term" data-definition="缓存（cache）是把计算或查询结果先存起来，下次要用的时候直接拿，不用重新计算或重新问一遍——省时间也省调用次数。">缓存</span>
+              数据只留 5 分钟，因为随时能重新问 Notion 要。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: static cost comparison -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">30 次调用 vs 1 次调用：费用差多少</h2>
+        <p>同样是处理一整月 30 天的日记，两种做法的账单完全不是一个量级。</p>
+
+        <div class="icon-rows stagger-children" style="display:grid; grid-template-columns: 1fr 1fr; gap: var(--space-6);">
+          <div class="icon-row animate-in" style="flex-direction:column; align-items:flex-start; border: 2px solid var(--color-error); background: var(--color-error-light);">
+            <strong style="color:var(--color-error)">方案 A：逐天调用（30 次）</strong>
+            <p style="line-height:1.9; font-size:1.4rem; letter-spacing:2px;">💸💸💸💸💸<br>💸💸💸💸💸<br>💸💸💸💸💸<br>💸💸💸💸💸<br>💸💸💸💸💸<br>💸💸💸💸💸</p>
+            <p>每天单独请 Claude 读一遍，30 天就是 30 张账单——中间还重复付了 30 次"读懂上下文"的钱。</p>
+          </div>
+          <div class="icon-row animate-in" style="flex-direction:column; align-items:flex-start; border: 2px solid var(--color-success); background: var(--color-success-light);">
+            <strong style="color:var(--color-success)">方案 B：整月打包（1 次）</strong>
+            <p style="font-size:2.5rem;">💸</p>
+            <p>把 30 天的内容一次性打包发给 Claude，只产生 1 张账单——HandLog 真实采用的就是这个方案。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: flow animation for the batched call -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">跟着"整月打包"走一遍</h2>
+        <p>点击"下一步"，看看 <code>generateMonthlyTableBullets</code> 这一次调用是怎么完成整月工作的。</p>
+
+        <div class="flow-animation" data-steps="[
+          {&quot;highlight&quot;:&quot;flow-actor-1&quot;,&quot;label&quot;:&quot;30 天的原始日记，按周分好段，等待处理&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-2&quot;,&quot;label&quot;:&quot;所有周的内容被拼接成一整段文字，一次性打包&quot;,&quot;packet&quot;:true,&quot;from&quot;:&quot;actor-1&quot;,&quot;to&quot;:&quot;actor-2&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-3&quot;,&quot;label&quot;:&quot;交给便宜的 Haiku 模型处理——这只是提取几个关键词，不需要请最贵的师傅&quot;,&quot;packet&quot;:true,&quot;from&quot;:&quot;actor-2&quot;,&quot;to&quot;:&quot;actor-3&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-4&quot;,&quot;label&quot;:&quot;只用 1 次 API 调用，就拿回整月每一天的事项列表——相比逐周调用，省下约 75% 的 token 费用&quot;,&quot;packet&quot;:true,&quot;from&quot;:&quot;actor-3&quot;,&quot;to&quot;:&quot;actor-4&quot;}
+        ]">
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon" style="background: var(--color-actor-1)">📓</div>
+              <span>30 天日记</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon" style="background: var(--color-actor-2)">📦</div>
+              <span>整月打包</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon" style="background: var(--color-actor-4)">🎩</div>
+              <span>Haiku 模型</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon" style="background: var(--color-actor-3)">✅</div>
+              <span>1 次调用完成</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"下一步"开始</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重来</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// 整月一次调用：把所有周内容合并传给 Claude，只用 1 次 API 调用处理整月</span></span>
+<span class="code-line"><span class="code-comment">// 比逐周调用节省 75% token 费用</span></span>
+<span class="code-line"><span class="code-keyword">export async function</span> <span class="code-function">generateMonthlyTableBullets</span>(</span>
+<span class="code-line">  weeks: Array&lt;{ weekLabel: <span class="code-keyword">string</span>; dailySummary: <span class="code-keyword">string</span> }&gt;,</span>
+<span class="code-line">  month: <span class="code-keyword">number</span></span>
+<span class="code-line">): Promise&lt;DayBullets[]&gt; {</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">这两行注释是程序员自己写给自己看的——直接说明了为什么这么设计。</p>
+              <p class="tl">这个函数接收的不是一天的日记，而是"一整月按周分好的所有内容"。</p>
+              <p class="tl">weeks 参数是一个数组，每一项都是一周的标签加上这一周的原始文字。</p>
+              <p class="tl">函数处理完，会返回整月每一天的事项列表——但只用了 1 次 AI 调用。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: model tiering translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">同一个管家，两副面孔</h2>
+        <p>日/周复盘要写得有洞察力，值得请贵一点的模型；从日记里挑几个关键词这种粗活，便宜模型完全够用。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码 · 日复盘</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">const</span> message = <span class="code-keyword">await</span> client.messages.<span class="code-function">create</span>({</span>
+<span class="code-line">  <span class="code-property">model</span>: <span class="code-string">"claude-sonnet-4-6"</span>,</span>
+<span class="code-line">  <span class="code-property">max_tokens</span>: <span class="code-number">8192</span>,</span>
+<span class="code-line">  <span class="code-property">messages</span>: [{ role: <span class="code-string">"user"</span>, content: prompt }],</span>
+<span class="code-line">});</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">生成每天的复盘，要读懂情绪、总结重点、给出有洞察力的反馈——这是"高手活"。</p>
+              <p class="tl">所以这里请的是 Sonnet，Claude 家族里理解能力更强、也更贵的那位。</p>
+              <p class="tl">8192 是这次回复最多能写多长——留足空间让它写一篇完整的复盘。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码 · 提取表格 bullet</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">const</span> message = <span class="code-keyword">await</span> client.messages.<span class="code-function">create</span>({</span>
+<span class="code-line">  <span class="code-property">model</span>: <span class="code-string">"claude-haiku-4-5-20251001"</span>,</span>
+<span class="code-line">  <span class="code-property">max_tokens</span>: <span class="code-number">1024</span>,</span>
+<span class="code-line">  <span class="code-property">messages</span>: [{ role: <span class="code-string">"user"</span>, content: prompt }],</span>
+<span class="code-line">});</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">这次任务只是"从日记里挑 2-4 个关键事项"——不需要深度理解，只需要提取。</p>
+              <p class="tl">所以换成 Haiku，Claude 家族里更轻量、响应更快、也更便宜的那位。</p>
+              <p class="tl">回复只要 1024 个 token 就够——因为输出只是几个短语，不是长文章。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info animate-in">
+          <div class="callout-icon">🎩</div>
+          <div class="callout-content">
+            <strong class="callout-title">管家的判断标准</strong>
+            <p>不是"这个任务重不重要"，而是"这个任务需不需要深度理解"。表格提取、关键词抽取这类结构化小活，便宜模型往往就能做好。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: batchAppend translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Notion 的"每次最多搬 100 件"规则</h2>
+        <p>Notion 的
+          <span class="term" data-definition="API 是两个程序之间约定好的&quot;沟通规则&quot;——你按照规则发请求，对方就按照规则给你回应。Notion 的 API 就是程序跟 Notion 笔记本对话的方式。">API</span>
+          有个硬性限制：一次最多只能往一个页面里追加 100 个内容块。HandLog 用一个小函数悄悄绕开了这个限制。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// Notion API 每次 append 最多 100 个 block，超过会报错。这个函数自动分批处理。</span></span>
+<span class="code-line"><span class="code-keyword">async function</span> <span class="code-function">batchAppend</span>(notion, blockId, blocks) {</span>
+<span class="code-line">  <span class="code-keyword">const</span> CHUNK = <span class="code-number">100</span>;</span>
+<span class="code-line">  <span class="code-keyword">for</span> (<span class="code-keyword">let</span> i = <span class="code-number">0</span>; i &lt; blocks.length; i += CHUNK) {</span>
+<span class="code-line">    <span class="code-keyword">await</span> withAuthCheck(() =&gt;</span>
+<span class="code-line">      notion.blocks.children.<span class="code-function">append</span>({ block_id: blockId, children: blocks.slice(i, i + CHUNK) })</span>
+<span class="code-line">    );</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">先把"每趟最多搬多少件"定成一个数字：100。</p>
+              <p class="tl">用一个循环，每次往前挪 100 件，一趟一趟地搬，直到全部搬完。</p>
+              <p class="tl">每一趟都单独发一次请求给 Notion，只带上这一批的内容块。</p>
+              <p class="tl">哪怕日记再长、生成的块再多，Notion 那边也永远只看到"每次不超过 100 个"。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 7: double TTL + auth wrapper -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">两种"保质期"，两个理由</h2>
+        <p>草稿和 Notion 数据缓存都存在同一个地方，但管家给它们设置了完全不同的过期时间。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">const</span> DRAFT_TTL = <span class="code-number">60</span> * <span class="code-number">60</span> * <span class="code-number">24</span> * <span class="code-number">7</span>; <span class="code-comment">// 7 days</span></span>
+<span class="code-line"><span class="code-keyword">const</span> CACHE_TTL = <span class="code-number">60</span> * <span class="code-number">5</span>;            <span class="code-comment">// 5 minutes</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">草稿的
+                <span class="term" data-definition="TTL 全称 Time To Live，意思是&quot;这条数据活多久&quot;。过了这个时间，数据会自动被清理掉，不用手动删。">TTL</span>
+                是 7 天——因为这是你手写还没提交的东西，丢了没法找回，宁可多留一阵子。</p>
+              <p class="tl">Notion 数据的缓存只留 5 分钟——因为这份数据随时能重新问 Notion 要一份新的，留太久反而可能是过期信息。</p>
+            </div>
+          </div>
+        </div>
+
+        <p>另一个"统一拦截"的小聪明：把所有 Notion 调用都包一层，专门盯着一种错误——
+          <span class="term" data-definition="401 是 HTTP 状态码之一，服务器用它告诉你&quot;你没有权限做这件事&quot;，通常意味着登录凭证过期或被撤销了。">401</span>。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">async function</span> <span class="code-function">withAuthCheck</span>&lt;T&gt;(fn: () =&gt; Promise&lt;T&gt;): Promise&lt;T&gt; {</span>
+<span class="code-line">  <span class="code-keyword">try</span> {</span>
+<span class="code-line">    <span class="code-keyword">return</span> <span class="code-keyword">await</span> fn();</span>
+<span class="code-line">  } <span class="code-keyword">catch</span> (error: unknown) {</span>
+<span class="code-line">    <span class="code-keyword">if</span> (</span>
+<span class="code-line">      <span class="code-keyword">typeof</span> error === <span class="code-string">"object"</span> &amp;&amp;</span>
+<span class="code-line">      error !== <span class="code-keyword">null</span> &amp;&amp;</span>
+<span class="code-line">      <span class="code-string">"status"</span> <span class="code-keyword">in</span> error &amp;&amp;</span>
+<span class="code-line">      (error <span class="code-keyword">as</span> { status: <span class="code-keyword">number</span> }).status === <span class="code-number">401</span></span>
+<span class="code-line">    ) {</span>
+<span class="code-line">      <span class="code-keyword">throw new</span> NotionAuthError();</span>
+<span class="code-line">    }</span>
+<span class="code-line">    <span class="code-keyword">throw</span> error;</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">这个函数把"真正要做的 Notion 调用"包在 try 里执行。</p>
+              <p class="tl">一旦出错，先检查这个错误是不是"401 未授权"——也就是用户在 Notion 后台把授权撤销了。</p>
+              <p class="tl">如果是，就统一抛出一个自定义的 NotionAuthError，让上层代码能识别"要引导用户重新连接"。</p>
+              <p class="tl">如果不是 401，就把错误原样往外抛——不吞掉任何意外情况。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么要"统一包一层"</strong>
+            <p>如果没有 withAuthCheck，每一个调用 Notion 的函数都要自己重复写一遍"检查 401、判断要不要报特殊错误"的逻辑——多一个新函数就多一处可能忘记写的地方。包一层之后，这个规则只用维护一次。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 8: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验一下：换你来当管家</h2>
+        <p>这次不是回忆知识点，而是把学到的判断标准用到新场景里。</p>
+
+        <div class="quiz-container" id="quiz-module5">
+
+          <div class="quiz-question-block"
+               data-correct="opt-haiku"
+               data-explanation-right="对！情绪标签提取是结构化归类，不需要深度创作或推理，跟表格 bullet 提取是同一类活——便宜模型就够。"
+               data-explanation-wrong="再想想：这个任务是&quot;从固定选项里挑一个标签&quot;，还是需要模型自己组织语言、写出有洞察力的内容？前者才需要贵模型。">
+            <h3 class="quiz-question">你在做一个类似的日记 App，要新加一个"情绪标签提取"的小功能（从固定的几个情绪词里挑一个），你会用贵模型还是便宜模型？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-sonnet" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>贵模型（比如 Sonnet），标签这么重要必须最准</span>
+              </button>
+              <button class="quiz-option" data-value="opt-haiku" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>便宜模型（比如 Haiku），这是结构化提取，不需要深度理解</span>
+              </button>
+              <button class="quiz-option" data-value="opt-none" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>不需要 AI，写死几个关键词匹配规则就行</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="opt-batch"
+               data-explanation-right="对！CHUNK 这个常量控制着每趟搬多少件，改成 10 之后循环逻辑完全不用变——这就是当初把&quot;分批&quot;单独封装成一个函数的好处。"
+               data-explanation-wrong="再想想：哪个函数里写死了&quot;100&quot;这个数字？提示：不是负责发起调用的函数，而是负责&quot;拆包裹&quot;的那个。">
+            <h3 class="quiz-question">如果 Notion 突然要求你一次最多只能创建 10 个 blocks（不是 100 个），代码里哪个函数需要改？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-batch" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>batchAppend——把 CHUNK 常量从 100 改成 10</span>
+              </button>
+              <button class="quiz-option" data-value="opt-auth" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>withAuthCheck——它负责处理这类错误</span>
+              </button>
+              <button class="quiz-option" data-value="opt-client" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>createNotionClient——它负责创建连接</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="opt-swap-bad"
+               data-explanation-right="对！草稿只留 5 分钟，你打字打到一半页面一崩溃，草稿可能已经过期消失——找不回来。而 Notion 数据缓存留 7 天，意味着你 Notion 里手动改的内容，可能一周都不会在 App 里更新，看到的全是旧数据。"
+               data-explanation-wrong="再想一下：草稿是&quot;用户还没保存的手写内容&quot;，缓存是&quot;随时能问 Notion 重新要一份的数据&quot;——这两者对&quot;过期&quot;的容忍度完全不同，数值反过来会分别在哪个场景出问题？">
+            <h3 class="quiz-question">草稿缓存留 7 天、Notion 数据缓存只留 5 分钟——如果这两个数值反过来会有什么问题？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-swap-bad" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>草稿 5 分钟就可能丢失没保存的内容，Notion 缓存 7 天又会让 App 长期显示过期数据</span>
+              </button>
+              <button class="quiz-option" data-value="opt-swap-fine" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>没什么影响，反正都是缓存</span>
+              </button>
+              <button class="quiz-option" data-value="opt-swap-fast" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>App 会运行得更快</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="opt-central"
+               data-explanation-right="对！withAuthCheck 把&quot;识别 401、抛出统一错误&quot;这件事集中在一个地方。没有它的话，每新增一个调用 Notion 的函数，都要自己重复写一遍这段判断逻辑——多一处重复代码，就多一处以后可能漏改、漏写的风险。"
+               data-explanation-wrong="再想想：如果每个 Notion 相关函数都要自己写一遍&quot;检查 error.status === 401&quot;的逻辑，长期维护会有什么代价？">
+            <h3 class="quiz-question">withAuthCheck 这种"统一包一层处理错误"的写法，好处是什么？如果没有它，代码会变成什么样？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-central" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>把 401 判断逻辑集中管理一次；没有它，每个 Notion 函数都要重复写一遍同样的判断代码</span>
+              </button>
+              <button class="quiz-option" data-value="opt-speed" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>让每次 Notion 调用的速度变快</span>
+              </button>
+              <button class="quiz-option" data-value="opt-token" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>减少调用 Claude 的 token 消耗</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

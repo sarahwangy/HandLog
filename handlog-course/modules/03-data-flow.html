@@ -1,0 +1,430 @@
+<section class="module" id="module-3" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">数据怎么流动——从一段文字到 Notion 里的一个折叠块</h1>
+      <p class="module-subtitle">你在 Notion 里点开的那个"复盘"折叠框，其实是程序分两次快递才"造"出来的</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Hook + metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">先想象一次快递打包</h2>
+        <p>你的日记文字，就像一件要寄出的商品。Claude 把它"打包"成一个标准化的包裹——这个包裹在程序世界里有个名字，叫
+          <span class="term" data-definition="JSON 是一种用大括号 {} 组织数据的通用文本格式，几乎所有程序之间传递结构化信息都靠它——就像所有快递公司都认的标准包裹格式。">JSON</span>。
+        </p>
+        <p>但快递偶尔会"包装变形"——AI 写出来的 JSON 有时候不完全合规。Notion 这位收货员，还得会一手"拆歪包装"的绝活，才能把东西正确放进你笔记本的格子里。</p>
+
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">这周你会学到的核心问题</strong>
+            <p>AI 吐出来的是<strong>一段文字</strong>，但程序要用的是<strong>结构化数据</strong>。从文字到结构化数据、再到 Notion 复杂的块结构，中间经过好几层"翻译"和"容错"——这是几乎所有 AI 应用都要处理的通用问题。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: hero data flow animation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">整个快递流程：从商品到格子</h2>
+        <p>点击"下一步"，跟着一件商品（你的日记）走完它的旅程。</p>
+
+        <div class="flow-animation" data-steps="[
+          {&quot;highlight&quot;:&quot;flow-actor-1&quot;,&quot;label&quot;:&quot;你写的日记文字，是这次要打包寄出的商品&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-2&quot;,&quot;label&quot;:&quot;Claude这位打包员开始工作，把商品装进包裹&quot;,&quot;packet&quot;:true,&quot;from&quot;:&quot;actor-1&quot;,&quot;to&quot;:&quot;actor-2&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-2&quot;,&quot;label&quot;:&quot;包裹产出了——一段看起来像JSON的文本，但包装偶尔会有点变形&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-3&quot;,&quot;label&quot;:&quot;质检员上场：extractJson先剪开外层，只留下真正完整闭合的那个包裹&quot;,&quot;packet&quot;:true,&quot;from&quot;:&quot;actor-2&quot;,&quot;to&quot;:&quot;actor-3&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-3&quot;,&quot;label&quot;:&quot;sanitizeJson再检查一遍包装纸——把不合规的弯引号捋直&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-4&quot;,&quot;label&quot;:&quot;拿到干净包裹后，翻译标签表登场：把打包员的说法换成收货员认得的中文标签&quot;,&quot;packet&quot;:true,&quot;from&quot;:&quot;actor-3&quot;,&quot;to&quot;:&quot;actor-4&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-5&quot;,&quot;label&quot;:&quot;收货员（Notion）按标签把商品放进笔记本里对应的格子&quot;,&quot;packet&quot;:true,&quot;from&quot;:&quot;actor-4&quot;,&quot;to&quot;:&quot;actor-5&quot;}
+        ]">
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon" style="background: var(--color-actor-1)">📝</div>
+              <span>你的日记</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon" style="background: var(--color-actor-3)">🧠</div>
+              <span>Claude（打包员）</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon" style="background: var(--color-actor-4)">🔍</div>
+              <span>质检员（extractJson / sanitizeJson）</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon" style="background: var(--color-actor-2)">🏷️</div>
+              <span>翻译标签表（notion-schema.ts）</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-5">
+              <div class="flow-actor-icon" style="background: var(--color-actor-5)">📓</div>
+              <span>Notion（笔记本格子）</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+
+          <div class="flow-step-label" id="flow-label">点击"下一步"开始</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: extractJson translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">质检员的第一招：只剪最外层完整的包裹</h2>
+        <p>Claude 有时候会在 JSON 前后多说几句客套话，比如"好的，这是你的复盘："。extractJson 不会傻乎乎地找最后一个
+          <span class="term" data-definition="大括号 {} 在JSON里用来包住一整块结构化数据，就像包裹的外层纸箱。">大括号</span>，
+          而是用"括号计数法"精确数出真正闭合的那一个。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// 从 Claude 的响应里提取 JSON 对象，忽略前后多余的文字或 markdown 代码块</span></span>
+<span class="code-line"><span class="code-keyword">function</span> <span class="code-function">extractJson</span>(text: <span class="code-keyword">string</span>): <span class="code-keyword">string</span> {</span>
+<span class="code-line">  <span class="code-keyword">const</span> start = text.indexOf(<span class="code-string">"{"</span>);</span>
+<span class="code-line">  <span class="code-keyword">if</span> (start === -1) <span class="code-keyword">throw new</span> Error(<span class="code-string">"No JSON object found in response"</span>);</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-comment">// 用括号计数法找到真正匹配的根级闭合括号，而不是 lastIndexOf</span></span>
+<span class="code-line">  <span class="code-keyword">let</span> depth = <span class="code-number">0</span>;</span>
+<span class="code-line">  <span class="code-keyword">let</span> inString = <span class="code-keyword">false</span>;</span>
+<span class="code-line">  <span class="code-keyword">let</span> escape = <span class="code-keyword">false</span>;</span>
+<span class="code-line">  <span class="code-keyword">for</span> (<span class="code-keyword">let</span> i = start; i &lt; text.length; i++) {</span>
+<span class="code-line">    <span class="code-keyword">const</span> ch = text[i];</span>
+<span class="code-line">    <span class="code-keyword">if</span> (escape) { escape = <span class="code-keyword">false</span>; <span class="code-keyword">continue</span>; }</span>
+<span class="code-line">    <span class="code-keyword">if</span> (ch === <span class="code-string">"\\"</span> &amp;&amp; inString) { escape = <span class="code-keyword">true</span>; <span class="code-keyword">continue</span>; }</span>
+<span class="code-line">    <span class="code-keyword">if</span> (ch === <span class="code-string">'"'</span>) { inString = !inString; <span class="code-keyword">continue</span>; }</span>
+<span class="code-line">    <span class="code-keyword">if</span> (inString) <span class="code-keyword">continue</span>;</span>
+<span class="code-line">    <span class="code-keyword">if</span> (ch === <span class="code-string">"{"</span>) depth++;</span>
+<span class="code-line">    <span class="code-keyword">else if</span> (ch === <span class="code-string">"}"</span>) {</span>
+<span class="code-line">      depth--;</span>
+<span class="code-line">      <span class="code-keyword">if</span> (depth === <span class="code-number">0</span>) <span class="code-keyword">return</span> text.slice(start, i + <span class="code-number">1</span>);</span>
+<span class="code-line">    }</span>
+<span class="code-line">  }</span>
+<span class="code-line">  <span class="code-keyword">throw new</span> Error(<span class="code-string">"JSON object not properly closed (truncated response)"</span>);</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">先找到第一个 { ——包裹的开箱位置。没找到就直接报错，说明这次没打包出任何东西。</p>
+              <p class="tl">准备一个计数器 depth，从 0 开始；另外记录"现在是不是在一段引号字符串里面"。</p>
+              <p class="tl">逐个字符扫描：如果在字符串里，先原样跳过（字符串里的花括号不算数，比如日记正文里写的表情符号或符号）。</p>
+              <p class="tl">碰到 { 就把计数器加一，碰到 } 就减一——每一层花括号都被记一笔账。</p>
+              <p class="tl">当计数器第一次回到 0，说明最外层的包裹刚好在这里闭合——把这一段截出来就是完整、干净的 JSON，不用管后面 Claude 还说了什么客套话。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: group chat about sanitizeJson -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">打包员和收货员的对话</h2>
+        <p>剪开包裹只是第一步。包装纸本身有时候也不合规——这时候 claude.ts 和 notion.ts 会这样"对话"。</p>
+
+        <div class="chat-window" id="chat-module3">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="claude" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">🧠</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">claude.ts</span>
+                <p>笔记本，我把大脑说的话打包成 JSON 了，你收一下。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="notion" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">📓</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">notion.ts</span>
+                <p>等等——你这包裹里有个弯弯的引号，我先给它捋直，不然拆包裹的时候会直接报错。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="claude" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">🧠</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">claude.ts</span>
+                <p>辛苦了，大脑写字的时候有时候会顺手用中文输入法的弯引号，不是故意的。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="notion" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">📓</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">notion.ts</span>
+                <p>没事，这是 sanitizeJson 这个函数每天都在做的事——把弯引号这类"不合规包装材料"换成 JSON 认得的直引号，中文书名号《》这种正文内容会原样保留。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="claude" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">🧠</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">claude.ts</span>
+                <p>那就拜托了，笔记本大哥。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一句</button>
+            <button class="btn chat-all-btn">全部播放</button>
+            <button class="btn chat-reset-btn">重播</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: field mapping translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">翻译标签表：程序内部名字 ≠ 你在 Notion 里看到的列名</h2>
+        <p>拿到干净的 JSON 后，程序里的字段叫
+          <code>score</code>，但你在 Notion 表格里实际看到的列名是"打分"——这张
+          <span class="term" data-definition="字段映射，就是一张对照表，把程序内部用的英文变量名和你在 Notion 数据库里实际看到的中文列名一一对应起来。改列名不用改代码，只需要改这张表。">字段映射表</span>
+          就是负责这层翻译的。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">export const</span> DEFAULT_FIELD_MAPPING: JournalFieldMapping = {</span>
+<span class="code-line">  <span class="code-property">name</span>: <span class="code-string">"Name"</span>,</span>
+<span class="code-line">  <span class="code-property">dailySummary</span>: <span class="code-string">"简短日常"</span>,</span>
+<span class="code-line">  <span class="code-property">labels</span>: <span class="code-string">"label标签"</span>,</span>
+<span class="code-line">  <span class="code-property">score</span>: <span class="code-string">"打分"</span>,</span>
+<span class="code-line">  <span class="code-property">insight</span>: <span class="code-string">"一句话感悟"</span>,</span>
+<span class="code-line">  <span class="code-property">review</span>: <span class="code-string">"复盘"</span>,</span>
+<span class="code-line">  <span class="code-property">nextSteps</span>: <span class="code-string">"下一步"</span>,</span>
+<span class="code-line">  <span class="code-property">handlogImage</span>: <span class="code-string">"手绘复盘图"</span>,</span>
+<span class="code-line">  <span class="code-property">psychNote</span>: <span class="code-string">"心理学正能量话"</span>,</span>
+<span class="code-line">};</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">左边是程序写代码时用的英文名字，右边引号里是你在 Notion 表格里实际看到的中文列名。</p>
+              <p class="tl">比如程序算完 score（打分）之后，要往 Notion 写数据，就查这张表：score 对应的列名叫"打分"。</p>
+              <p class="tl">这样做的好处是：以后你想把 Notion 里"打分"这一列改名叫"评分"，只需要改这一行，不用满代码库去找 score 这个词改。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: Toggle + Callout two-step -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">最后一关：造一个可以点开的"复盘"折叠框</h2>
+        <p>你在 Notion 看到的那个可以点开的
+          <span class="term" data-definition="Toggle（折叠块）是 Notion 里一种可以点击展开/收起的内容块，点击左边的小三角就能看到里面藏的内容。">折叠块（Toggle）</span>，
+          外面是个能点开的壳，里面套了一个带图标的
+          <span class="term" data-definition="Callout（高亮块）是 Notion 里一种带图标、带背景色的提示框，常用来突出显示一段内容。">高亮块（Callout）</span>
+          ——这两层是分两次
+          <span class="term" data-definition="API（应用程序编程接口）是两个程序之间约定好的对话方式——notion.ts 通过调用 Notion 的 API，才能真正把内容写进你的笔记本。">API</span>
+          调用才造出来的，不是一次搞定。</p>
+
+        <div class="step-cards stagger-children">
+          <div class="step-card animate-in">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>先造一个空盒子</strong>
+              <p>调用一次 API，在页面里建一个 Toggle，Toggle 里放一个内容还是空的 Callout——这时候程序还不知道这个 Callout 真正的编号（ID）是什么。</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>回头查一下盒子的编号</strong>
+              <p>再调用一次 API，去问 Notion："刚才那个 Toggle 里面，你给它装的 Callout 编号是多少？"——拿到真正的 ID，才能往里塞东西。</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>把复盘内容塞进去</strong>
+              <p>评分、感悟、下一步这些内容块，最后都追加到这个真正拿到手的 Callout 编号下面，你才会在 Notion 里看到点开折叠框有完整内容。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE · Step 1</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// Step 1：建 Toggle，Toggle 里包一个空 Callout（作为内容容器）</span></span>
+<span class="code-line"><span class="code-comment">// eslint-disable-next-line @typescript-eslint/no-explicit-any</span></span>
+<span class="code-line"><span class="code-keyword">const</span> toggleRes = <span class="code-keyword">await</span> withAuthCheck(() =&gt;</span>
+<span class="code-line">  notion.blocks.children.append({</span>
+<span class="code-line">    <span class="code-property">block_id</span>: pageId,</span>
+<span class="code-line">    <span class="code-property">children</span>: [</span>
+<span class="code-line">      {</span>
+<span class="code-line">        <span class="code-property">type</span>: <span class="code-string">"toggle"</span>,</span>
+<span class="code-line">        <span class="code-property">toggle</span>: {</span>
+<span class="code-line">          <span class="code-property">rich_text</span>: [{ <span class="code-property">type</span>: <span class="code-string">"text"</span>, <span class="code-property">text</span>: { <span class="code-property">content</span>: <span class="code-string">`周${dayChar}复盘`</span> }, <span class="code-property">annotations</span>: { <span class="code-property">bold</span>: <span class="code-keyword">true</span> } }],</span>
+<span class="code-line">          <span class="code-property">color</span>: <span class="code-string">"default"</span>,</span>
+<span class="code-line">          <span class="code-property">children</span>: [</span>
+<span class="code-line">            {</span>
+<span class="code-line">              <span class="code-property">type</span>: <span class="code-string">"callout"</span>,</span>
+<span class="code-line">              <span class="code-property">callout</span>: {</span>
+<span class="code-line">                <span class="code-property">rich_text</span>: [],          <span class="code-comment">// 空标题，内容在子块里</span></span>
+<span class="code-line">                <span class="code-property">icon</span>: { <span class="code-property">type</span>: <span class="code-string">"emoji"</span>, <span class="code-property">emoji</span>: <span class="code-string">"📋"</span> },</span>
+<span class="code-line">                <span class="code-property">color</span>: <span class="code-string">"blue_background"</span>,</span>
+<span class="code-line">              },</span>
+<span class="code-line">            } <span class="code-keyword">as</span> Parameters&lt;<span class="code-keyword">typeof</span> notion.blocks.children.append&gt;[<span class="code-number">0</span>][<span class="code-string">"children"</span>][<span class="code-number">0</span>],</span>
+<span class="code-line">          ],</span>
+<span class="code-line">        },</span>
+<span class="code-line">      } <span class="code-keyword">as</span> Parameters&lt;<span class="code-keyword">typeof</span> notion.blocks.children.append&gt;[<span class="code-number">0</span>][<span class="code-string">"children"</span>][<span class="code-number">0</span>],</span>
+<span class="code-line">    ],</span>
+<span class="code-line">  })</span>
+<span class="code-line">) <span class="code-keyword">as</span> { <span class="code-property">results</span>: { <span class="code-property">id</span>: <span class="code-keyword">string</span>; <span class="code-property">type</span>: <span class="code-keyword">string</span> }[] };</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">调用 Notion 的 API，往这个页面里追加一块内容。</p>
+              <p class="tl">要加的内容是一个 Toggle（折叠块），标题写"周X复盘"，加粗显示。</p>
+              <p class="tl">这个 Toggle 里面预先塞了一个空的 Callout（高亮块），带个 📋 图标——先当个占位的空盒子。</p>
+              <p class="tl">这个空 Callout 现在还没有内容，也不知道自己的真实编号——那是下一步才要去问的。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE · Step 2</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// Step 2：找到刚建的 Toggle 里的 Callout ID</span></span>
+<span class="code-line"><span class="code-keyword">const</span> toggleId = toggleRes.results[<span class="code-number">0</span>]?.id;</span>
+<span class="code-line"><span class="code-keyword">if</span> (!toggleId) <span class="code-keyword">return</span>;</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">const</span> toggleChildren = <span class="code-keyword">await</span> withAuthCheck(() =&gt;</span>
+<span class="code-line">  notion.blocks.children.list({ <span class="code-property">block_id</span>: toggleId })</span>
+<span class="code-line">) <span class="code-keyword">as</span> { <span class="code-property">results</span>: { <span class="code-property">id</span>: <span class="code-keyword">string</span>; <span class="code-property">type</span>: <span class="code-keyword">string</span> }[] };</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">const</span> calloutId = toggleChildren.results.find(b =&gt; b.type === <span class="code-string">"callout"</span>)?.id;</span>
+<span class="code-line"><span class="code-keyword">if</span> (!calloutId) <span class="code-keyword">return</span>;</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">从第一次 API 调用的返回结果里，拿到刚创建的 Toggle 自己的编号。如果没拿到就直接放弃（说明创建失败）。</p>
+              <p class="tl">再发一次 API 请求，问 Notion："这个 Toggle 底下都有哪些子内容？"——这才是第二次真正的网络请求。</p>
+              <p class="tl">在返回的子内容列表里，找到类型是 "callout" 的那一个，取出它的真实编号。</p>
+              <p class="tl">有了这个真实编号，后面才能放心地往这个 Callout 里追加评分、感悟、下一步这些内容。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 7: quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验一下：你能顺着这条快递线找到问题吗？</h2>
+
+        <div class="quiz-container" id="quiz-module3">
+
+          <div class="quiz-question-block"
+               data-correct="opt-yes"
+               data-explanation-right="没错——extractJson 根本不关心 { 前面有什么闲聊文字，它只从第一个 { 开始数括号，前面多说几句客套话完全不影响结果。"
+               data-explanation-wrong="再想想：extractJson 是从 text.indexOf(&quot;{&quot;) 开始找的，也就是说它压根不管 { 前面写了什么。">
+            <h3 class="quiz-question">如果 Claude 返回的文本前面多了一句"好的，这是你的复盘："，extractJson 还能正确工作吗？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-yes" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>能，因为它是从第一个 { 开始数括号的，前面的闲聊文字会被自动忽略</span>
+              </button>
+              <button class="quiz-option" data-value="opt-no" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>不能，多余的文字会让 JSON.parse 直接报错</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">场景</span>
+              <p>你想在 Notion 数据库里新增一列"今日运动"，除了在 Notion 网页里手动加一列，代码这边最少还要改哪里？</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="opt-schema"
+                 data-explanation-right="对——notion-schema.ts 里的 JournalFieldMapping 和 DEFAULT_FIELD_MAPPING 就是那张翻译表，加一个新字段名和对应的中文列名，程序才知道这个新数据该往哪一列写。"
+                 data-explanation-wrong="Notion 网页上加了列，但程序内部完全不知道这一列叫什么、该往哪填数据——它需要一张翻译表告诉它对应关系。">
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="opt-claude" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>src/lib/claude.ts，因为是它负责生成内容</span>
+                </button>
+                <button class="quiz-option" data-value="opt-schema" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>src/lib/notion-schema.ts，因为它是字段名的翻译表</span>
+                </button>
+                <button class="quiz-option" data-value="opt-none" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>不用改代码，Notion 网页上加列就自动生效</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="opt-twostep"
+               data-explanation-right="正是这样——创建 Toggle 时，Notion 只告诉你 Toggle 自己的编号，不会主动告诉你它里面 Callout 子块的编号。程序得再问一次'你里面装的是什么，编号多少'，才能后续把内容准确塞进那个 Callout。"
+               data-explanation-wrong="再想想：第一次调用创建完 Toggle 和里面的空 Callout 后，返回结果只包含 Toggle 自己的信息——Callout 藏在里面，编号还不知道。">
+            <h3 class="quiz-question">为什么创建 Notion 的折叠块（Toggle）需要调用两次 API，而不是一次搞定？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-network" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为网络不稳定，需要多试一次保险</span>
+              </button>
+              <button class="quiz-option" data-value="opt-twostep" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为第一次创建后，Notion 不会主动返回里面 Callout 子块的真实编号，得再查一次才知道</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">Debugging 场景</span>
+              <p>用户反馈"复盘生成了，但 Notion 里没有新增内容"。你会先怀疑这条快递线的哪个环节？</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="opt-chain"
+                 data-explanation-right="对——遇到'生成了但没写进去'，最实用的排查方式就是顺着这条链路一环环看：JSON 有没有被 extractJson/sanitizeJson 正确解析出来？notion-schema.ts 里的列名和你 Notion 里实际的列名是否一致？最后创建 Toggle+Callout 那两次 API 调用有没有报错？单看某一个文件很容易漏掉真正出问题的那一环。"
+                 data-explanation-wrong="只盯着一个环节可能会错过问题——'生成了但没写进去'恰好说明前半段（Claude 生成）是通的，问题更可能出在后半段的某个转换步骤里，值得顺着链路一步步排查。">
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="opt-ui" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>先怀疑前端页面的按钮样式出了问题</span>
+                </button>
+                <button class="quiz-option" data-value="opt-chain" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>顺着链路查：JSON 解析是否成功、字段映射是否对得上、Toggle/Callout 两次 API 调用有没有报错</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

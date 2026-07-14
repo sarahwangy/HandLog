@@ -1,0 +1,2330 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HandLog 拆解课：AI 日记是怎么运作的</title>
+
+  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    :root {
+      --color-accent:       #D94F30;
+      --color-accent-hover: #C4432A;
+      --color-accent-light: #FDEEE9;
+      --color-accent-muted: #E8836C;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">HandLog 拆解课</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="录音之后发生了什么" role="tab" aria-label="Module 1: 录音之后发生了什么"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="认识主要角色" role="tab" aria-label="Module 2: 认识主要角色"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="数据怎么流动" role="tab" aria-label="Module 3: 数据怎么流动"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="外部世界" role="tab" aria-label="Module 4: 外部世界"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="聪明的工程技巧" role="tab" aria-label="Module 5: 聪明的工程技巧"></button>
+        <button class="nav-dot" data-target="module-6" data-tooltip="容易踩的坑" role="tab" aria-label="Module 6: 容易踩的坑"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main">
+    <!-- modules/*.html content is assembled here by build.sh -->
+<section class="module" id="module-1" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">录音之后，发生了什么？</h1>
+      <p class="module-subtitle">你按下麦克风按钮说了两分钟的话——这两分钟里，你的声音其实经过了三次"翻译"，才变成 Notion 里那份漂亮的复盘。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: App intro -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">HandLog 是什么</h2>
+        <p>HandLog 是一个"偷懒式日记" App。你不用坐下来认真写日记——像跟朋友吐槽一样，把今天发生的事随口说出来就行。</p>
+
+        <div class="icon-rows stagger-children">
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-1)">📝</div>
+            <div>
+              <strong>整理成复盘</strong>
+              <p>今天心情打几分、见了谁、发生了什么事、有什么感悟</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-2)">📓</div>
+            <div>
+              <strong>自动存进笔记本</strong>
+              <p>不用你手动复制粘贴，AI 帮你写进 Notion</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-4)">📊</div>
+            <div>
+              <strong>攒够一周/一个月</strong>
+              <p>还能再帮你生成"周复盘""月复盘"</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">👤</div>
+          <div class="callout-content">
+            <strong class="callout-title">只有一个人在用</strong>
+            <p>这个 App 目前只有一个用户——项目作者本人自己用。后面的模块会讲为什么登录只允许一个邮箱。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一场"翻译接力"</h2>
+        <p>想象你把一张潦草的字条塞进一条<span class="term" data-definition="传话筒队伍：一种类比，指信息依次经过多个人手中传递，每个人只处理自己那一段，不了解全局。">传话筒队伍</span>：第一个人把声音变成文字，第二个人把文字整理成一份漂亮的复盘，第三个人把它归档进笔记本。</p>
+        <p>每个人只做自己那一件事，谁都不知道全局——但接力完成后，你得到了一份结构化的日记。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">👂</div>
+            <h4 class="pattern-title">耳朵（Whisper）</h4>
+            <p class="pattern-desc">只负责一件事：把声音变成文字。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🧠</div>
+            <h4 class="pattern-title">大脑（Claude）</h4>
+            <p class="pattern-desc">只负责一件事：把文字整理成结构化复盘。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">📓</div>
+            <h4 class="pattern-title">笔记本（Notion）</h4>
+            <p class="pattern-desc">只负责一件事：把结果归档保存。</p>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键洞察</strong>
+            <p>一个看起来"一键完成"的功能，背后其实是好几个独立系统按顺序接力完成的。学会拆解这条链路，你就知道"如果哪一步坏了，该去哪里找问题"。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: data flow animation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">追踪你声音的旅程</h2>
+        <p>点击"下一步"，看看你说的那段话，是怎么一步步变成 Notion 里的一份复盘的。</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"这是你的声音——你对着手机说了两分钟的话"},
+          {"highlight":"flow-actor-2","label":"浏览器把声音录下来，变成一段音频文件","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-3","label":"音频文件被送去问耳朵（Whisper）","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-4","label":"耳朵把声音变成了一段文字","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-5","label":"文字被送去问大脑（Claude）","packet":true,"from":"actor-4","to":"actor-5"},
+          {"highlight":"flow-actor-6","label":"大脑把文字整理成结构化的 JSON 复盘","packet":true,"from":"actor-5","to":"actor-6"},
+          {"highlight":"flow-actor-6","label":"结构化复盘被存进了笔记本（Notion）——旅程结束"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">🎙️</div>
+              <span>你的声音</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">🌐</div>
+              <span>浏览器</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">📤</div>
+              <span>/api/transcribe</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">👂</div>
+              <span>耳朵 (Whisper)</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-5">
+              <div class="flow-actor-icon">🧠</div>
+              <span>大脑 (Claude)</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-6">
+              <div class="flow-actor-icon">📓</div>
+              <span>笔记本 (Notion)</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+
+          <div class="flow-step-label" id="flow-label">点击"下一步"开始追踪</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: code translation 1 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">第一站：浏览器怎么录音</h2>
+        <p>这段代码来自 <code>src/hooks/useWhisper.ts</code>——它负责问你的手机要麦克风权限、录音、再把录音送出去。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">const</span> startRecording = <span class="code-keyword">async</span> () => {</span>
+<span class="code-line">  <span class="code-keyword">const</span> stream = <span class="code-keyword">await</span> navigator.mediaDevices.<span class="code-function">getUserMedia</span>({ audio: <span class="code-keyword">true</span> });</span>
+<span class="code-line">  <span class="code-keyword">const</span> mimeType = MediaRecorder.<span class="code-function">isTypeSupported</span>(<span class="code-string">"audio/mp4"</span>)</span>
+<span class="code-line">    ? <span class="code-string">"audio/mp4"</span></span>
+<span class="code-line">    : <span class="code-string">"audio/webm"</span>;</span>
+<span class="code-line">  <span class="code-keyword">const</span> recorder = <span class="code-keyword">new</span> <span class="code-function">MediaRecorder</span>(stream, { mimeType });</span>
+<span class="code-line">  recorder.onstop = <span class="code-keyword">async</span> () => {</span>
+<span class="code-line">    <span class="code-keyword">const</span> audioBlob = <span class="code-keyword">new</span> <span class="code-function">Blob</span>(chunks, { type: mimeType });</span>
+<span class="code-line">    <span class="code-keyword">const</span> formData = <span class="code-keyword">new</span> <span class="code-function">FormData</span>();</span>
+<span class="code-line">    formData.<span class="code-function">append</span>(<span class="code-string">"audio"</span>, audioBlob);</span>
+<span class="code-line">    <span class="code-keyword">const</span> response = <span class="code-keyword">await</span> <span class="code-function">fetch</span>(<span class="code-string">"/api/transcribe"</span>, {</span>
+<span class="code-line">      method: <span class="code-string">"POST"</span>,</span>
+<span class="code-line">      body: formData,</span>
+<span class="code-line">    });</span>
+<span class="code-line">  };</span>
+<span class="code-line">  recorder.start();</span>
+<span class="code-line">};</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">开始录音这件事，是一个<span class="term" data-definition="异步函数：一种可以'先放一放、等结果回来再继续'的函数，专门处理需要等待的操作（比如问手机要权限、等网络请求返回）。写代码时你会看到 async/await 这对关键词。">异步</span>过程——要等手机的麦克风权限批下来才能继续。</p>
+              <p class="tl">向浏览器申请麦克风权限，得到一条"声音数据流"。</p>
+              <p class="tl">检查手机支持哪种音频格式，优先用 mp4，不支持就退而求其次用 webm。</p>
+              <p class="tl">用拿到的格式，创建一个真正的"录音机"对象。</p>
+              <p class="tl">当你点击"停止录音"时，把录到的声音打包成一个音频文件（<span class="term" data-definition="Blob：Binary Large Object 的缩写，浏览器里用来表示一段'原始二进制数据'的对象，比如一段音频、一张图片。可以把它想成一个装着文件内容的信封。">Blob</span>）。</p>
+              <p class="tl">再把这个音频文件塞进一个"表单包裹"（<span class="term" data-definition="FormData：浏览器提供的一种打包数据的方式，专门用来在网络请求里发送文件或表单内容，就像把东西装进一个可以邮寄的箱子。">FormData</span>）里，方便通过网络送出去。</p>
+              <p class="tl">把这个包裹寄给后端的 <code>/api/transcribe</code> 地址，也就是"耳朵"的接待窗口。</p>
+              <p class="tl">用 POST 方式发送——意味着"我要交给你一些数据"，不是单纯"问你要数据"。</p>
+              <p class="tl">最后，按下"开始录音"按钮，一切才真正启动。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: code translation 2 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">第二站：耳朵怎么听懂人话</h2>
+        <p>这段代码来自 <code>src/app/api/transcribe/route.ts</code>——它把音频文件转发给 OpenAI 的 Whisper 模型，请它"翻译"成文字。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">const</span> audioFile = <span class="code-keyword">new</span> <span class="code-function">File</span>([audioBlob], <span class="code-string">"recording.webm"</span>, { type: audioBlob.type });</span>
+<span class="code-line"><span class="code-keyword">const</span> response = <span class="code-keyword">await</span> openai.audio.transcriptions.<span class="code-function">create</span>({</span>
+<span class="code-line">  file: audioFile,</span>
+<span class="code-line">  model: <span class="code-string">"whisper-1"</span>,</span>
+<span class="code-line">  prompt: <span class="code-string">"这是一段日记录音，请保留所有标点符号。今天天气很好，我去了咖啡馆，见了老朋友。"</span>,</span>
+<span class="code-line">});</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">把浏览器送来的音频数据，重新包装成一个标准"文件"对象，方便交给 Whisper。</p>
+              <p class="tl">调用<span class="term" data-definition="API：Application Programming Interface 的缩写，是一个服务对外开放的'服务窗口'，别的程序可以通过它请求数据或功能，而不需要知道内部是怎么实现的。跟 AI 沟通时你可以说'帮我调用这个 API'。">API</span>，把文件交给 OpenAI，让它转录成文字。</p>
+              <p class="tl">这里就是那个文件本体。</p>
+              <p class="tl">指定用哪个模型来"听"——这里用的是 <code>whisper-1</code>。</p>
+              <p class="tl">给一个"提示词"，像是提前跟耳朵打个招呼："这是日记，别漏掉标点"，帮它转录得更准确。</p>
+              <p class="tl">发出请求，等它把文字结果传回来。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: code translation 3 (the handoff) -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">第三站：大脑整理完，交给笔记本</h2>
+        <p>这段代码来自 <code>src/app/api/process/route.ts</code>——是整条接力棒的核心衔接点：大脑整理完，立刻交给笔记本归档。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">const</span> review = <span class="code-keyword">await</span> <span class="code-function">generateDailyReview</span>(journal, date);</span>
+<span class="code-line"><span class="code-comment">// 拿到 Claude 生成的结构化结果后...</span></span>
+<span class="code-line"><span class="code-keyword">await</span> <span class="code-function">findOrCreateWeekPage</span>(date);</span>
+<span class="code-line"><span class="code-keyword">await</span> <span class="code-function">appendDailySummary</span>(date, journal);</span>
+<span class="code-line"><span class="code-keyword">await</span> <span class="code-function">appendReviewBlocks</span>(weekPageId, review);</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">让大脑（Claude）读一遍你今天的日记文字，生成一份结构化的复盘。</p>
+              <p class="tl">从这里开始，我们手里已经是大脑整理好的结果了。</p>
+              <p class="tl">先去笔记本里找这周的页面——没有就新建一页。</p>
+              <p class="tl">把今天的原始日记内容追加进笔记本里存一份底稿。</p>
+              <p class="tl">再把大脑整理出的复盘内容，也写进这周的页面里。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">🔗</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么要拆开这三步</strong>
+            <p>把"整理复盘"和"存进笔记本"拆成两个独立步骤，是因为它们各自可能出错——如果只有存笔记本失败了，你不用重新整理一遍复盘。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验一下：你能追踪这条链路吗？</h2>
+        <p>这三道题不考你背代码，考你能不能用这条链路去推理新情况。</p>
+
+        <div class="quiz-container" id="quiz-module1">
+
+          <div class="quiz-question-block"
+               data-correct="opt-b"
+               data-explanation-right="没错！Whisper 只负责'把声音变成文字'，如果你本来就是打字输入，文字已经有了，这一步完全没有存在的必要——录音、上传音频、转文字这三步都会被跳过。"
+               data-explanation-wrong="再想想：Whisper（耳朵）在整条链路里唯一的工作是什么？如果你的输入本来就已经是文字了，耳朵还有活干吗？">
+            <h3 class="quiz-question">1. 如果你选择打字而不是录音，上面这条链路会跳过哪一步？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>大脑整理复盘那一步会被跳过</span>
+              </button>
+              <button class="quiz-option" data-value="opt-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>耳朵（Whisper）转文字那一步会被跳过</span>
+              </button>
+              <button class="quiz-option" data-value="opt-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>存进笔记本（Notion）那一步会被跳过</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="opt-b"
+               data-explanation-right="正确！转录出来的文字是错别字，说明问题发生在'声音变文字'这一步，也就是 /api/transcribe 里调用 Whisper 的那段代码——可以从这里检查录音质量、prompt 提示词是否给得合适。"
+               data-explanation-wrong="提示：错别字出现在'文字'这个环节，而不是'整理格式'或'存储'环节。想想链路里哪一步的工作就是'把声音变成文字'？">
+            <h3 class="quiz-question">2. 如果转录出来的文字全是错别字，问题最可能出在链路的哪个环节？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>大脑（Claude）整理复盘那一步</span>
+              </button>
+              <button class="quiz-option" data-value="opt-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>耳朵（Whisper）转文字那一步</span>
+              </button>
+              <button class="quiz-option" data-value="opt-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>笔记本（Notion）存档那一步</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="opt-a"
+               data-explanation-right="没错——当前用的 Claude 版本是接收文字输入的，它没办法直接'听'一段音频。所以链路必须先经过耳朵把声音转成文字，大脑才能读懂并整理。"
+               data-explanation-wrong="再想一层：大脑（Claude）在这条链路里收到的输入是什么类型？是一段音频，还是一段文字？">
+            <h3 class="quiz-question">3. 为什么要先转文字、再让大脑整理，而不是让大脑直接"听"录音？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为当前用的这个大脑（Claude）版本走的是文字输入，听不懂音频</span>
+              </button>
+              <button class="quiz-option" data-value="opt-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为这样存进笔记本的速度会更快</span>
+              </button>
+              <button class="quiz-option" data-value="opt-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为浏览器不允许直接上传音频文件</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重新作答</button>
+        </div>
+      </section>
+
+      <!-- Connection to next module -->
+      <section class="screen animate-in">
+        <div class="callout callout-info">
+          <div class="callout-icon">➡️</div>
+          <div class="callout-content">
+            <strong class="callout-title">下一站</strong>
+            <p>现在你已经知道声音走过了哪些"站"。下一个模块，我们会打开地图，看看这条链路背后到底有哪些文件、分别是谁在负责哪一段。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">认识主要角色</h1>
+      <p class="module-subtitle">同一个页面，其实是两个"演员"在轮流上场</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Opening hook -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">你打开 Capture 页面时，加载了两个文件</h2>
+        <p>你打开 Capture 页面时，其实同时加载了两个文件——一个你几乎看不出存在，另一个才是你真正在跟它互动的。</p>
+        <p>这不是巧合，而是 <span class="term" data-definition="Next.js 是一个用来搭建网站/App 的开发框架（framework），HandLog 项目就是用它搭的。">Next.js</span> 项目里一个非常常见的搭配模式。</p>
+
+        <div class="icon-rows stagger-children">
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🎬</div>
+            <div>
+              <strong>导演（<code>page.tsx</code>）</strong>
+              <p>在<span class="term" data-definition="服务器端（server-side）指代码在远处的电脑上跑，跑完只把结果发给你，你看不到这个过程。">服务器端</span>跑，从不直接上场表演，只负责"这个人有没有登录"之类的把关。</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🎭</div>
+            <div>
+              <strong>演员（<code>XxxContent.tsx</code> / <code>CaptureForm.tsx</code>）</strong>
+              <p>在<span class="term" data-definition="浏览器端（client-side）指代码在你自己的电脑/手机上跑，你点按钮、打字，它立刻做出反应。">浏览器端</span>跑，真正在台上和你互动——录音、打字、点按钮，都归它管。</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🧰</div>
+            <div>
+              <strong>道具管理员（<code>lib/</code> 里的文件）</strong>
+              <p>负责准备所有跟外部世界打交道的工具——比如怎么问 Claude、怎么写进 Notion。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: File tree -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">剧组名单：文件地图</h2>
+        <p>不用死记每个文件叫什么，先建立一张"谁负责什么"的地图，之后跟 AI 沟通时才能说得准。</p>
+
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">app/</span>
+            <span class="ft-desc">页面和后端接口都放这里</span>
+            <div class="ft-children">
+              <div class="ft-folder open">
+                <span class="ft-name">[locale]/capture/</span>
+                <span class="ft-desc">录入日记的页面</span>
+                <div class="ft-children">
+                  <div class="ft-file">
+                    <span class="ft-name">page.tsx</span>
+                    <span class="ft-desc">"导演"：服务器端，检查登录、准备数据</span>
+                  </div>
+                  <div class="ft-file">
+                    <span class="ft-name">CaptureForm.tsx</span>
+                    <span class="ft-desc">"演员"：浏览器里跑，处理录音/打字/按钮</span>
+                  </div>
+                </div>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">review/, dashboard/, history/, timeline/, chat/, login/</span>
+                <span class="ft-desc">每个都是同一套"导演 + 演员"搭配</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">api/</span>
+                <span class="ft-desc">后端接口，不渲染任何画面，只负责"干活"</span>
+              </div>
+            </div>
+          </div>
+          <div class="ft-folder">
+            <span class="ft-name">hooks/</span>
+            <span class="ft-desc">给"演员"用的专用小工具</span>
+            <div class="ft-children">
+              <div class="ft-file">
+                <span class="ft-name">useWhisper.ts</span>
+                <span class="ft-desc">封装录音逻辑</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">useAutosave.ts</span>
+                <span class="ft-desc">每隔几秒自动把草稿存起来</span>
+              </div>
+            </div>
+          </div>
+          <div class="ft-folder">
+            <span class="ft-name">lib/</span>
+            <span class="ft-desc">道具管理员：负责跟外部世界打交道</span>
+            <div class="ft-children">
+              <div class="ft-file">
+                <span class="ft-name">claude.ts</span>
+                <span class="ft-desc">所有跟 Claude 对话的代码，401 行</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">notion.ts</span>
+                <span class="ft-desc">所有跟 Notion 读写的代码，1150 行（全项目最大文件）</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">notion-schema.ts</span>
+                <span class="ft-desc">"翻译表"：程序内部字段名 ↔ Notion 里的中文列名</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">auth.ts</span>
+                <span class="ft-desc">登录规则</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">kv.ts</span>
+                <span class="ft-desc">一个"便利贴"式的临时存储</span>
+              </div>
+            </div>
+          </div>
+          <div class="ft-folder">
+            <span class="ft-name">prompts/</span>
+            <span class="ft-desc">喂给 Claude 的"说明书"</span>
+            <div class="ft-children">
+              <div class="ft-file">
+                <span class="ft-name">daily-review.md / weekly-review.md / monthly-review.md</span>
+                <span class="ft-desc">不同周期的复盘指令</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Group chat -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">让角色自己介绍自己</h2>
+        <p>与其看图表，不如听他们自己"开会"说清楚各自的职责分工。</p>
+
+        <div class="chat-window" id="chat-module2">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="page" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">导</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">page.tsx（导演）</span>
+                <p>我先检查你有没有登录，登录了才把页面给你。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="capture" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">演</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">CaptureForm.tsx（演员）</span>
+                <p>登录之后，真正跟你互动的是我——录音、打字、点生成，都归我管。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="whisper" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">耳</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">useWhisper.ts（助手）</span>
+                <p>我是 CaptureForm 的助手，专门处理录音这件小事。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="claude" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">脑</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">claude.ts（道具管理员）</span>
+                <p>有人问我问题，我就去问 Claude，把答案整理好带回去。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="notion" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">本</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">notion.ts（道具管理员）</span>
+                <p>最后我负责把所有东西真正存进你的 Notion 笔记本。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条</button>
+            <button class="btn chat-all-btn">全部播放</button>
+            <button class="btn chat-reset-btn">重播</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Code translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">演员的日常：自动保存草稿</h2>
+        <p>这是 <code>useAutosave.ts</code> 里真实的一小段——一个专门负责"你停止打字 3 秒后自动存草稿"的<span class="term" data-definition="Hook 是 React 里一段可以被组件重复调用的小逻辑，通常以 use 开头，比如 useAutosave。你可以把它想成一个随叫随到的专属小助理。">hook</span>。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">if</span> (timerRef.current) <span class="code-function">clearTimeout</span>(timerRef.current);</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-function">setStatus</span>(<span class="code-string">"idle"</span>); <span class="code-comment">// 重置为 idle，等待下一次保存</span></span>
+<span class="code-line"></span>
+<span class="code-line">timerRef.current = <span class="code-function">setTimeout</span>(() => {</span>
+<span class="code-line">  <span class="code-function">save</span>(content);</span>
+<span class="code-line">}, delay);</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">如果上一个"倒计时"还没响，先取消它——不然会存好几次重复的草稿。</p>
+              <p class="tl">把保存状态标成"还没存"，让界面上能显示出来。</p>
+              <p class="tl">重新开始一个倒计时：等 <code>delay</code>（默认 3000 毫秒，也就是 3 秒）之后，再真正去保存。</p>
+            </div>
+          </div>
+        </div>
+
+        <p>这种"每次输入都重新计时，停下来才真正执行"的写法，业内叫<span class="term" data-definition="防抖（debounce）是一种常见编程技巧：短时间内的多次触发只认最后一次，避免频繁执行同一个操作（比如每敲一个字就存一次盘）。">防抖（debounce）</span>——你敲键盘越快，它越"忍着不存"，直到你停下来。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键洞察</strong>
+            <p>把"检查权限"和"处理交互"拆成两个文件，是工程里的重要原则——业内叫<span class="term" data-definition="关注点分离（separation of concerns）指把不同职责的代码拆到不同地方，各管一摊，互不干扰，方便维护和排错。">"关注点分离"</span>。这也是为什么 HandLog 把 Claude 调用逻辑单独放进 <code>lib/claude.ts</code>，而不是直接写在 <code>CaptureForm.tsx</code> 里。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验一下：你能分清角色了吗？</h2>
+
+        <div class="quiz-container" id="quiz-module2">
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！深色模式切换是用户在浏览器里点按钮触发的交互，属于'演员'的职责——它要监听点击、立刻改变画面。"
+               data-explanation-wrong="再想想：这个功能需要响应用户在浏览器里的点击，并立刻改变画面显示。这类'马上要有反应'的交互，通常归谁管？">
+            <h3 class="quiz-question">如果你想加一个"深色模式切换按钮"，这个逻辑更可能加在 <code>page.tsx</code> 还是 <code>XxxContent.tsx</code>？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span><code>page.tsx</code> —— 因为它先加载</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span><code>XxxContent.tsx</code> —— 因为按钮点击是浏览器里的交互</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>两个文件各写一半</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="对！api/ 里的文件只干活、不画画面——它们收到请求、处理数据、返回结果，用户永远看不到它们本身长什么样。"
+               data-explanation-wrong="不完全对。想想看：你打开 /capture 页面能看到画面，那 /api/draft 这样的地址呢？打开它你会看到一个页面，还是一堆数据？">
+            <h3 class="quiz-question"><code>api/</code> 文件夹里的路由和 <code>app/[locale]/</code> 里的页面文件有什么本质区别？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>api/ 只负责干活、不渲染任何画面；页面文件负责画面</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>没有区别，只是文件夹名字不同</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>api/ 更快，页面文件更慢</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">场景</span>
+              <p>AI 建议你把"调用 Claude 生成日记总结"的代码，直接写进 <code>CaptureForm.tsx</code>，而不是像 HandLog 现在这样单独放进 <code>lib/claude.ts</code>。你会采纳这个建议吗？</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="option-b"
+                 data-explanation-right="正是如此！claude.ts 被拆出来，是因为将来别的页面（比如周复盘、月复盘）也要调用 Claude——放在一个独立文件里，谁都能 import 复用，不用抄一遍代码。"
+                 data-explanation-wrong="再想想：如果以后 review 页面、chat 页面也要调用 Claude，代码写在 CaptureForm.tsx 里的话，其他页面还能用得上吗？">
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>会采纳，反正功能能跑起来就行</span>
+                </button>
+                <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>不会，因为其他页面以后也需要调用 Claude，拆出来才能复用</span>
+                </button>
+                <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>不会，因为 CaptureForm.tsx 文件已经太长了</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重新再来</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-3" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">数据怎么流动——从一段文字到 Notion 里的一个折叠块</h1>
+      <p class="module-subtitle">你在 Notion 里点开的那个"复盘"折叠框，其实是程序分两次快递才"造"出来的</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Hook + metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">先想象一次快递打包</h2>
+        <p>你的日记文字，就像一件要寄出的商品。Claude 把它"打包"成一个标准化的包裹——这个包裹在程序世界里有个名字，叫
+          <span class="term" data-definition="JSON 是一种用大括号 {} 组织数据的通用文本格式，几乎所有程序之间传递结构化信息都靠它——就像所有快递公司都认的标准包裹格式。">JSON</span>。
+        </p>
+        <p>但快递偶尔会"包装变形"——AI 写出来的 JSON 有时候不完全合规。Notion 这位收货员，还得会一手"拆歪包装"的绝活，才能把东西正确放进你笔记本的格子里。</p>
+
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">这周你会学到的核心问题</strong>
+            <p>AI 吐出来的是<strong>一段文字</strong>，但程序要用的是<strong>结构化数据</strong>。从文字到结构化数据、再到 Notion 复杂的块结构，中间经过好几层"翻译"和"容错"——这是几乎所有 AI 应用都要处理的通用问题。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: hero data flow animation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">整个快递流程：从商品到格子</h2>
+        <p>点击"下一步"，跟着一件商品（你的日记）走完它的旅程。</p>
+
+        <div class="flow-animation" data-steps="[
+          {&quot;highlight&quot;:&quot;flow-actor-1&quot;,&quot;label&quot;:&quot;你写的日记文字，是这次要打包寄出的商品&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-2&quot;,&quot;label&quot;:&quot;Claude这位打包员开始工作，把商品装进包裹&quot;,&quot;packet&quot;:true,&quot;from&quot;:&quot;actor-1&quot;,&quot;to&quot;:&quot;actor-2&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-2&quot;,&quot;label&quot;:&quot;包裹产出了——一段看起来像JSON的文本，但包装偶尔会有点变形&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-3&quot;,&quot;label&quot;:&quot;质检员上场：extractJson先剪开外层，只留下真正完整闭合的那个包裹&quot;,&quot;packet&quot;:true,&quot;from&quot;:&quot;actor-2&quot;,&quot;to&quot;:&quot;actor-3&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-3&quot;,&quot;label&quot;:&quot;sanitizeJson再检查一遍包装纸——把不合规的弯引号捋直&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-4&quot;,&quot;label&quot;:&quot;拿到干净包裹后，翻译标签表登场：把打包员的说法换成收货员认得的中文标签&quot;,&quot;packet&quot;:true,&quot;from&quot;:&quot;actor-3&quot;,&quot;to&quot;:&quot;actor-4&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-5&quot;,&quot;label&quot;:&quot;收货员（Notion）按标签把商品放进笔记本里对应的格子&quot;,&quot;packet&quot;:true,&quot;from&quot;:&quot;actor-4&quot;,&quot;to&quot;:&quot;actor-5&quot;}
+        ]">
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon" style="background: var(--color-actor-1)">📝</div>
+              <span>你的日记</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon" style="background: var(--color-actor-3)">🧠</div>
+              <span>Claude（打包员）</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon" style="background: var(--color-actor-4)">🔍</div>
+              <span>质检员（extractJson / sanitizeJson）</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon" style="background: var(--color-actor-2)">🏷️</div>
+              <span>翻译标签表（notion-schema.ts）</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-5">
+              <div class="flow-actor-icon" style="background: var(--color-actor-5)">📓</div>
+              <span>Notion（笔记本格子）</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+
+          <div class="flow-step-label" id="flow-label">点击"下一步"开始</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: extractJson translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">质检员的第一招：只剪最外层完整的包裹</h2>
+        <p>Claude 有时候会在 JSON 前后多说几句客套话，比如"好的，这是你的复盘："。extractJson 不会傻乎乎地找最后一个
+          <span class="term" data-definition="大括号 {} 在JSON里用来包住一整块结构化数据，就像包裹的外层纸箱。">大括号</span>，
+          而是用"括号计数法"精确数出真正闭合的那一个。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// 从 Claude 的响应里提取 JSON 对象，忽略前后多余的文字或 markdown 代码块</span></span>
+<span class="code-line"><span class="code-keyword">function</span> <span class="code-function">extractJson</span>(text: <span class="code-keyword">string</span>): <span class="code-keyword">string</span> {</span>
+<span class="code-line">  <span class="code-keyword">const</span> start = text.indexOf(<span class="code-string">"{"</span>);</span>
+<span class="code-line">  <span class="code-keyword">if</span> (start === -1) <span class="code-keyword">throw new</span> Error(<span class="code-string">"No JSON object found in response"</span>);</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-comment">// 用括号计数法找到真正匹配的根级闭合括号，而不是 lastIndexOf</span></span>
+<span class="code-line">  <span class="code-keyword">let</span> depth = <span class="code-number">0</span>;</span>
+<span class="code-line">  <span class="code-keyword">let</span> inString = <span class="code-keyword">false</span>;</span>
+<span class="code-line">  <span class="code-keyword">let</span> escape = <span class="code-keyword">false</span>;</span>
+<span class="code-line">  <span class="code-keyword">for</span> (<span class="code-keyword">let</span> i = start; i &lt; text.length; i++) {</span>
+<span class="code-line">    <span class="code-keyword">const</span> ch = text[i];</span>
+<span class="code-line">    <span class="code-keyword">if</span> (escape) { escape = <span class="code-keyword">false</span>; <span class="code-keyword">continue</span>; }</span>
+<span class="code-line">    <span class="code-keyword">if</span> (ch === <span class="code-string">"\\"</span> &amp;&amp; inString) { escape = <span class="code-keyword">true</span>; <span class="code-keyword">continue</span>; }</span>
+<span class="code-line">    <span class="code-keyword">if</span> (ch === <span class="code-string">'"'</span>) { inString = !inString; <span class="code-keyword">continue</span>; }</span>
+<span class="code-line">    <span class="code-keyword">if</span> (inString) <span class="code-keyword">continue</span>;</span>
+<span class="code-line">    <span class="code-keyword">if</span> (ch === <span class="code-string">"{"</span>) depth++;</span>
+<span class="code-line">    <span class="code-keyword">else if</span> (ch === <span class="code-string">"}"</span>) {</span>
+<span class="code-line">      depth--;</span>
+<span class="code-line">      <span class="code-keyword">if</span> (depth === <span class="code-number">0</span>) <span class="code-keyword">return</span> text.slice(start, i + <span class="code-number">1</span>);</span>
+<span class="code-line">    }</span>
+<span class="code-line">  }</span>
+<span class="code-line">  <span class="code-keyword">throw new</span> Error(<span class="code-string">"JSON object not properly closed (truncated response)"</span>);</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">先找到第一个 { ——包裹的开箱位置。没找到就直接报错，说明这次没打包出任何东西。</p>
+              <p class="tl">准备一个计数器 depth，从 0 开始；另外记录"现在是不是在一段引号字符串里面"。</p>
+              <p class="tl">逐个字符扫描：如果在字符串里，先原样跳过（字符串里的花括号不算数，比如日记正文里写的表情符号或符号）。</p>
+              <p class="tl">碰到 { 就把计数器加一，碰到 } 就减一——每一层花括号都被记一笔账。</p>
+              <p class="tl">当计数器第一次回到 0，说明最外层的包裹刚好在这里闭合——把这一段截出来就是完整、干净的 JSON，不用管后面 Claude 还说了什么客套话。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: group chat about sanitizeJson -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">打包员和收货员的对话</h2>
+        <p>剪开包裹只是第一步。包装纸本身有时候也不合规——这时候 claude.ts 和 notion.ts 会这样"对话"。</p>
+
+        <div class="chat-window" id="chat-module3">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="claude" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">🧠</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">claude.ts</span>
+                <p>笔记本，我把大脑说的话打包成 JSON 了，你收一下。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="notion" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">📓</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">notion.ts</span>
+                <p>等等——你这包裹里有个弯弯的引号，我先给它捋直，不然拆包裹的时候会直接报错。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="claude" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">🧠</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">claude.ts</span>
+                <p>辛苦了，大脑写字的时候有时候会顺手用中文输入法的弯引号，不是故意的。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="notion" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">📓</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">notion.ts</span>
+                <p>没事，这是 sanitizeJson 这个函数每天都在做的事——把弯引号这类"不合规包装材料"换成 JSON 认得的直引号，中文书名号《》这种正文内容会原样保留。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="claude" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">🧠</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">claude.ts</span>
+                <p>那就拜托了，笔记本大哥。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一句</button>
+            <button class="btn chat-all-btn">全部播放</button>
+            <button class="btn chat-reset-btn">重播</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: field mapping translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">翻译标签表：程序内部名字 ≠ 你在 Notion 里看到的列名</h2>
+        <p>拿到干净的 JSON 后，程序里的字段叫
+          <code>score</code>，但你在 Notion 表格里实际看到的列名是"打分"——这张
+          <span class="term" data-definition="字段映射，就是一张对照表，把程序内部用的英文变量名和你在 Notion 数据库里实际看到的中文列名一一对应起来。改列名不用改代码，只需要改这张表。">字段映射表</span>
+          就是负责这层翻译的。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">export const</span> DEFAULT_FIELD_MAPPING: JournalFieldMapping = {</span>
+<span class="code-line">  <span class="code-property">name</span>: <span class="code-string">"Name"</span>,</span>
+<span class="code-line">  <span class="code-property">dailySummary</span>: <span class="code-string">"简短日常"</span>,</span>
+<span class="code-line">  <span class="code-property">labels</span>: <span class="code-string">"label标签"</span>,</span>
+<span class="code-line">  <span class="code-property">score</span>: <span class="code-string">"打分"</span>,</span>
+<span class="code-line">  <span class="code-property">insight</span>: <span class="code-string">"一句话感悟"</span>,</span>
+<span class="code-line">  <span class="code-property">review</span>: <span class="code-string">"复盘"</span>,</span>
+<span class="code-line">  <span class="code-property">nextSteps</span>: <span class="code-string">"下一步"</span>,</span>
+<span class="code-line">  <span class="code-property">handlogImage</span>: <span class="code-string">"手绘复盘图"</span>,</span>
+<span class="code-line">  <span class="code-property">psychNote</span>: <span class="code-string">"心理学正能量话"</span>,</span>
+<span class="code-line">};</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">左边是程序写代码时用的英文名字，右边引号里是你在 Notion 表格里实际看到的中文列名。</p>
+              <p class="tl">比如程序算完 score（打分）之后，要往 Notion 写数据，就查这张表：score 对应的列名叫"打分"。</p>
+              <p class="tl">这样做的好处是：以后你想把 Notion 里"打分"这一列改名叫"评分"，只需要改这一行，不用满代码库去找 score 这个词改。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: Toggle + Callout two-step -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">最后一关：造一个可以点开的"复盘"折叠框</h2>
+        <p>你在 Notion 看到的那个可以点开的
+          <span class="term" data-definition="Toggle（折叠块）是 Notion 里一种可以点击展开/收起的内容块，点击左边的小三角就能看到里面藏的内容。">折叠块（Toggle）</span>，
+          外面是个能点开的壳，里面套了一个带图标的
+          <span class="term" data-definition="Callout（高亮块）是 Notion 里一种带图标、带背景色的提示框，常用来突出显示一段内容。">高亮块（Callout）</span>
+          ——这两层是分两次
+          <span class="term" data-definition="API（应用程序编程接口）是两个程序之间约定好的对话方式——notion.ts 通过调用 Notion 的 API，才能真正把内容写进你的笔记本。">API</span>
+          调用才造出来的，不是一次搞定。</p>
+
+        <div class="step-cards stagger-children">
+          <div class="step-card animate-in">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>先造一个空盒子</strong>
+              <p>调用一次 API，在页面里建一个 Toggle，Toggle 里放一个内容还是空的 Callout——这时候程序还不知道这个 Callout 真正的编号（ID）是什么。</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>回头查一下盒子的编号</strong>
+              <p>再调用一次 API，去问 Notion："刚才那个 Toggle 里面，你给它装的 Callout 编号是多少？"——拿到真正的 ID，才能往里塞东西。</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>把复盘内容塞进去</strong>
+              <p>评分、感悟、下一步这些内容块，最后都追加到这个真正拿到手的 Callout 编号下面，你才会在 Notion 里看到点开折叠框有完整内容。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE · Step 1</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// Step 1：建 Toggle，Toggle 里包一个空 Callout（作为内容容器）</span></span>
+<span class="code-line"><span class="code-comment">// eslint-disable-next-line @typescript-eslint/no-explicit-any</span></span>
+<span class="code-line"><span class="code-keyword">const</span> toggleRes = <span class="code-keyword">await</span> withAuthCheck(() =&gt;</span>
+<span class="code-line">  notion.blocks.children.append({</span>
+<span class="code-line">    <span class="code-property">block_id</span>: pageId,</span>
+<span class="code-line">    <span class="code-property">children</span>: [</span>
+<span class="code-line">      {</span>
+<span class="code-line">        <span class="code-property">type</span>: <span class="code-string">"toggle"</span>,</span>
+<span class="code-line">        <span class="code-property">toggle</span>: {</span>
+<span class="code-line">          <span class="code-property">rich_text</span>: [{ <span class="code-property">type</span>: <span class="code-string">"text"</span>, <span class="code-property">text</span>: { <span class="code-property">content</span>: <span class="code-string">`周${dayChar}复盘`</span> }, <span class="code-property">annotations</span>: { <span class="code-property">bold</span>: <span class="code-keyword">true</span> } }],</span>
+<span class="code-line">          <span class="code-property">color</span>: <span class="code-string">"default"</span>,</span>
+<span class="code-line">          <span class="code-property">children</span>: [</span>
+<span class="code-line">            {</span>
+<span class="code-line">              <span class="code-property">type</span>: <span class="code-string">"callout"</span>,</span>
+<span class="code-line">              <span class="code-property">callout</span>: {</span>
+<span class="code-line">                <span class="code-property">rich_text</span>: [],          <span class="code-comment">// 空标题，内容在子块里</span></span>
+<span class="code-line">                <span class="code-property">icon</span>: { <span class="code-property">type</span>: <span class="code-string">"emoji"</span>, <span class="code-property">emoji</span>: <span class="code-string">"📋"</span> },</span>
+<span class="code-line">                <span class="code-property">color</span>: <span class="code-string">"blue_background"</span>,</span>
+<span class="code-line">              },</span>
+<span class="code-line">            } <span class="code-keyword">as</span> Parameters&lt;<span class="code-keyword">typeof</span> notion.blocks.children.append&gt;[<span class="code-number">0</span>][<span class="code-string">"children"</span>][<span class="code-number">0</span>],</span>
+<span class="code-line">          ],</span>
+<span class="code-line">        },</span>
+<span class="code-line">      } <span class="code-keyword">as</span> Parameters&lt;<span class="code-keyword">typeof</span> notion.blocks.children.append&gt;[<span class="code-number">0</span>][<span class="code-string">"children"</span>][<span class="code-number">0</span>],</span>
+<span class="code-line">    ],</span>
+<span class="code-line">  })</span>
+<span class="code-line">) <span class="code-keyword">as</span> { <span class="code-property">results</span>: { <span class="code-property">id</span>: <span class="code-keyword">string</span>; <span class="code-property">type</span>: <span class="code-keyword">string</span> }[] };</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">调用 Notion 的 API，往这个页面里追加一块内容。</p>
+              <p class="tl">要加的内容是一个 Toggle（折叠块），标题写"周X复盘"，加粗显示。</p>
+              <p class="tl">这个 Toggle 里面预先塞了一个空的 Callout（高亮块），带个 📋 图标——先当个占位的空盒子。</p>
+              <p class="tl">这个空 Callout 现在还没有内容，也不知道自己的真实编号——那是下一步才要去问的。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE · Step 2</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// Step 2：找到刚建的 Toggle 里的 Callout ID</span></span>
+<span class="code-line"><span class="code-keyword">const</span> toggleId = toggleRes.results[<span class="code-number">0</span>]?.id;</span>
+<span class="code-line"><span class="code-keyword">if</span> (!toggleId) <span class="code-keyword">return</span>;</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">const</span> toggleChildren = <span class="code-keyword">await</span> withAuthCheck(() =&gt;</span>
+<span class="code-line">  notion.blocks.children.list({ <span class="code-property">block_id</span>: toggleId })</span>
+<span class="code-line">) <span class="code-keyword">as</span> { <span class="code-property">results</span>: { <span class="code-property">id</span>: <span class="code-keyword">string</span>; <span class="code-property">type</span>: <span class="code-keyword">string</span> }[] };</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-keyword">const</span> calloutId = toggleChildren.results.find(b =&gt; b.type === <span class="code-string">"callout"</span>)?.id;</span>
+<span class="code-line"><span class="code-keyword">if</span> (!calloutId) <span class="code-keyword">return</span>;</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">从第一次 API 调用的返回结果里，拿到刚创建的 Toggle 自己的编号。如果没拿到就直接放弃（说明创建失败）。</p>
+              <p class="tl">再发一次 API 请求，问 Notion："这个 Toggle 底下都有哪些子内容？"——这才是第二次真正的网络请求。</p>
+              <p class="tl">在返回的子内容列表里，找到类型是 "callout" 的那一个，取出它的真实编号。</p>
+              <p class="tl">有了这个真实编号，后面才能放心地往这个 Callout 里追加评分、感悟、下一步这些内容。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 7: quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验一下：你能顺着这条快递线找到问题吗？</h2>
+
+        <div class="quiz-container" id="quiz-module3">
+
+          <div class="quiz-question-block"
+               data-correct="opt-yes"
+               data-explanation-right="没错——extractJson 根本不关心 { 前面有什么闲聊文字，它只从第一个 { 开始数括号，前面多说几句客套话完全不影响结果。"
+               data-explanation-wrong="再想想：extractJson 是从 text.indexOf(&quot;{&quot;) 开始找的，也就是说它压根不管 { 前面写了什么。">
+            <h3 class="quiz-question">如果 Claude 返回的文本前面多了一句"好的，这是你的复盘："，extractJson 还能正确工作吗？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-yes" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>能，因为它是从第一个 { 开始数括号的，前面的闲聊文字会被自动忽略</span>
+              </button>
+              <button class="quiz-option" data-value="opt-no" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>不能，多余的文字会让 JSON.parse 直接报错</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">场景</span>
+              <p>你想在 Notion 数据库里新增一列"今日运动"，除了在 Notion 网页里手动加一列，代码这边最少还要改哪里？</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="opt-schema"
+                 data-explanation-right="对——notion-schema.ts 里的 JournalFieldMapping 和 DEFAULT_FIELD_MAPPING 就是那张翻译表，加一个新字段名和对应的中文列名，程序才知道这个新数据该往哪一列写。"
+                 data-explanation-wrong="Notion 网页上加了列，但程序内部完全不知道这一列叫什么、该往哪填数据——它需要一张翻译表告诉它对应关系。">
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="opt-claude" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>src/lib/claude.ts，因为是它负责生成内容</span>
+                </button>
+                <button class="quiz-option" data-value="opt-schema" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>src/lib/notion-schema.ts，因为它是字段名的翻译表</span>
+                </button>
+                <button class="quiz-option" data-value="opt-none" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>不用改代码，Notion 网页上加列就自动生效</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="opt-twostep"
+               data-explanation-right="正是这样——创建 Toggle 时，Notion 只告诉你 Toggle 自己的编号，不会主动告诉你它里面 Callout 子块的编号。程序得再问一次'你里面装的是什么，编号多少'，才能后续把内容准确塞进那个 Callout。"
+               data-explanation-wrong="再想想：第一次调用创建完 Toggle 和里面的空 Callout 后，返回结果只包含 Toggle 自己的信息——Callout 藏在里面，编号还不知道。">
+            <h3 class="quiz-question">为什么创建 Notion 的折叠块（Toggle）需要调用两次 API，而不是一次搞定？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-network" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为网络不稳定，需要多试一次保险</span>
+              </button>
+              <button class="quiz-option" data-value="opt-twostep" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为第一次创建后，Notion 不会主动返回里面 Callout 子块的真实编号，得再查一次才知道</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">Debugging 场景</span>
+              <p>用户反馈"复盘生成了，但 Notion 里没有新增内容"。你会先怀疑这条快递线的哪个环节？</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="opt-chain"
+                 data-explanation-right="对——遇到'生成了但没写进去'，最实用的排查方式就是顺着这条链路一环环看：JSON 有没有被 extractJson/sanitizeJson 正确解析出来？notion-schema.ts 里的列名和你 Notion 里实际的列名是否一致？最后创建 Toggle+Callout 那两次 API 调用有没有报错？单看某一个文件很容易漏掉真正出问题的那一环。"
+                 data-explanation-wrong="只盯着一个环节可能会错过问题——'生成了但没写进去'恰好说明前半段（Claude 生成）是通的，问题更可能出在后半段的某个转换步骤里，值得顺着链路一步步排查。">
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="opt-ui" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>先怀疑前端页面的按钮样式出了问题</span>
+                </button>
+                <button class="quiz-option" data-value="opt-chain" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>顺着链路查：JSON 解析是否成功、字段映射是否对得上、Toggle/Callout 两次 API 调用有没有报错</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module3')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module3')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-4" style="background: var(--color-bg)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">外部世界</h1>
+      <p class="module-subtitle">那些不属于这个项目、却撑起整个 App 的服务</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Opening hook + metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">HandLog 其实什么都不会</h2>
+        <p>HandLog 这个 App 自己不会转录声音、不会理解你写了什么、也不会画画。这些活它全部"外包"给了专业公司。</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🎙️</div>
+            <div>
+              <strong>听你说话 → 外包给 OpenAI Whisper</strong>
+              <p>HandLog 自己完全不懂声音信号是什么</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🧠</div>
+            <div>
+              <strong>理解你写的文字 → 外包给 Anthropic Claude</strong>
+              <p>把杂乱的日记整理成结构化复盘，这个"理解能力"不是 HandLog 自己造的</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">🎨</div>
+            <div>
+              <strong>画配图 → 外包给 OpenAI DALL-E</strong>
+              <p>手帐风水彩画，是另一家公司的模型画出来的</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">📓</div>
+            <div>
+              <strong>记住一切 → 外包给 Notion</strong>
+              <p>所有日记和复盘数据，其实都存在别人的数据库里</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🧩</div>
+          <div class="callout-content">
+            <strong class="callout-title">外包顾问团</strong>
+            <p>想象 HandLog 是一个只有一个人的小工作室——它不自己养团队，而是雇了一群<span class="term" data-definition="API 是 Application Programming Interface 的缩写，指一家公司开放出来、让别的程序调用自己服务的接口——就像一个电话号码，你拨过去说清楚需求，对方就把结果传回来。">专业外部顾问</span>：一个负责听写，一个负责思考，一个负责画画，一个负责记笔记。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: The cost of outsourcing -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">外包有好处，也有代价</h2>
+        <p>雇外部顾问不用自己从零造轮子，但也意味着三件事：要按用量<span class="term" data-definition="按用量付费（pay-as-you-go）指不是买断，而是每次实际使用了多少就付多少钱——用得越多，账单越高。">付钱</span>、对方服务器挂了你也跟着挂、每家公司的"接口合同"格式都不一样，要一个个学。</p>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">✓</div>
+            <p>不用自己训练语音识别模型</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">💸</div>
+            <p>但每次转录都要付费</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">⚠️</div>
+            <p>对方挂了，这个功能也挂了</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Service cards -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">六位"外包顾问"的名片</h2>
+        <p>把上面提到的服务摊开来看——每一位负责什么、怎么收费、有什么值得注意的脾气。</p>
+
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🧠</div>
+            <h4 class="pattern-title">Anthropic Claude</h4>
+            <p class="pattern-desc">把日记整理成结构化复盘、回答你的追问</p>
+            <span class="badge-code" style="display:inline-block; margin-top:8px;">按 <span class="term" data-definition="Token 是 AI 模型处理文字的最小单位，大致相当于半个词到一个词。输入和输出的文字越多，消耗的 token 越多，账单也越高。">token</span> 计费</span>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🎙️</div>
+            <h4 class="pattern-title">OpenAI Whisper</h4>
+            <p class="pattern-desc">语音转文字，给它一句示范文本当提示，引导标点输出</p>
+            <span class="badge-code" style="display:inline-block; margin-top:8px;">按音频时长计费</span>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🎨</div>
+            <h4 class="pattern-title">OpenAI DALL-E 3</h4>
+            <p class="pattern-desc">生成手帐风配图，是可选功能，不是每次都会触发</p>
+            <span class="badge-code" style="display:inline-block; margin-top:8px;">按张数计费（比文字贵很多）</span>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">📓</div>
+            <h4 class="pattern-title">Notion API</h4>
+            <p class="pattern-desc">存储所有日记与复盘数据，单次最多处理 100 个 blocks，要分批</p>
+            <span class="badge-code" style="display:inline-block; margin-top:8px;">个人使用免费</span>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🔑</div>
+            <h4 class="pattern-title">Google OAuth</h4>
+            <p class="pattern-desc">负责登录，只允许一个白名单邮箱进门——这不是多用户产品</p>
+            <span class="badge-code" style="display:inline-block; margin-top:8px;">免费</span>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-accent-muted)">
+            <div class="pattern-icon" style="background: var(--color-accent-muted)">⚡</div>
+            <h4 class="pattern-title">Vercel KV</h4>
+            <p class="pattern-desc">临时存草稿、缓存。草稿存 7 天，Notion 缓存只存 5 分钟——不同数据有不同"保质期"</p>
+            <span class="badge-code" style="display:inline-block; margin-top:8px;">小额按量 / 有免费额度</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: auth.ts translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">门口只站着一个保安</h2>
+        <p>登录环节最像一个只认一张脸的<span class="term" data-definition="门禁/白名单是一份允许通过的名单，只有名单上的人能进——别人即使拿到正确的钥匙也进不去。">门禁</span>。HandLog 不是要给所有人用的产品，而是自己给自己做的私人工具。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE · src/lib/auth.ts</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">const</span> ALLOWED_EMAIL = (process.env.ALLOWED_EMAIL ?? <span class="code-string">""</span>).trim();</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-comment">// 登录时检查邮箱白名单</span></span>
+<span class="code-line">  <span class="code-keyword">async</span> <span class="code-function">signIn</span>({ user }) {</span>
+<span class="code-line">    <span class="code-keyword">return</span> user.email === ALLOWED_EMAIL;</span>
+<span class="code-line">  },</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">先从<span class="term" data-definition="Environment variable（环境变量）是存在服务器配置里、不写进代码文件的秘密值，比如密码或白名单邮箱。这样即使代码被别人看到，敏感信息也不会泄露。">环境变量</span>里读出"允许登录的邮箱"，这个值不会被硬编码进代码里。</p>
+              <p class="tl">每次有人尝试登录，都会跑这段检查。</p>
+              <p class="tl">只有一件事被问：你的邮箱和白名单上那一个邮箱，是不是完全一样？</p>
+              <p class="tl">不一样，直接拒绝——没有"第二个用户"这回事。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Key Insight</strong>
+            <p>很多"登录系统"教程会讲注册、找回密码、多用户管理——但 HandLog 的登录只回答一个问题："你是不是那唯一一个人？"这提醒我们：需求决定架构复杂度，不是功能越全越好。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: middleware flow -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">保安站在哪个岗位上？</h2>
+        <p>门禁检查不是分散在每个页面里各查一次，而是在<span class="term" data-definition="Middleware（中间件）是请求到达具体页面之前、必经的一段检查逻辑——像大楼入口的保安岗，所有人进大楼前都要先经过这里。">中间件</span>这一个岗位上统一拦截。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE · src/middleware.ts</span>
+            <pre><code>
+<span class="code-line">  <span class="code-keyword">const</span> token = <span class="code-keyword">await</span> <span class="code-function">getToken</span>({ req, secret: ... });</span>
+<span class="code-line">  <span class="code-keyword">if</span> (!token) {</span>
+<span class="code-line">    <span class="code-comment">// 未登录跳转到登录页，保留当前 URL 作为 callbackUrl</span></span>
+<span class="code-line">    <span class="code-keyword">const</span> loginUrl = <span class="code-keyword">new</span> <span class="code-function">URL</span>(<span class="code-string">"/en/login"</span>, req.url);</span>
+<span class="code-line">    loginUrl.searchParams.<span class="code-function">set</span>(<span class="code-string">"callbackUrl"</span>, req.url);</span>
+<span class="code-line">    <span class="code-keyword">return</span> NextResponse.<span class="code-function">redirect</span>(loginUrl);</span>
+<span class="code-line">  }</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">先问："这个访问者手里有没有登录凭证（<span class="term" data-definition="Token 在登录场景里指一段加密过的登录凭证，证明"这个人已经登录过"，不用每次都重新输密码。">token</span>）？"</p>
+              <p class="tl">没有凭证的话……</p>
+              <p class="tl">就把他带去登录页，同时记下他原本想去哪儿。</p>
+              <p class="tl">这样登录完能自动送回他本来要去的地方。</p>
+              <p class="tl">没有凭证，一律不放行。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: DALL-E translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">画画顾问按张收费，而且比较贵</h2>
+        <p>配图功能默认不自动触发——它是用户手动点一下才会调用的"加价服务"。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE · src/app/api/handlog/generate/route.ts</span>
+            <pre><code>
+<span class="code-line">  <span class="code-keyword">const</span> res = <span class="code-keyword">await</span> openai.images.<span class="code-function">generate</span>({</span>
+<span class="code-line">    model: <span class="code-string">"dall-e-3"</span>,</span>
+<span class="code-line">    prompt: <span class="code-function">buildPrompt</span>(review),</span>
+<span class="code-line">    n: <span class="code-number">1</span>,</span>
+<span class="code-line">    size: <span class="code-string">"1024x1024"</span>,</span>
+<span class="code-line">    response_format: <span class="code-string">"url"</span>,</span>
+<span class="code-line">  });</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">打个电话给 DALL-E 顾问，说"帮我画一张"。</p>
+              <p class="tl">用哪个型号的画笔（3 代模型）。</p>
+              <p class="tl"><span class="term" data-definition="Prompt（提示词）是喂给 AI 模型、描述你想要什么结果的文字指令——写得越具体，出来的结果越贴近预期。">提示词</span>是根据当天心情分数、地点动态拼出来的一段"日式手帐水彩画"风格描述。</p>
+              <p class="tl">只要一张，不用一次画一堆。</p>
+              <p class="tl">图片尺寸固定为 1024×1024。</p>
+              <p class="tl">让顾问直接把图片网址传回来，而不是传一大坨二进制数据。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">留意这里</strong>
+            <p>DALL-E 这张"账单"比文字请求贵得多，所以它被设计成用户手动触发的可选功能，而不是每次生成复盘都自动画一张——这是一个成本上的克制。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验一下</h2>
+        <p>下面几题不是考记忆，而是看你能不能用刚才学到的架构去判断新情况。</p>
+
+        <div class="quiz-container" id="quiz-module4">
+
+          <div class="quiz-question-block"
+               data-correct="opt-a"
+               data-explanation-right="没错——Whisper 转录和 DALL-E 配图都来自 OpenAI，OpenAI 挂了这两个功能都会受影响；但 Claude 是 Anthropic 的服务，两家公司服务器是独立的，所以整理复盘、聊天问答这些功能不受影响。"
+               data-explanation-wrong="再想想：题目问的是'哪家公司'挂了。Whisper 和 DALL-E 同属 OpenAI，Claude 属于 Anthropic——不同公司的服务器是彼此独立的。">
+            <h3 class="quiz-question">如果 OpenAI 的服务器今天挂了，HandLog 的哪些功能会受影响？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>语音转录和配图功能会挂，但整理复盘、聊天问答不受影响，因为那是另一家公司（Anthropic）的服务</span>
+              </button>
+              <button class="quiz-option" data-value="opt-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>整个 App 都会挂，因为所有 AI 功能都是"AI"，属于同一类服务</span>
+              </button>
+              <button class="quiz-option" data-value="opt-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>什么都不会受影响，因为 Notion 存了所有数据</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="opt-b"
+               data-explanation-right="正确——把一周的日记攒起来，一次性交给 Claude 处理，只产生一次 token 账单；如果每天都调用一次再手动拼接，等于为同样的内容多付好几次钱，还要多写代码去合并结果。"
+               data-explanation-wrong="再想一步：按 token 计费的服务，调用次数和账单大小是挂钩的。想想'一周一次'和'一天一次连续七天'哪个调用次数更少。">
+            <h3 class="quiz-question">为什么周复盘/月复盘设计成"整周一次调用 Claude"，而不是"每天调用一次再拼起来"？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为 Claude 一天只能被调用一次，有次数限制</span>
+              </button>
+              <button class="quiz-option" data-value="opt-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>按 token 计费的服务，调用次数越少越省钱——一次性处理一整周比拆成七次调用更经济</span>
+              </button>
+              <button class="quiz-option" data-value="opt-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>纯粹是代码写起来更方便，跟钱没关系</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="opt-a"
+               data-explanation-right="对——登录逻辑只认 ALLOWED_EMAIL 这一个值，想让朋友也能用，最少要把白名单机制改成'多邮箱名单'或更完整的用户系统，而不是仅仅改一下前端文案。"
+               data-explanation-wrong="再看一眼 auth.ts 里的 signIn 那段代码：它比较的是哪个变量？改哪里才能让'第二个人'也通过这个判断？">
+            <h3 class="quiz-question">如果你想让朋友也能用你的 HandLog，最少需要改哪部分代码？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>signIn 里的白名单判断逻辑——从"只认一个邮箱"改成"认一份名单"或更完整的用户系统</span>
+              </button>
+              <button class="quiz-option" data-value="opt-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只需要把网站链接发给朋友就行，代码不用动</span>
+              </button>
+              <button class="quiz-option" data-value="opt-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>把 DALL-E 配图关掉就可以了</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="opt-b"
+               data-explanation-right="正是——HandLog 现在就是这么做的：配图是用户手动触发的可选功能（对应一个单独的生成接口），不是每次复盘自动画一张。这样预算可控，也不会因为一次请求同时等文字+图片而变慢。"
+               data-explanation-wrong="回想一下 DALL-E 的收费方式和它在代码里被调用的位置——它是复盘生成流程里必然发生的一步，还是一个单独、可选的动作？">
+            <h3 class="quiz-question">DALL-E 配图如果预算有限，该设计成默认开启还是手动触发？HandLog 现在是怎么做的？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>默认每次生成复盘都自动配一张图，体验更完整</span>
+              </button>
+              <button class="quiz-option" data-value="opt-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>设计成用户手动触发的可选功能——HandLog 正是这么做的，因为配图比文字贵很多</span>
+              </button>
+              <button class="quiz-option" data-value="opt-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>预算有限跟这个功能怎么设计没有关系</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-5" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">聪明的工程技巧——一个精明管家的省钱哲学</h1>
+      <p class="module-subtitle">好管家不会每件事都用最贵的方式做——HandLog 的代码里，藏着好几个这样的小聪明</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Hook + metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">想象一个精明的管家</h2>
+        <p>一个好管家不会每次都请最贵的师傅办事——日常小事交给便宜的帮手，重要场合才请真正的高手。东西太多一次搬不完，就分几趟搬；不同东西也有不同的"保质期"。</p>
+
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">一个真实的数字</strong>
+            <p>HandLog 生成"月复盘"的时候，并没有把整整 30 天的日记一天天喂给 Claude——这个设计选择，一年能省下不少
+              <span class="term" data-definition="Token 是 AI 模型处理文字的最小计费单位，大致相当于半个到一个汉字。你发给模型的文字和模型回复的文字都要按 token 计费——越啰嗦、调用次数越多，花的钱就越多。">token</span>
+              费用。这一模块就来拆解这些"管家智慧"。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: Pattern cards -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">四张"管家的小聪明"卡片</h2>
+        <p>好工程不是"能跑就行"，而是在成本、速度、可靠性之间做出刻意的权衡。下面这四张卡片，就是 HandLog 里最典型的四个权衡。</p>
+
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🎩</div>
+            <h4 class="pattern-title">模型分级</h4>
+            <p class="pattern-desc">重要的日/周复盘请贵一点的
+              <span class="term" data-definition="模型（model）指的是具体某一版本的 AI，比如 Claude Sonnet 或 Claude Haiku。同一家公司的不同模型，理解能力和价格都不一样，就像同一个团队里有资深师傅也有学徒。">模型</span>
+              帮忙，简单的提取小任务交给便宜的模型——省钱。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">📦</div>
+            <h4 class="pattern-title">整月一次打包</h4>
+            <p class="pattern-desc">不是每天叫一次 AI，而是把一整月的内容打包成一次
+              <span class="term" data-definition="API 调用指程序向另一个服务（比如 Claude）发送一次请求并等待返回结果的过程。每调用一次通常都要单独计费或消耗额度。">API 调用</span>
+              ——省钱效果更明显。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🚚</div>
+            <h4 class="pattern-title">分批搬运</h4>
+            <p class="pattern-desc">Notion 一次最多只肯收 100 件"包裹"，东西多的话就分几趟搬，一次超限报错都不会有。</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">⏳</div>
+            <h4 class="pattern-title">双保质期缓存</h4>
+            <p class="pattern-desc">草稿留 7 天防止你没保存就白写，
+              <span class="term" data-definition="缓存（cache）是把计算或查询结果先存起来，下次要用的时候直接拿，不用重新计算或重新问一遍——省时间也省调用次数。">缓存</span>
+              数据只留 5 分钟，因为随时能重新问 Notion 要。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: static cost comparison -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">30 次调用 vs 1 次调用：费用差多少</h2>
+        <p>同样是处理一整月 30 天的日记，两种做法的账单完全不是一个量级。</p>
+
+        <div class="icon-rows stagger-children" style="display:grid; grid-template-columns: 1fr 1fr; gap: var(--space-6);">
+          <div class="icon-row animate-in" style="flex-direction:column; align-items:flex-start; border: 2px solid var(--color-error); background: var(--color-error-light);">
+            <strong style="color:var(--color-error)">方案 A：逐天调用（30 次）</strong>
+            <p style="line-height:1.9; font-size:1.4rem; letter-spacing:2px;">💸💸💸💸💸<br>💸💸💸💸💸<br>💸💸💸💸💸<br>💸💸💸💸💸<br>💸💸💸💸💸<br>💸💸💸💸💸</p>
+            <p>每天单独请 Claude 读一遍，30 天就是 30 张账单——中间还重复付了 30 次"读懂上下文"的钱。</p>
+          </div>
+          <div class="icon-row animate-in" style="flex-direction:column; align-items:flex-start; border: 2px solid var(--color-success); background: var(--color-success-light);">
+            <strong style="color:var(--color-success)">方案 B：整月打包（1 次）</strong>
+            <p style="font-size:2.5rem;">💸</p>
+            <p>把 30 天的内容一次性打包发给 Claude，只产生 1 张账单——HandLog 真实采用的就是这个方案。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: flow animation for the batched call -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">跟着"整月打包"走一遍</h2>
+        <p>点击"下一步"，看看 <code>generateMonthlyTableBullets</code> 这一次调用是怎么完成整月工作的。</p>
+
+        <div class="flow-animation" data-steps="[
+          {&quot;highlight&quot;:&quot;flow-actor-1&quot;,&quot;label&quot;:&quot;30 天的原始日记，按周分好段，等待处理&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-2&quot;,&quot;label&quot;:&quot;所有周的内容被拼接成一整段文字，一次性打包&quot;,&quot;packet&quot;:true,&quot;from&quot;:&quot;actor-1&quot;,&quot;to&quot;:&quot;actor-2&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-3&quot;,&quot;label&quot;:&quot;交给便宜的 Haiku 模型处理——这只是提取几个关键词，不需要请最贵的师傅&quot;,&quot;packet&quot;:true,&quot;from&quot;:&quot;actor-2&quot;,&quot;to&quot;:&quot;actor-3&quot;},
+          {&quot;highlight&quot;:&quot;flow-actor-4&quot;,&quot;label&quot;:&quot;只用 1 次 API 调用，就拿回整月每一天的事项列表——相比逐周调用，省下约 75% 的 token 费用&quot;,&quot;packet&quot;:true,&quot;from&quot;:&quot;actor-3&quot;,&quot;to&quot;:&quot;actor-4&quot;}
+        ]">
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon" style="background: var(--color-actor-1)">📓</div>
+              <span>30 天日记</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon" style="background: var(--color-actor-2)">📦</div>
+              <span>整月打包</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon" style="background: var(--color-actor-4)">🎩</div>
+              <span>Haiku 模型</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon" style="background: var(--color-actor-3)">✅</div>
+              <span>1 次调用完成</span>
+            </div>
+          </div>
+          <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-step-label" id="flow-label">点击"下一步"开始</div>
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重来</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// 整月一次调用：把所有周内容合并传给 Claude，只用 1 次 API 调用处理整月</span></span>
+<span class="code-line"><span class="code-comment">// 比逐周调用节省 75% token 费用</span></span>
+<span class="code-line"><span class="code-keyword">export async function</span> <span class="code-function">generateMonthlyTableBullets</span>(</span>
+<span class="code-line">  weeks: Array&lt;{ weekLabel: <span class="code-keyword">string</span>; dailySummary: <span class="code-keyword">string</span> }&gt;,</span>
+<span class="code-line">  month: <span class="code-keyword">number</span></span>
+<span class="code-line">): Promise&lt;DayBullets[]&gt; {</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">这两行注释是程序员自己写给自己看的——直接说明了为什么这么设计。</p>
+              <p class="tl">这个函数接收的不是一天的日记，而是"一整月按周分好的所有内容"。</p>
+              <p class="tl">weeks 参数是一个数组，每一项都是一周的标签加上这一周的原始文字。</p>
+              <p class="tl">函数处理完，会返回整月每一天的事项列表——但只用了 1 次 AI 调用。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: model tiering translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">同一个管家，两副面孔</h2>
+        <p>日/周复盘要写得有洞察力，值得请贵一点的模型；从日记里挑几个关键词这种粗活，便宜模型完全够用。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码 · 日复盘</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">const</span> message = <span class="code-keyword">await</span> client.messages.<span class="code-function">create</span>({</span>
+<span class="code-line">  <span class="code-property">model</span>: <span class="code-string">"claude-sonnet-4-6"</span>,</span>
+<span class="code-line">  <span class="code-property">max_tokens</span>: <span class="code-number">8192</span>,</span>
+<span class="code-line">  <span class="code-property">messages</span>: [{ role: <span class="code-string">"user"</span>, content: prompt }],</span>
+<span class="code-line">});</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">生成每天的复盘，要读懂情绪、总结重点、给出有洞察力的反馈——这是"高手活"。</p>
+              <p class="tl">所以这里请的是 Sonnet，Claude 家族里理解能力更强、也更贵的那位。</p>
+              <p class="tl">8192 是这次回复最多能写多长——留足空间让它写一篇完整的复盘。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码 · 提取表格 bullet</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">const</span> message = <span class="code-keyword">await</span> client.messages.<span class="code-function">create</span>({</span>
+<span class="code-line">  <span class="code-property">model</span>: <span class="code-string">"claude-haiku-4-5-20251001"</span>,</span>
+<span class="code-line">  <span class="code-property">max_tokens</span>: <span class="code-number">1024</span>,</span>
+<span class="code-line">  <span class="code-property">messages</span>: [{ role: <span class="code-string">"user"</span>, content: prompt }],</span>
+<span class="code-line">});</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">这次任务只是"从日记里挑 2-4 个关键事项"——不需要深度理解，只需要提取。</p>
+              <p class="tl">所以换成 Haiku，Claude 家族里更轻量、响应更快、也更便宜的那位。</p>
+              <p class="tl">回复只要 1024 个 token 就够——因为输出只是几个短语，不是长文章。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info animate-in">
+          <div class="callout-icon">🎩</div>
+          <div class="callout-content">
+            <strong class="callout-title">管家的判断标准</strong>
+            <p>不是"这个任务重不重要"，而是"这个任务需不需要深度理解"。表格提取、关键词抽取这类结构化小活，便宜模型往往就能做好。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: batchAppend translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Notion 的"每次最多搬 100 件"规则</h2>
+        <p>Notion 的
+          <span class="term" data-definition="API 是两个程序之间约定好的&quot;沟通规则&quot;——你按照规则发请求，对方就按照规则给你回应。Notion 的 API 就是程序跟 Notion 笔记本对话的方式。">API</span>
+          有个硬性限制：一次最多只能往一个页面里追加 100 个内容块。HandLog 用一个小函数悄悄绕开了这个限制。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// Notion API 每次 append 最多 100 个 block，超过会报错。这个函数自动分批处理。</span></span>
+<span class="code-line"><span class="code-keyword">async function</span> <span class="code-function">batchAppend</span>(notion, blockId, blocks) {</span>
+<span class="code-line">  <span class="code-keyword">const</span> CHUNK = <span class="code-number">100</span>;</span>
+<span class="code-line">  <span class="code-keyword">for</span> (<span class="code-keyword">let</span> i = <span class="code-number">0</span>; i &lt; blocks.length; i += CHUNK) {</span>
+<span class="code-line">    <span class="code-keyword">await</span> withAuthCheck(() =&gt;</span>
+<span class="code-line">      notion.blocks.children.<span class="code-function">append</span>({ block_id: blockId, children: blocks.slice(i, i + CHUNK) })</span>
+<span class="code-line">    );</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">先把"每趟最多搬多少件"定成一个数字：100。</p>
+              <p class="tl">用一个循环，每次往前挪 100 件，一趟一趟地搬，直到全部搬完。</p>
+              <p class="tl">每一趟都单独发一次请求给 Notion，只带上这一批的内容块。</p>
+              <p class="tl">哪怕日记再长、生成的块再多，Notion 那边也永远只看到"每次不超过 100 个"。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 7: double TTL + auth wrapper -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">两种"保质期"，两个理由</h2>
+        <p>草稿和 Notion 数据缓存都存在同一个地方，但管家给它们设置了完全不同的过期时间。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">const</span> DRAFT_TTL = <span class="code-number">60</span> * <span class="code-number">60</span> * <span class="code-number">24</span> * <span class="code-number">7</span>; <span class="code-comment">// 7 days</span></span>
+<span class="code-line"><span class="code-keyword">const</span> CACHE_TTL = <span class="code-number">60</span> * <span class="code-number">5</span>;            <span class="code-comment">// 5 minutes</span></span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">草稿的
+                <span class="term" data-definition="TTL 全称 Time To Live，意思是&quot;这条数据活多久&quot;。过了这个时间，数据会自动被清理掉，不用手动删。">TTL</span>
+                是 7 天——因为这是你手写还没提交的东西，丢了没法找回，宁可多留一阵子。</p>
+              <p class="tl">Notion 数据的缓存只留 5 分钟——因为这份数据随时能重新问 Notion 要一份新的，留太久反而可能是过期信息。</p>
+            </div>
+          </div>
+        </div>
+
+        <p>另一个"统一拦截"的小聪明：把所有 Notion 调用都包一层，专门盯着一种错误——
+          <span class="term" data-definition="401 是 HTTP 状态码之一，服务器用它告诉你&quot;你没有权限做这件事&quot;，通常意味着登录凭证过期或被撤销了。">401</span>。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">代码</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">async function</span> <span class="code-function">withAuthCheck</span>&lt;T&gt;(fn: () =&gt; Promise&lt;T&gt;): Promise&lt;T&gt; {</span>
+<span class="code-line">  <span class="code-keyword">try</span> {</span>
+<span class="code-line">    <span class="code-keyword">return</span> <span class="code-keyword">await</span> fn();</span>
+<span class="code-line">  } <span class="code-keyword">catch</span> (error: unknown) {</span>
+<span class="code-line">    <span class="code-keyword">if</span> (</span>
+<span class="code-line">      <span class="code-keyword">typeof</span> error === <span class="code-string">"object"</span> &amp;&amp;</span>
+<span class="code-line">      error !== <span class="code-keyword">null</span> &amp;&amp;</span>
+<span class="code-line">      <span class="code-string">"status"</span> <span class="code-keyword">in</span> error &amp;&amp;</span>
+<span class="code-line">      (error <span class="code-keyword">as</span> { status: <span class="code-keyword">number</span> }).status === <span class="code-number">401</span></span>
+<span class="code-line">    ) {</span>
+<span class="code-line">      <span class="code-keyword">throw new</span> NotionAuthError();</span>
+<span class="code-line">    }</span>
+<span class="code-line">    <span class="code-keyword">throw</span> error;</span>
+<span class="code-line">  }</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">大白话</span>
+            <div class="translation-lines">
+              <p class="tl">这个函数把"真正要做的 Notion 调用"包在 try 里执行。</p>
+              <p class="tl">一旦出错，先检查这个错误是不是"401 未授权"——也就是用户在 Notion 后台把授权撤销了。</p>
+              <p class="tl">如果是，就统一抛出一个自定义的 NotionAuthError，让上层代码能识别"要引导用户重新连接"。</p>
+              <p class="tl">如果不是 401，就把错误原样往外抛——不吞掉任何意外情况。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么要"统一包一层"</strong>
+            <p>如果没有 withAuthCheck，每一个调用 Notion 的函数都要自己重复写一遍"检查 401、判断要不要报特殊错误"的逻辑——多一个新函数就多一处可能忘记写的地方。包一层之后，这个规则只用维护一次。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 8: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验一下：换你来当管家</h2>
+        <p>这次不是回忆知识点，而是把学到的判断标准用到新场景里。</p>
+
+        <div class="quiz-container" id="quiz-module5">
+
+          <div class="quiz-question-block"
+               data-correct="opt-haiku"
+               data-explanation-right="对！情绪标签提取是结构化归类，不需要深度创作或推理，跟表格 bullet 提取是同一类活——便宜模型就够。"
+               data-explanation-wrong="再想想：这个任务是&quot;从固定选项里挑一个标签&quot;，还是需要模型自己组织语言、写出有洞察力的内容？前者才需要贵模型。">
+            <h3 class="quiz-question">你在做一个类似的日记 App，要新加一个"情绪标签提取"的小功能（从固定的几个情绪词里挑一个），你会用贵模型还是便宜模型？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-sonnet" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>贵模型（比如 Sonnet），标签这么重要必须最准</span>
+              </button>
+              <button class="quiz-option" data-value="opt-haiku" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>便宜模型（比如 Haiku），这是结构化提取，不需要深度理解</span>
+              </button>
+              <button class="quiz-option" data-value="opt-none" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>不需要 AI，写死几个关键词匹配规则就行</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="opt-batch"
+               data-explanation-right="对！CHUNK 这个常量控制着每趟搬多少件，改成 10 之后循环逻辑完全不用变——这就是当初把&quot;分批&quot;单独封装成一个函数的好处。"
+               data-explanation-wrong="再想想：哪个函数里写死了&quot;100&quot;这个数字？提示：不是负责发起调用的函数，而是负责&quot;拆包裹&quot;的那个。">
+            <h3 class="quiz-question">如果 Notion 突然要求你一次最多只能创建 10 个 blocks（不是 100 个），代码里哪个函数需要改？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-batch" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>batchAppend——把 CHUNK 常量从 100 改成 10</span>
+              </button>
+              <button class="quiz-option" data-value="opt-auth" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>withAuthCheck——它负责处理这类错误</span>
+              </button>
+              <button class="quiz-option" data-value="opt-client" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>createNotionClient——它负责创建连接</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="opt-swap-bad"
+               data-explanation-right="对！草稿只留 5 分钟，你打字打到一半页面一崩溃，草稿可能已经过期消失——找不回来。而 Notion 数据缓存留 7 天，意味着你 Notion 里手动改的内容，可能一周都不会在 App 里更新，看到的全是旧数据。"
+               data-explanation-wrong="再想一下：草稿是&quot;用户还没保存的手写内容&quot;，缓存是&quot;随时能问 Notion 重新要一份的数据&quot;——这两者对&quot;过期&quot;的容忍度完全不同，数值反过来会分别在哪个场景出问题？">
+            <h3 class="quiz-question">草稿缓存留 7 天、Notion 数据缓存只留 5 分钟——如果这两个数值反过来会有什么问题？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-swap-bad" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>草稿 5 分钟就可能丢失没保存的内容，Notion 缓存 7 天又会让 App 长期显示过期数据</span>
+              </button>
+              <button class="quiz-option" data-value="opt-swap-fine" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>没什么影响，反正都是缓存</span>
+              </button>
+              <button class="quiz-option" data-value="opt-swap-fast" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>App 会运行得更快</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="opt-central"
+               data-explanation-right="对！withAuthCheck 把&quot;识别 401、抛出统一错误&quot;这件事集中在一个地方。没有它的话，每新增一个调用 Notion 的函数，都要自己重复写一遍这段判断逻辑——多一处重复代码，就多一处以后可能漏改、漏写的风险。"
+               data-explanation-wrong="再想想：如果每个 Notion 相关函数都要自己写一遍&quot;检查 error.status === 401&quot;的逻辑，长期维护会有什么代价？">
+            <h3 class="quiz-question">withAuthCheck 这种"统一包一层处理错误"的写法，好处是什么？如果没有它，代码会变成什么样？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-central" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>把 401 判断逻辑集中管理一次；没有它，每个 Notion 函数都要重复写一遍同样的判断代码</span>
+              </button>
+              <button class="quiz-option" data-value="opt-speed" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>让每次 Notion 调用的速度变快</span>
+              </button>
+              <button class="quiz-option" data-value="opt-token" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>减少调用 Claude 的 token 消耗</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5')">重新作答</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+<section class="module" id="module-6" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">06</span>
+      <h1 class="module-title">验房报告：这栋房子的裂缝在哪</h1>
+      <p class="module-subtitle">买房前请验房师来挑毛病，不是为了劝退你，而是让你带着清单住进去。这是 HandLog 的验房报告，也是这门课的最后一站。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: opening hook -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一个会骗人的名字</h2>
+        <p>如果你去翻 HandLog 的代码，会发现一个叫 <code>/api/handlog/generate</code> 的<span class="term" data-definition="路由：一个网址路径对应服务器上的一段处理逻辑，比如 /api/login 对应'处理登录'的代码。你可以把它理解成一个'门牌号'，请求敲这个门，就会有对应的代码来开门。">路由</span>——名字听起来像"生成日记"，但它实际上是用来画画的。</p>
+        <p>名字有时候会骗人。这一模块，我们像验房师一样，把 HandLog 里容易让新手迷惑的细节一条条挑出来。</p>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">🔍</div>
+          <div class="callout-content">
+            <strong class="callout-title">真实项目 ≠ 教科书例子</strong>
+            <p>真实代码会有命名不准确、文档过时、"预留但没用上"的设计。学会识别这些不完美，是从"看得懂代码"到"能独立<span class="term" data-definition="Debug（调试）：找到代码里出问题的地方并修复它的过程。名字来自最早计算机里真的卡进去一只飞蛾（bug），工程师们把它'debug'（去虫）之后，这个词就沿用下来了。">debug</span>"的关键一步。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: route naming trap -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">坑一：同名不同姓，同姓不同名</h2>
+        <p>两个路由的名字和实际功能对不上号——这是最容易让新手在真实项目里迷路的地方。</p>
+
+        <div class="file-tree">
+          <div class="ft-file">
+            <span class="ft-name">/api/handlog/generate</span>
+            <span class="ft-desc">名字像"生成日记"，实际是调用 OpenAI 画一张手绘复盘图</span>
+          </div>
+          <div class="ft-file">
+            <span class="ft-name">/api/process</span>
+            <span class="ft-desc">名字很朴素，实际才是真正"生成复盘"的那个路由</span>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键洞察</strong>
+            <p>命名不是文档，代码本身才是唯一可信的来源。下次遇到"望文生义"的函数名或路由名，先打开文件看它实际在做什么，别只信名字。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: weekLabel split fragile string protocol -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">坑二：一个靠"约定"撑着的字符串</h2>
+        <p>这段代码来自 <code>src/lib/claude.ts</code>——它靠 <code>weekLabel</code> 这个字符串必须长成固定格式，才能正确拆出月份和日期。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">const</span> parts = weekLabel.<span class="code-function">split</span>(<span class="code-string">"-"</span>);</span>
+<span class="code-line"><span class="code-keyword">const</span> month = parts[0];</span>
+<span class="code-line"><span class="code-keyword">const</span> startDay = <span class="code-function">parseInt</span>(parts[1]);</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">把 <code>weekLabel</code>（长得像 <code>"5-4-10"</code>，意思是 5 月 4 日到 10 日）按"-"切成几段。</p>
+              <p class="tl">默认第一段就是月份——这里没做任何检查。</p>
+              <p class="tl">默认第二段就是起始日期，直接转成数字用。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">脆弱的字符串协议</strong>
+            <p>这段代码<span class="term" data-definition="字符串协议：代码之间约定好用某种固定格式的文本（字符串）来传递信息，比如'月-起始日-结束日'。这种约定不会被程序强制检查，全靠开发者自觉遵守，一旦格式变了就会出问题，还不会报错提醒你。">依赖固定格式的字符串协议</span>：如果 <code>weekLabel</code> 的格式对不上，这里不会报错提醒你，只会静默产生错误的日期。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: two auth mechanisms comparison -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">坑三：两套认证机制，只有一套真的在用</h2>
+        <p>HandLog 里同时存在两种"跟 Notion 打交道"的设计——但目前只有一种真正被激活。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-success)">
+            <div class="pattern-icon" style="background: var(--color-success)">✅</div>
+            <h4 class="pattern-title">Internal Token（真正在用）</h4>
+            <p class="pattern-desc"><code>src/lib/auth.ts</code> 里的 <code>getNotionTokenInternal()</code>——直接从环境变量读一个固定 Token，只服务这一个用户。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-text-muted)">
+            <div class="pattern-icon" style="background: var(--color-text-muted)">🚧</div>
+            <h4 class="pattern-title">多用户 OAuth（预留未激活）</h4>
+            <p class="pattern-desc"><code>src/lib/notion-schema.ts</code> 里的 <code>NotionUserSchema</code>——为"每个用户有自己的 Notion 数据库"设计的字段映射结构，但目前没有被真正接入认证流程。</p>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🧭</div>
+          <div class="callout-content">
+            <strong class="callout-title">好在哪</strong>
+            <p>这是一种常见的工程习惯：先把"未来可能需要"的结构写出来占位，但先用最简单的方式跑通。看到"两条路同时存在"，先搞清楚哪条是真正被调用的，别被没被激活的那条绕晕。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Notion API general gotcha recap -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">坑四：先创建，再回查（复习）</h2>
+        <p>Module 3 详细讲过：<code>notion.ts</code> 里的 <code>appendReviewBlocks</code> 得先创建 Toggle 和 Callout 两个区块，再回头查它们的 id，才能把内容正确写进去。</p>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🔁</div>
+          <div class="callout-content">
+            <strong class="callout-title">不是 HandLog 特有的坑</strong>
+            <p>这其实是 <span class="term" data-definition="Notion API：Notion 提供的一套接口，允许程序自动创建、修改笔记本里的页面和内容块。">Notion API</span> 的通用限制——它的设计就是"先创建空壳，再补内容"，任何调用 Notion API 写复杂结构的项目都得处理这一步，不是 HandLog 独有的毛病。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: sessionStorage limitation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">坑五：交接班用的是一张便利贴</h2>
+        <p>录音页面生成复盘后，要把结果"带"到复盘页面去。HandLog 用的是浏览器的 <span class="term" data-definition="sessionStorage：浏览器提供的一个'临时储物格'，只在当前这个标签页打开期间有效——关掉标签页或者跳到别的域名，里面存的东西就没了。刷新页面倒是不会丢。">sessionStorage</span>，像在两个房间之间传一张便利贴。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE — CaptureForm.tsx</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// 把复盘结果存到 sessionStorage，Review 页面从这里读</span></span>
+<span class="code-line">sessionStorage.<span class="code-function">setItem</span>(<span class="code-string">"pendingReview"</span>, JSON.<span class="code-function">stringify</span>(review));</span>
+<span class="code-line">router.<span class="code-function">push</span>(<span class="code-string">`/${locale}/review`</span>);</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">把刚生成的复盘结果，写进这张"便利贴"，贴的名字叫 <code>pendingReview</code>。</p>
+              <p class="tl">再把用户带到复盘页面去——那边的代码会去找这张便利贴。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE — ReviewContent.tsx</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// 页面加载时先检查 sessionStorage 里有没有从 Capture 页传来的复盘结果</span></span>
+<span class="code-line"><span class="code-keyword">const</span> pending = sessionStorage.<span class="code-function">getItem</span>(<span class="code-string">"pendingReview"</span>);</span>
+<span class="code-line"><span class="code-keyword">if</span> (pending) {</span>
+<span class="code-line">  <span class="code-keyword">const</span> parsed = JSON.<span class="code-function">parse</span>(pending);</span>
+<span class="code-line">  <span class="code-function">setReview</span>(parsed);</span>
+<span class="code-line">  sessionStorage.<span class="code-function">removeItem</span>(<span class="code-string">"pendingReview"</span>);</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">复盘页面一打开，先去便利贴那里瞅一眼有没有东西。</p>
+              <p class="tl">如果有——</p>
+              <p class="tl">就把它读出来解析成数据。</p>
+              <p class="tl">显示到页面上。</p>
+              <p class="tl">看完立刻把便利贴撕掉，避免下次进来看到过期数据。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">便利贴的局限</strong>
+            <p>sessionStorage 只在当前标签页有效——用户如果直接把复盘页面的链接分享给自己、换个浏览器标签页打开，便利贴就是空的。这是一种"够用但不完美"的取巧方案，本质上是前端页面间传数据的常见权宜之计。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 7: doc-lag + dev bypass supplementary notes -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">收尾两个小提醒</h2>
+
+        <div class="icon-rows stagger-children">
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-4)">📄</div>
+            <div>
+              <strong>文档会滞后于代码</strong>
+              <p>项目约定里提到要遵守 <code>docs/notion.md</code>，但这个文件在代码库里其实不存在——真正的字段映射定义在 <code>src/lib/notion-schema.ts</code> 里。文档过时是真实项目的常态，代码才是最终真相。</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🚪</div>
+            <div>
+              <strong>开发环境的"后门"</strong>
+              <p>本地开发时（<code>NODE_ENV === "development"</code>），有几个路由会跳过登录校验，方便调试。这很方便，但上线前一定要再三确认这个判断真的只在开发环境生效，别把后门带上线。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">全课程综合验收</h2>
+        <p>这五道题不只考本模块，还会把 Module 1-6 学到的东西串起来考一遍。</p>
+
+        <div class="quiz-container" id="quiz-module6">
+
+          <div class="quiz-question-block"
+               data-correct="opt-b"
+               data-explanation-right="没错——名字撞了车，是这类项目最容易踩的坑。/api/handlog/generate 实际调用的是 OpenAI 画图，真正'生成复盘'的路由叫 /api/process。碰到望文生义的名字，先打开文件看代码，别信名字。"
+               data-explanation-wrong="再看一眼：这条路由名字里有'generate'，容易让人以为是'生成日记复盘'。但它连的服务是 OpenAI，而不是 Claude——想想 OpenAI 在这个项目里通常被用来做什么？">
+            <h3 class="quiz-question">1. "/api/handlog/generate" 这个路由实际是做什么的？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>调用 Claude 生成结构化的每日复盘</span>
+              </button>
+              <button class="quiz-option" data-value="opt-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>调用 OpenAI 画一张手绘复盘图</span>
+              </button>
+              <button class="quiz-option" data-value="opt-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>把日记内容存进 Notion 笔记本</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="opt-a"
+               data-explanation-right="正确！代码假设第一段永远是月份、第二段永远是起始日。如果格式变成'2026-05-04-10'，parts[0] 会变成年份'2026'，month 就错了——而且不会有任何报错提醒你，只会悄悄生成一个不对的日期标签。"
+               data-explanation-wrong="想一下 split('-') 的逻辑：它不管这个字符串到底有几段，只会机械地按位置取第 0 段当月份、第 1 段当起始日。多一段之后，位置对应关系还成立吗？会不会报错，还是悄悄算错？">
+            <h3 class="quiz-question">2. 如果 weekLabel 的格式变成 "2026-05-04-10"（多了一段年份），split("-") 会出什么问题？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>month 会变成 "2026"，日期从此悄悄算错，且不会报错</span>
+              </button>
+              <button class="quiz-option" data-value="opt-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>程序会立刻抛出错误，提示格式不对</span>
+              </button>
+              <button class="quiz-option" data-value="opt-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>没有任何影响，split 会自动识别年份段并跳过</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="opt-a"
+               data-explanation-right="没错——getNotionTokenInternal() 才是真正在跑的路径，它直接从环境变量读一个固定 Token。NotionUserSchema 那套多用户 OAuth 设计目前只是预留的结构，还没有被接入实际的认证流程。"
+               data-explanation-wrong="提示：看看 auth.ts 里哪个函数被路由代码真正调用了。notion-schema.ts 里定义的字段映射结构，目前有没有配套一整套'用户登录后拿自己 Token'的流程？">
+            <h3 class="quiz-question">3. HandLog 里 Notion 认证实际生效的是哪一种方式？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Internal Token（从环境变量读固定 Token）</span>
+              </button>
+              <button class="quiz-option" data-value="opt-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>多用户 OAuth（每个用户单独授权自己的 Notion）</span>
+              </button>
+              <button class="quiz-option" data-value="opt-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>两种同时在生效，互为备份</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="opt-b"
+               data-explanation-right="正确！sessionStorage 只属于当前这一个标签页——用户如果换个标签页或换个浏览器打开复盘链接，便利贴是空的，什么都读不到。这也是为什么这类临时传值方案只适合'同一次操作、同一个标签页内'的短途交接。"
+               data-explanation-wrong="再想想 sessionStorage 的'session'是什么意思——它的存活范围绑定在什么上？是绑定在'这台电脑'，还是绑定在'这一个浏览器标签页'？">
+            <h3 class="quiz-question">4. sessionStorage 传递数据的方案，有什么已知的局限？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>刷新当前页面后，数据就会立刻丢失</span>
+              </button>
+              <button class="quiz-option" data-value="opt-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>换一个标签页或浏览器打开同一个链接，读不到数据</span>
+              </button>
+              <button class="quiz-option" data-value="opt-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>数据会永久保存，即使关掉浏览器也不会丢</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="opt-c"
+               data-explanation-right="没有标准答案，但从今天学到的内容看，这三个方向最直接：把 Internal Token 换成真正的多用户 OAuth（notion-schema.ts 的设计已经预留好了字段映射）；把 sessionStorage 这种'同标签页便利贴'换成更可靠的服务器端状态或数据库存储；把命名不清楚的路由（比如 handlog/generate）重新梳理成'见名知意'的结构，方便多人协作维护。"
+               data-explanation-wrong="不必纠结'标准答案'——这题是开放性的。但提示一下方向：今天讲到的三个坑（认证方式、临时数据传递方式、命名混乱）里，哪些是'只服务一个人时无所谓，但服务多人时必须解决'的？">
+            <h3 class="quiz-question">5. 如果要把 HandLog 改造成能给多个朋友一起用的产品，按今天学到的内容，你觉得优先要解决哪三个问题？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>先把手绘复盘图的画风换得更好看</span>
+              </button>
+              <button class="quiz-option" data-value="opt-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>先把 Whisper 换成另一个转录模型</span>
+              </button>
+              <button class="quiz-option" data-value="opt-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>把认证机制改成多用户 OAuth、把便利贴式数据传递换成更可靠的方式、把命名混乱的路由理清楚</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module6')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module6')">重新作答</button>
+        </div>
+      </section>
+
+      <!-- Group chat celebration -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">庆功群聊：角色们互相伤害一下</h2>
+        <p>这门课的主角们开了个庆功群聊，互相调侃一下刚才犯过的那些"坑"。</p>
+
+        <div class="chat-window" id="chat-module6">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="director" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🎬</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">导演（page.tsx）</span>
+                <p>各位辛苦了，今天验房验出好几个"假门"啊。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="actor" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">🎭</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">演员（CaptureForm.tsx）</span>
+                <p>别提了，我传数据靠的还是一张便利贴（sessionStorage），换个标签页人家就找不到我了。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="ear" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">👂</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">耳朵（Whisper）</span>
+                <p>至少你还有便利贴，"generate" 那个路由连名字都是错的，谁能想到它其实是去画画的。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="brain" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">🧠</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">大脑（Claude）</span>
+                <p>我也不敢说自己多干净——weekLabel 这个字符串我一直是"猜"格式对的，格式一变我就悄悄算错日期，连声都不吭。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="notebook" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">📓</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">笔记本（Notion）</span>
+                <p>行了行了，我这有两套认证方式，一套真的在跑，一套还在"预留中"睡大觉——咱们半斤八两，谁也别笑话谁。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条</button>
+            <button class="btn chat-all-btn">全部播放</button>
+            <button class="btn chat-reset-btn">重新播放</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Full-course architecture recap -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">全课程回顾：一张图看完整个 HandLog</h2>
+        <p>从 Module 1 的"翻译接力"，到刚才的验房报告——现在，把所有角色重新放回同一张图里。</p>
+
+        <div class="icon-rows stagger-children">
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-2)">👂</div>
+            <div>
+              <strong>耳朵（Whisper）</strong>
+              <p>把你的声音变成文字——只做这一件事</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🧠</div>
+            <div>
+              <strong>大脑（Claude）</strong>
+              <p>把文字整理成结构化复盘、周复盘、月复盘</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-3)">📓</div>
+            <div>
+              <strong>笔记本（Notion）</strong>
+              <p>把所有结果归档保存，认证方式目前是"单人内部 Token"</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-4)">🎬</div>
+            <div>
+              <strong>导演 + 演员（page.tsx + XxxContent.tsx）</strong>
+              <p>一个负责服务器端准备数据，一个负责浏览器里的交互</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-5)">🎨</div>
+            <div>
+              <strong>画手（/api/handlog/generate，本名"生成图"但没改名）</strong>
+              <p>调用 OpenAI，把复盘内容画成一张手绘风格的图</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">🎓</div>
+          <div class="callout-content">
+            <strong class="callout-title">首尾呼应</strong>
+            <p>还记得 Module 1 那场"翻译接力"吗？耳朵、大脑、笔记本各司其职地把你的声音变成一份复盘。现在你不仅知道这条接力棒怎么传，还知道接力棒上哪几个环节容易掉链子——这就是从"用户"到"能读懂这个项目的人"的距离。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Course wrap-up -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">现在，你懂了</h2>
+        <p>六个模块走下来，你已经能看懂一个真实的全栈项目：它的角色分工、数据怎么流动、哪些是聪明的工程技巧、哪些是留着没收拾的"装修尾款"。</p>
+        <p>这些认知不是 HandLog 专属的——下次你看任何一个 AI 帮你写的项目，都可以用同样的眼光去问："这个名字准不准？这个字符串协议脆不脆弱？这个'临时方案'撑不撑得住以后的需求？"</p>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🚀</div>
+          <div class="callout-content">
+            <strong class="callout-title">行动建议</strong>
+            <p>找一个小功能，自己动手往 HandLog 里加一个——比如把手绘复盘图的路由改个更准确的名字，或者给 weekLabel 加一层格式校验。带着 AI 一起做，你会发现自己已经能提出"内行"的问题了。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
+  </main>
+
+</body>
+</html>

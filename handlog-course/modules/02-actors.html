@@ -1,0 +1,315 @@
+<section class="module" id="module-2" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">认识主要角色</h1>
+      <p class="module-subtitle">同一个页面，其实是两个"演员"在轮流上场</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Opening hook -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">你打开 Capture 页面时，加载了两个文件</h2>
+        <p>你打开 Capture 页面时，其实同时加载了两个文件——一个你几乎看不出存在，另一个才是你真正在跟它互动的。</p>
+        <p>这不是巧合，而是 <span class="term" data-definition="Next.js 是一个用来搭建网站/App 的开发框架（framework），HandLog 项目就是用它搭的。">Next.js</span> 项目里一个非常常见的搭配模式。</p>
+
+        <div class="icon-rows stagger-children">
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🎬</div>
+            <div>
+              <strong>导演（<code>page.tsx</code>）</strong>
+              <p>在<span class="term" data-definition="服务器端（server-side）指代码在远处的电脑上跑，跑完只把结果发给你，你看不到这个过程。">服务器端</span>跑，从不直接上场表演，只负责"这个人有没有登录"之类的把关。</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🎭</div>
+            <div>
+              <strong>演员（<code>XxxContent.tsx</code> / <code>CaptureForm.tsx</code>）</strong>
+              <p>在<span class="term" data-definition="浏览器端（client-side）指代码在你自己的电脑/手机上跑，你点按钮、打字，它立刻做出反应。">浏览器端</span>跑，真正在台上和你互动——录音、打字、点按钮，都归它管。</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🧰</div>
+            <div>
+              <strong>道具管理员（<code>lib/</code> 里的文件）</strong>
+              <p>负责准备所有跟外部世界打交道的工具——比如怎么问 Claude、怎么写进 Notion。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: File tree -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">剧组名单：文件地图</h2>
+        <p>不用死记每个文件叫什么，先建立一张"谁负责什么"的地图，之后跟 AI 沟通时才能说得准。</p>
+
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">app/</span>
+            <span class="ft-desc">页面和后端接口都放这里</span>
+            <div class="ft-children">
+              <div class="ft-folder open">
+                <span class="ft-name">[locale]/capture/</span>
+                <span class="ft-desc">录入日记的页面</span>
+                <div class="ft-children">
+                  <div class="ft-file">
+                    <span class="ft-name">page.tsx</span>
+                    <span class="ft-desc">"导演"：服务器端，检查登录、准备数据</span>
+                  </div>
+                  <div class="ft-file">
+                    <span class="ft-name">CaptureForm.tsx</span>
+                    <span class="ft-desc">"演员"：浏览器里跑，处理录音/打字/按钮</span>
+                  </div>
+                </div>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">review/, dashboard/, history/, timeline/, chat/, login/</span>
+                <span class="ft-desc">每个都是同一套"导演 + 演员"搭配</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">api/</span>
+                <span class="ft-desc">后端接口，不渲染任何画面，只负责"干活"</span>
+              </div>
+            </div>
+          </div>
+          <div class="ft-folder">
+            <span class="ft-name">hooks/</span>
+            <span class="ft-desc">给"演员"用的专用小工具</span>
+            <div class="ft-children">
+              <div class="ft-file">
+                <span class="ft-name">useWhisper.ts</span>
+                <span class="ft-desc">封装录音逻辑</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">useAutosave.ts</span>
+                <span class="ft-desc">每隔几秒自动把草稿存起来</span>
+              </div>
+            </div>
+          </div>
+          <div class="ft-folder">
+            <span class="ft-name">lib/</span>
+            <span class="ft-desc">道具管理员：负责跟外部世界打交道</span>
+            <div class="ft-children">
+              <div class="ft-file">
+                <span class="ft-name">claude.ts</span>
+                <span class="ft-desc">所有跟 Claude 对话的代码，401 行</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">notion.ts</span>
+                <span class="ft-desc">所有跟 Notion 读写的代码，1150 行（全项目最大文件）</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">notion-schema.ts</span>
+                <span class="ft-desc">"翻译表"：程序内部字段名 ↔ Notion 里的中文列名</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">auth.ts</span>
+                <span class="ft-desc">登录规则</span>
+              </div>
+              <div class="ft-file">
+                <span class="ft-name">kv.ts</span>
+                <span class="ft-desc">一个"便利贴"式的临时存储</span>
+              </div>
+            </div>
+          </div>
+          <div class="ft-folder">
+            <span class="ft-name">prompts/</span>
+            <span class="ft-desc">喂给 Claude 的"说明书"</span>
+            <div class="ft-children">
+              <div class="ft-file">
+                <span class="ft-name">daily-review.md / weekly-review.md / monthly-review.md</span>
+                <span class="ft-desc">不同周期的复盘指令</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Group chat -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">让角色自己介绍自己</h2>
+        <p>与其看图表，不如听他们自己"开会"说清楚各自的职责分工。</p>
+
+        <div class="chat-window" id="chat-module2">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="page" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">导</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">page.tsx（导演）</span>
+                <p>我先检查你有没有登录，登录了才把页面给你。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="capture" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">演</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">CaptureForm.tsx（演员）</span>
+                <p>登录之后，真正跟你互动的是我——录音、打字、点生成，都归我管。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="whisper" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">耳</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">useWhisper.ts（助手）</span>
+                <p>我是 CaptureForm 的助手，专门处理录音这件小事。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="claude" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">脑</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">claude.ts（道具管理员）</span>
+                <p>有人问我问题，我就去问 Claude，把答案整理好带回去。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="notion" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">本</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">notion.ts（道具管理员）</span>
+                <p>最后我负责把所有东西真正存进你的 Notion 笔记本。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条</button>
+            <button class="btn chat-all-btn">全部播放</button>
+            <button class="btn chat-reset-btn">重播</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: Code translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">演员的日常：自动保存草稿</h2>
+        <p>这是 <code>useAutosave.ts</code> 里真实的一小段——一个专门负责"你停止打字 3 秒后自动存草稿"的<span class="term" data-definition="Hook 是 React 里一段可以被组件重复调用的小逻辑，通常以 use 开头，比如 useAutosave。你可以把它想成一个随叫随到的专属小助理。">hook</span>。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">if</span> (timerRef.current) <span class="code-function">clearTimeout</span>(timerRef.current);</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="code-function">setStatus</span>(<span class="code-string">"idle"</span>); <span class="code-comment">// 重置为 idle，等待下一次保存</span></span>
+<span class="code-line"></span>
+<span class="code-line">timerRef.current = <span class="code-function">setTimeout</span>(() => {</span>
+<span class="code-line">  <span class="code-function">save</span>(content);</span>
+<span class="code-line">}, delay);</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">如果上一个"倒计时"还没响，先取消它——不然会存好几次重复的草稿。</p>
+              <p class="tl">把保存状态标成"还没存"，让界面上能显示出来。</p>
+              <p class="tl">重新开始一个倒计时：等 <code>delay</code>（默认 3000 毫秒，也就是 3 秒）之后，再真正去保存。</p>
+            </div>
+          </div>
+        </div>
+
+        <p>这种"每次输入都重新计时，停下来才真正执行"的写法，业内叫<span class="term" data-definition="防抖（debounce）是一种常见编程技巧：短时间内的多次触发只认最后一次，避免频繁执行同一个操作（比如每敲一个字就存一次盘）。">防抖（debounce）</span>——你敲键盘越快，它越"忍着不存"，直到你停下来。</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键洞察</strong>
+            <p>把"检查权限"和"处理交互"拆成两个文件，是工程里的重要原则——业内叫<span class="term" data-definition="关注点分离（separation of concerns）指把不同职责的代码拆到不同地方，各管一摊，互不干扰，方便维护和排错。">"关注点分离"</span>。这也是为什么 HandLog 把 Claude 调用逻辑单独放进 <code>lib/claude.ts</code>，而不是直接写在 <code>CaptureForm.tsx</code> 里。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验一下：你能分清角色了吗？</h2>
+
+        <div class="quiz-container" id="quiz-module2">
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="没错！深色模式切换是用户在浏览器里点按钮触发的交互，属于'演员'的职责——它要监听点击、立刻改变画面。"
+               data-explanation-wrong="再想想：这个功能需要响应用户在浏览器里的点击，并立刻改变画面显示。这类'马上要有反应'的交互，通常归谁管？">
+            <h3 class="quiz-question">如果你想加一个"深色模式切换按钮"，这个逻辑更可能加在 <code>page.tsx</code> 还是 <code>XxxContent.tsx</code>？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span><code>page.tsx</code> —— 因为它先加载</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span><code>XxxContent.tsx</code> —— 因为按钮点击是浏览器里的交互</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>两个文件各写一半</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="对！api/ 里的文件只干活、不画画面——它们收到请求、处理数据、返回结果，用户永远看不到它们本身长什么样。"
+               data-explanation-wrong="不完全对。想想看：你打开 /capture 页面能看到画面，那 /api/draft 这样的地址呢？打开它你会看到一个页面，还是一堆数据？">
+            <h3 class="quiz-question"><code>api/</code> 文件夹里的路由和 <code>app/[locale]/</code> 里的页面文件有什么本质区别？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>api/ 只负责干活、不渲染任何画面；页面文件负责画面</span>
+              </button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>没有区别，只是文件夹名字不同</span>
+              </button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>api/ 更快，页面文件更慢</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="scenario-block">
+            <div class="scenario-context">
+              <span class="scenario-label">场景</span>
+              <p>AI 建议你把"调用 Claude 生成日记总结"的代码，直接写进 <code>CaptureForm.tsx</code>，而不是像 HandLog 现在这样单独放进 <code>lib/claude.ts</code>。你会采纳这个建议吗？</p>
+            </div>
+            <div class="quiz-question-block"
+                 data-correct="option-b"
+                 data-explanation-right="正是如此！claude.ts 被拆出来，是因为将来别的页面（比如周复盘、月复盘）也要调用 Claude——放在一个独立文件里，谁都能 import 复用，不用抄一遍代码。"
+                 data-explanation-wrong="再想想：如果以后 review 页面、chat 页面也要调用 Claude，代码写在 CaptureForm.tsx 里的话，其他页面还能用得上吗？">
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>会采纳，反正功能能跑起来就行</span>
+                </button>
+                <button class="quiz-option" data-value="option-b" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>不会，因为其他页面以后也需要调用 Claude，拆出来才能复用</span>
+                </button>
+                <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
+                  <div class="quiz-option-radio"></div>
+                  <span>不会，因为 CaptureForm.tsx 文件已经太长了</span>
+                </button>
+              </div>
+              <div class="quiz-feedback"></div>
+            </div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module2')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module2')">重新再来</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

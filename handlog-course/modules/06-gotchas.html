@@ -1,0 +1,458 @@
+<section class="module" id="module-6" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">06</span>
+      <h1 class="module-title">验房报告：这栋房子的裂缝在哪</h1>
+      <p class="module-subtitle">买房前请验房师来挑毛病，不是为了劝退你，而是让你带着清单住进去。这是 HandLog 的验房报告，也是这门课的最后一站。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: opening hook -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一个会骗人的名字</h2>
+        <p>如果你去翻 HandLog 的代码，会发现一个叫 <code>/api/handlog/generate</code> 的<span class="term" data-definition="路由：一个网址路径对应服务器上的一段处理逻辑，比如 /api/login 对应'处理登录'的代码。你可以把它理解成一个'门牌号'，请求敲这个门，就会有对应的代码来开门。">路由</span>——名字听起来像"生成日记"，但它实际上是用来画画的。</p>
+        <p>名字有时候会骗人。这一模块，我们像验房师一样，把 HandLog 里容易让新手迷惑的细节一条条挑出来。</p>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">🔍</div>
+          <div class="callout-content">
+            <strong class="callout-title">真实项目 ≠ 教科书例子</strong>
+            <p>真实代码会有命名不准确、文档过时、"预留但没用上"的设计。学会识别这些不完美，是从"看得懂代码"到"能独立<span class="term" data-definition="Debug（调试）：找到代码里出问题的地方并修复它的过程。名字来自最早计算机里真的卡进去一只飞蛾（bug），工程师们把它'debug'（去虫）之后，这个词就沿用下来了。">debug</span>"的关键一步。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: route naming trap -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">坑一：同名不同姓，同姓不同名</h2>
+        <p>两个路由的名字和实际功能对不上号——这是最容易让新手在真实项目里迷路的地方。</p>
+
+        <div class="file-tree">
+          <div class="ft-file">
+            <span class="ft-name">/api/handlog/generate</span>
+            <span class="ft-desc">名字像"生成日记"，实际是调用 OpenAI 画一张手绘复盘图</span>
+          </div>
+          <div class="ft-file">
+            <span class="ft-name">/api/process</span>
+            <span class="ft-desc">名字很朴素，实际才是真正"生成复盘"的那个路由</span>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键洞察</strong>
+            <p>命名不是文档，代码本身才是唯一可信的来源。下次遇到"望文生义"的函数名或路由名，先打开文件看它实际在做什么，别只信名字。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: weekLabel split fragile string protocol -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">坑二：一个靠"约定"撑着的字符串</h2>
+        <p>这段代码来自 <code>src/lib/claude.ts</code>——它靠 <code>weekLabel</code> 这个字符串必须长成固定格式，才能正确拆出月份和日期。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">const</span> parts = weekLabel.<span class="code-function">split</span>(<span class="code-string">"-"</span>);</span>
+<span class="code-line"><span class="code-keyword">const</span> month = parts[0];</span>
+<span class="code-line"><span class="code-keyword">const</span> startDay = <span class="code-function">parseInt</span>(parts[1]);</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">把 <code>weekLabel</code>（长得像 <code>"5-4-10"</code>，意思是 5 月 4 日到 10 日）按"-"切成几段。</p>
+              <p class="tl">默认第一段就是月份——这里没做任何检查。</p>
+              <p class="tl">默认第二段就是起始日期，直接转成数字用。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">脆弱的字符串协议</strong>
+            <p>这段代码<span class="term" data-definition="字符串协议：代码之间约定好用某种固定格式的文本（字符串）来传递信息，比如'月-起始日-结束日'。这种约定不会被程序强制检查，全靠开发者自觉遵守，一旦格式变了就会出问题，还不会报错提醒你。">依赖固定格式的字符串协议</span>：如果 <code>weekLabel</code> 的格式对不上，这里不会报错提醒你，只会静默产生错误的日期。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: two auth mechanisms comparison -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">坑三：两套认证机制，只有一套真的在用</h2>
+        <p>HandLog 里同时存在两种"跟 Notion 打交道"的设计——但目前只有一种真正被激活。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-success)">
+            <div class="pattern-icon" style="background: var(--color-success)">✅</div>
+            <h4 class="pattern-title">Internal Token（真正在用）</h4>
+            <p class="pattern-desc"><code>src/lib/auth.ts</code> 里的 <code>getNotionTokenInternal()</code>——直接从环境变量读一个固定 Token，只服务这一个用户。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-text-muted)">
+            <div class="pattern-icon" style="background: var(--color-text-muted)">🚧</div>
+            <h4 class="pattern-title">多用户 OAuth（预留未激活）</h4>
+            <p class="pattern-desc"><code>src/lib/notion-schema.ts</code> 里的 <code>NotionUserSchema</code>——为"每个用户有自己的 Notion 数据库"设计的字段映射结构，但目前没有被真正接入认证流程。</p>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🧭</div>
+          <div class="callout-content">
+            <strong class="callout-title">好在哪</strong>
+            <p>这是一种常见的工程习惯：先把"未来可能需要"的结构写出来占位，但先用最简单的方式跑通。看到"两条路同时存在"，先搞清楚哪条是真正被调用的，别被没被激活的那条绕晕。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: Notion API general gotcha recap -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">坑四：先创建，再回查（复习）</h2>
+        <p>Module 3 详细讲过：<code>notion.ts</code> 里的 <code>appendReviewBlocks</code> 得先创建 Toggle 和 Callout 两个区块，再回头查它们的 id，才能把内容正确写进去。</p>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🔁</div>
+          <div class="callout-content">
+            <strong class="callout-title">不是 HandLog 特有的坑</strong>
+            <p>这其实是 <span class="term" data-definition="Notion API：Notion 提供的一套接口，允许程序自动创建、修改笔记本里的页面和内容块。">Notion API</span> 的通用限制——它的设计就是"先创建空壳，再补内容"，任何调用 Notion API 写复杂结构的项目都得处理这一步，不是 HandLog 独有的毛病。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: sessionStorage limitation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">坑五：交接班用的是一张便利贴</h2>
+        <p>录音页面生成复盘后，要把结果"带"到复盘页面去。HandLog 用的是浏览器的 <span class="term" data-definition="sessionStorage：浏览器提供的一个'临时储物格'，只在当前这个标签页打开期间有效——关掉标签页或者跳到别的域名，里面存的东西就没了。刷新页面倒是不会丢。">sessionStorage</span>，像在两个房间之间传一张便利贴。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE — CaptureForm.tsx</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// 把复盘结果存到 sessionStorage，Review 页面从这里读</span></span>
+<span class="code-line">sessionStorage.<span class="code-function">setItem</span>(<span class="code-string">"pendingReview"</span>, JSON.<span class="code-function">stringify</span>(review));</span>
+<span class="code-line">router.<span class="code-function">push</span>(<span class="code-string">`/${locale}/review`</span>);</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">把刚生成的复盘结果，写进这张"便利贴"，贴的名字叫 <code>pendingReview</code>。</p>
+              <p class="tl">再把用户带到复盘页面去——那边的代码会去找这张便利贴。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE — ReviewContent.tsx</span>
+            <pre><code>
+<span class="code-line"><span class="code-comment">// 页面加载时先检查 sessionStorage 里有没有从 Capture 页传来的复盘结果</span></span>
+<span class="code-line"><span class="code-keyword">const</span> pending = sessionStorage.<span class="code-function">getItem</span>(<span class="code-string">"pendingReview"</span>);</span>
+<span class="code-line"><span class="code-keyword">if</span> (pending) {</span>
+<span class="code-line">  <span class="code-keyword">const</span> parsed = JSON.<span class="code-function">parse</span>(pending);</span>
+<span class="code-line">  <span class="code-function">setReview</span>(parsed);</span>
+<span class="code-line">  sessionStorage.<span class="code-function">removeItem</span>(<span class="code-string">"pendingReview"</span>);</span>
+<span class="code-line">}</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">复盘页面一打开，先去便利贴那里瞅一眼有没有东西。</p>
+              <p class="tl">如果有——</p>
+              <p class="tl">就把它读出来解析成数据。</p>
+              <p class="tl">显示到页面上。</p>
+              <p class="tl">看完立刻把便利贴撕掉，避免下次进来看到过期数据。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">便利贴的局限</strong>
+            <p>sessionStorage 只在当前标签页有效——用户如果直接把复盘页面的链接分享给自己、换个浏览器标签页打开，便利贴就是空的。这是一种"够用但不完美"的取巧方案，本质上是前端页面间传数据的常见权宜之计。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 7: doc-lag + dev bypass supplementary notes -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">收尾两个小提醒</h2>
+
+        <div class="icon-rows stagger-children">
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-4)">📄</div>
+            <div>
+              <strong>文档会滞后于代码</strong>
+              <p>项目约定里提到要遵守 <code>docs/notion.md</code>，但这个文件在代码库里其实不存在——真正的字段映射定义在 <code>src/lib/notion-schema.ts</code> 里。文档过时是真实项目的常态，代码才是最终真相。</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🚪</div>
+            <div>
+              <strong>开发环境的"后门"</strong>
+              <p>本地开发时（<code>NODE_ENV === "development"</code>），有几个路由会跳过登录校验，方便调试。这很方便，但上线前一定要再三确认这个判断真的只在开发环境生效，别把后门带上线。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">全课程综合验收</h2>
+        <p>这五道题不只考本模块，还会把 Module 1-6 学到的东西串起来考一遍。</p>
+
+        <div class="quiz-container" id="quiz-module6">
+
+          <div class="quiz-question-block"
+               data-correct="opt-b"
+               data-explanation-right="没错——名字撞了车，是这类项目最容易踩的坑。/api/handlog/generate 实际调用的是 OpenAI 画图，真正'生成复盘'的路由叫 /api/process。碰到望文生义的名字，先打开文件看代码，别信名字。"
+               data-explanation-wrong="再看一眼：这条路由名字里有'generate'，容易让人以为是'生成日记复盘'。但它连的服务是 OpenAI，而不是 Claude——想想 OpenAI 在这个项目里通常被用来做什么？">
+            <h3 class="quiz-question">1. "/api/handlog/generate" 这个路由实际是做什么的？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>调用 Claude 生成结构化的每日复盘</span>
+              </button>
+              <button class="quiz-option" data-value="opt-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>调用 OpenAI 画一张手绘复盘图</span>
+              </button>
+              <button class="quiz-option" data-value="opt-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>把日记内容存进 Notion 笔记本</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="opt-a"
+               data-explanation-right="正确！代码假设第一段永远是月份、第二段永远是起始日。如果格式变成'2026-05-04-10'，parts[0] 会变成年份'2026'，month 就错了——而且不会有任何报错提醒你，只会悄悄生成一个不对的日期标签。"
+               data-explanation-wrong="想一下 split('-') 的逻辑：它不管这个字符串到底有几段，只会机械地按位置取第 0 段当月份、第 1 段当起始日。多一段之后，位置对应关系还成立吗？会不会报错，还是悄悄算错？">
+            <h3 class="quiz-question">2. 如果 weekLabel 的格式变成 "2026-05-04-10"（多了一段年份），split("-") 会出什么问题？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>month 会变成 "2026"，日期从此悄悄算错，且不会报错</span>
+              </button>
+              <button class="quiz-option" data-value="opt-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>程序会立刻抛出错误，提示格式不对</span>
+              </button>
+              <button class="quiz-option" data-value="opt-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>没有任何影响，split 会自动识别年份段并跳过</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="opt-a"
+               data-explanation-right="没错——getNotionTokenInternal() 才是真正在跑的路径，它直接从环境变量读一个固定 Token。NotionUserSchema 那套多用户 OAuth 设计目前只是预留的结构，还没有被接入实际的认证流程。"
+               data-explanation-wrong="提示：看看 auth.ts 里哪个函数被路由代码真正调用了。notion-schema.ts 里定义的字段映射结构，目前有没有配套一整套'用户登录后拿自己 Token'的流程？">
+            <h3 class="quiz-question">3. HandLog 里 Notion 认证实际生效的是哪一种方式？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Internal Token（从环境变量读固定 Token）</span>
+              </button>
+              <button class="quiz-option" data-value="opt-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>多用户 OAuth（每个用户单独授权自己的 Notion）</span>
+              </button>
+              <button class="quiz-option" data-value="opt-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>两种同时在生效，互为备份</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="opt-b"
+               data-explanation-right="正确！sessionStorage 只属于当前这一个标签页——用户如果换个标签页或换个浏览器打开复盘链接，便利贴是空的，什么都读不到。这也是为什么这类临时传值方案只适合'同一次操作、同一个标签页内'的短途交接。"
+               data-explanation-wrong="再想想 sessionStorage 的'session'是什么意思——它的存活范围绑定在什么上？是绑定在'这台电脑'，还是绑定在'这一个浏览器标签页'？">
+            <h3 class="quiz-question">4. sessionStorage 传递数据的方案，有什么已知的局限？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>刷新当前页面后，数据就会立刻丢失</span>
+              </button>
+              <button class="quiz-option" data-value="opt-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>换一个标签页或浏览器打开同一个链接，读不到数据</span>
+              </button>
+              <button class="quiz-option" data-value="opt-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>数据会永久保存，即使关掉浏览器也不会丢</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="opt-c"
+               data-explanation-right="没有标准答案，但从今天学到的内容看，这三个方向最直接：把 Internal Token 换成真正的多用户 OAuth（notion-schema.ts 的设计已经预留好了字段映射）；把 sessionStorage 这种'同标签页便利贴'换成更可靠的服务器端状态或数据库存储；把命名不清楚的路由（比如 handlog/generate）重新梳理成'见名知意'的结构，方便多人协作维护。"
+               data-explanation-wrong="不必纠结'标准答案'——这题是开放性的。但提示一下方向：今天讲到的三个坑（认证方式、临时数据传递方式、命名混乱）里，哪些是'只服务一个人时无所谓，但服务多人时必须解决'的？">
+            <h3 class="quiz-question">5. 如果要把 HandLog 改造成能给多个朋友一起用的产品，按今天学到的内容，你觉得优先要解决哪三个问题？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>先把手绘复盘图的画风换得更好看</span>
+              </button>
+              <button class="quiz-option" data-value="opt-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>先把 Whisper 换成另一个转录模型</span>
+              </button>
+              <button class="quiz-option" data-value="opt-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>把认证机制改成多用户 OAuth、把便利贴式数据传递换成更可靠的方式、把命名混乱的路由理清楚</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module6')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module6')">重新作答</button>
+        </div>
+      </section>
+
+      <!-- Group chat celebration -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">庆功群聊：角色们互相伤害一下</h2>
+        <p>这门课的主角们开了个庆功群聊，互相调侃一下刚才犯过的那些"坑"。</p>
+
+        <div class="chat-window" id="chat-module6">
+          <div class="chat-messages">
+            <div class="chat-message" data-msg="0" data-sender="director" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">🎬</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">导演（page.tsx）</span>
+                <p>各位辛苦了，今天验房验出好几个"假门"啊。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="actor" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">🎭</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">演员（CaptureForm.tsx）</span>
+                <p>别提了，我传数据靠的还是一张便利贴（sessionStorage），换个标签页人家就找不到我了。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="ear" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">👂</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">耳朵（Whisper）</span>
+                <p>至少你还有便利贴，"generate" 那个路由连名字都是错的，谁能想到它其实是去画画的。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="brain" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">🧠</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">大脑（Claude）</span>
+                <p>我也不敢说自己多干净——weekLabel 这个字符串我一直是"猜"格式对的，格式一变我就悄悄算错日期，连声都不吭。</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="notebook" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">📓</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">笔记本（Notion）</span>
+                <p>行了行了，我这有两套认证方式，一套真的在跑，一套还在"预留中"睡大觉——咱们半斤八两，谁也别笑话谁。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-typing" id="chat-typing" style="display:none">
+            <div class="chat-avatar" id="typing-avatar">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+
+          <div class="chat-controls">
+            <button class="btn chat-next-btn">下一条</button>
+            <button class="btn chat-all-btn">全部播放</button>
+            <button class="btn chat-reset-btn">重新播放</button>
+            <span class="chat-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Full-course architecture recap -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">全课程回顾：一张图看完整个 HandLog</h2>
+        <p>从 Module 1 的"翻译接力"，到刚才的验房报告——现在，把所有角色重新放回同一张图里。</p>
+
+        <div class="icon-rows stagger-children">
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-2)">👂</div>
+            <div>
+              <strong>耳朵（Whisper）</strong>
+              <p>把你的声音变成文字——只做这一件事</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🧠</div>
+            <div>
+              <strong>大脑（Claude）</strong>
+              <p>把文字整理成结构化复盘、周复盘、月复盘</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-3)">📓</div>
+            <div>
+              <strong>笔记本（Notion）</strong>
+              <p>把所有结果归档保存，认证方式目前是"单人内部 Token"</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-4)">🎬</div>
+            <div>
+              <strong>导演 + 演员（page.tsx + XxxContent.tsx）</strong>
+              <p>一个负责服务器端准备数据，一个负责浏览器里的交互</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-5)">🎨</div>
+            <div>
+              <strong>画手（/api/handlog/generate，本名"生成图"但没改名）</strong>
+              <p>调用 OpenAI，把复盘内容画成一张手绘风格的图</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">🎓</div>
+          <div class="callout-content">
+            <strong class="callout-title">首尾呼应</strong>
+            <p>还记得 Module 1 那场"翻译接力"吗？耳朵、大脑、笔记本各司其职地把你的声音变成一份复盘。现在你不仅知道这条接力棒怎么传，还知道接力棒上哪几个环节容易掉链子——这就是从"用户"到"能读懂这个项目的人"的距离。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Course wrap-up -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">现在，你懂了</h2>
+        <p>六个模块走下来，你已经能看懂一个真实的全栈项目：它的角色分工、数据怎么流动、哪些是聪明的工程技巧、哪些是留着没收拾的"装修尾款"。</p>
+        <p>这些认知不是 HandLog 专属的——下次你看任何一个 AI 帮你写的项目，都可以用同样的眼光去问："这个名字准不准？这个字符串协议脆不脆弱？这个'临时方案'撑不撑得住以后的需求？"</p>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🚀</div>
+          <div class="callout-content">
+            <strong class="callout-title">行动建议</strong>
+            <p>找一个小功能，自己动手往 HandLog 里加一个——比如把手绘复盘图的路由改个更准确的名字，或者给 weekLabel 加一层格式校验。带着 AI 一起做，你会发现自己已经能提出"内行"的问题了。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

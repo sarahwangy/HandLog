@@ -1,0 +1,340 @@
+<section class="module" id="module-1" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">录音之后，发生了什么？</h1>
+      <p class="module-subtitle">你按下麦克风按钮说了两分钟的话——这两分钟里，你的声音其实经过了三次"翻译"，才变成 Notion 里那份漂亮的复盘。</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: App intro -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">HandLog 是什么</h2>
+        <p>HandLog 是一个"偷懒式日记" App。你不用坐下来认真写日记——像跟朋友吐槽一样，把今天发生的事随口说出来就行。</p>
+
+        <div class="icon-rows stagger-children">
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-1)">📝</div>
+            <div>
+              <strong>整理成复盘</strong>
+              <p>今天心情打几分、见了谁、发生了什么事、有什么感悟</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-2)">📓</div>
+            <div>
+              <strong>自动存进笔记本</strong>
+              <p>不用你手动复制粘贴，AI 帮你写进 Notion</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-4)">📊</div>
+            <div>
+              <strong>攒够一周/一个月</strong>
+              <p>还能再帮你生成"周复盘""月复盘"</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">👤</div>
+          <div class="callout-content">
+            <strong class="callout-title">只有一个人在用</strong>
+            <p>这个 App 目前只有一个用户——项目作者本人自己用。后面的模块会讲为什么登录只允许一个邮箱。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">一场"翻译接力"</h2>
+        <p>想象你把一张潦草的字条塞进一条<span class="term" data-definition="传话筒队伍：一种类比，指信息依次经过多个人手中传递，每个人只处理自己那一段，不了解全局。">传话筒队伍</span>：第一个人把声音变成文字，第二个人把文字整理成一份漂亮的复盘，第三个人把它归档进笔记本。</p>
+        <p>每个人只做自己那一件事，谁都不知道全局——但接力完成后，你得到了一份结构化的日记。</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">👂</div>
+            <h4 class="pattern-title">耳朵（Whisper）</h4>
+            <p class="pattern-desc">只负责一件事：把声音变成文字。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🧠</div>
+            <h4 class="pattern-title">大脑（Claude）</h4>
+            <p class="pattern-desc">只负责一件事：把文字整理成结构化复盘。</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">📓</div>
+            <h4 class="pattern-title">笔记本（Notion）</h4>
+            <p class="pattern-desc">只负责一件事：把结果归档保存。</p>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">关键洞察</strong>
+            <p>一个看起来"一键完成"的功能，背后其实是好几个独立系统按顺序接力完成的。学会拆解这条链路，你就知道"如果哪一步坏了，该去哪里找问题"。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: data flow animation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">追踪你声音的旅程</h2>
+        <p>点击"下一步"，看看你说的那段话，是怎么一步步变成 Notion 里的一份复盘的。</p>
+
+        <div class="flow-animation" data-steps='[
+          {"highlight":"flow-actor-1","label":"这是你的声音——你对着手机说了两分钟的话"},
+          {"highlight":"flow-actor-2","label":"浏览器把声音录下来，变成一段音频文件","packet":true,"from":"actor-1","to":"actor-2"},
+          {"highlight":"flow-actor-3","label":"音频文件被送去问耳朵（Whisper）","packet":true,"from":"actor-2","to":"actor-3"},
+          {"highlight":"flow-actor-4","label":"耳朵把声音变成了一段文字","packet":true,"from":"actor-3","to":"actor-4"},
+          {"highlight":"flow-actor-5","label":"文字被送去问大脑（Claude）","packet":true,"from":"actor-4","to":"actor-5"},
+          {"highlight":"flow-actor-6","label":"大脑把文字整理成结构化的 JSON 复盘","packet":true,"from":"actor-5","to":"actor-6"},
+          {"highlight":"flow-actor-6","label":"结构化复盘被存进了笔记本（Notion）——旅程结束"}
+        ]'>
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-actor-1">
+              <div class="flow-actor-icon">🎙️</div>
+              <span>你的声音</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-2">
+              <div class="flow-actor-icon">🌐</div>
+              <span>浏览器</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-3">
+              <div class="flow-actor-icon">📤</div>
+              <span>/api/transcribe</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-4">
+              <div class="flow-actor-icon">👂</div>
+              <span>耳朵 (Whisper)</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-5">
+              <div class="flow-actor-icon">🧠</div>
+              <span>大脑 (Claude)</span>
+            </div>
+            <div class="flow-actor" id="flow-actor-6">
+              <div class="flow-actor-icon">📓</div>
+              <span>笔记本 (Notion)</span>
+            </div>
+          </div>
+
+          <div class="flow-packet" id="flow-packet"></div>
+
+          <div class="flow-step-label" id="flow-label">点击"下一步"开始追踪</div>
+
+          <div class="flow-controls">
+            <button class="btn flow-next-btn">下一步</button>
+            <button class="btn flow-reset-btn">重新开始</button>
+            <span class="flow-progress"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: code translation 1 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">第一站：浏览器怎么录音</h2>
+        <p>这段代码来自 <code>src/hooks/useWhisper.ts</code>——它负责问你的手机要麦克风权限、录音、再把录音送出去。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">const</span> startRecording = <span class="code-keyword">async</span> () => {</span>
+<span class="code-line">  <span class="code-keyword">const</span> stream = <span class="code-keyword">await</span> navigator.mediaDevices.<span class="code-function">getUserMedia</span>({ audio: <span class="code-keyword">true</span> });</span>
+<span class="code-line">  <span class="code-keyword">const</span> mimeType = MediaRecorder.<span class="code-function">isTypeSupported</span>(<span class="code-string">"audio/mp4"</span>)</span>
+<span class="code-line">    ? <span class="code-string">"audio/mp4"</span></span>
+<span class="code-line">    : <span class="code-string">"audio/webm"</span>;</span>
+<span class="code-line">  <span class="code-keyword">const</span> recorder = <span class="code-keyword">new</span> <span class="code-function">MediaRecorder</span>(stream, { mimeType });</span>
+<span class="code-line">  recorder.onstop = <span class="code-keyword">async</span> () => {</span>
+<span class="code-line">    <span class="code-keyword">const</span> audioBlob = <span class="code-keyword">new</span> <span class="code-function">Blob</span>(chunks, { type: mimeType });</span>
+<span class="code-line">    <span class="code-keyword">const</span> formData = <span class="code-keyword">new</span> <span class="code-function">FormData</span>();</span>
+<span class="code-line">    formData.<span class="code-function">append</span>(<span class="code-string">"audio"</span>, audioBlob);</span>
+<span class="code-line">    <span class="code-keyword">const</span> response = <span class="code-keyword">await</span> <span class="code-function">fetch</span>(<span class="code-string">"/api/transcribe"</span>, {</span>
+<span class="code-line">      method: <span class="code-string">"POST"</span>,</span>
+<span class="code-line">      body: formData,</span>
+<span class="code-line">    });</span>
+<span class="code-line">  };</span>
+<span class="code-line">  recorder.start();</span>
+<span class="code-line">};</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">开始录音这件事，是一个<span class="term" data-definition="异步函数：一种可以'先放一放、等结果回来再继续'的函数，专门处理需要等待的操作（比如问手机要权限、等网络请求返回）。写代码时你会看到 async/await 这对关键词。">异步</span>过程——要等手机的麦克风权限批下来才能继续。</p>
+              <p class="tl">向浏览器申请麦克风权限，得到一条"声音数据流"。</p>
+              <p class="tl">检查手机支持哪种音频格式，优先用 mp4，不支持就退而求其次用 webm。</p>
+              <p class="tl">用拿到的格式，创建一个真正的"录音机"对象。</p>
+              <p class="tl">当你点击"停止录音"时，把录到的声音打包成一个音频文件（<span class="term" data-definition="Blob：Binary Large Object 的缩写，浏览器里用来表示一段'原始二进制数据'的对象，比如一段音频、一张图片。可以把它想成一个装着文件内容的信封。">Blob</span>）。</p>
+              <p class="tl">再把这个音频文件塞进一个"表单包裹"（<span class="term" data-definition="FormData：浏览器提供的一种打包数据的方式，专门用来在网络请求里发送文件或表单内容，就像把东西装进一个可以邮寄的箱子。">FormData</span>）里，方便通过网络送出去。</p>
+              <p class="tl">把这个包裹寄给后端的 <code>/api/transcribe</code> 地址，也就是"耳朵"的接待窗口。</p>
+              <p class="tl">用 POST 方式发送——意味着"我要交给你一些数据"，不是单纯"问你要数据"。</p>
+              <p class="tl">最后，按下"开始录音"按钮，一切才真正启动。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: code translation 2 -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">第二站：耳朵怎么听懂人话</h2>
+        <p>这段代码来自 <code>src/app/api/transcribe/route.ts</code>——它把音频文件转发给 OpenAI 的 Whisper 模型，请它"翻译"成文字。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">const</span> audioFile = <span class="code-keyword">new</span> <span class="code-function">File</span>([audioBlob], <span class="code-string">"recording.webm"</span>, { type: audioBlob.type });</span>
+<span class="code-line"><span class="code-keyword">const</span> response = <span class="code-keyword">await</span> openai.audio.transcriptions.<span class="code-function">create</span>({</span>
+<span class="code-line">  file: audioFile,</span>
+<span class="code-line">  model: <span class="code-string">"whisper-1"</span>,</span>
+<span class="code-line">  prompt: <span class="code-string">"这是一段日记录音，请保留所有标点符号。今天天气很好，我去了咖啡馆，见了老朋友。"</span>,</span>
+<span class="code-line">});</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">把浏览器送来的音频数据，重新包装成一个标准"文件"对象，方便交给 Whisper。</p>
+              <p class="tl">调用<span class="term" data-definition="API：Application Programming Interface 的缩写，是一个服务对外开放的'服务窗口'，别的程序可以通过它请求数据或功能，而不需要知道内部是怎么实现的。跟 AI 沟通时你可以说'帮我调用这个 API'。">API</span>，把文件交给 OpenAI，让它转录成文字。</p>
+              <p class="tl">这里就是那个文件本体。</p>
+              <p class="tl">指定用哪个模型来"听"——这里用的是 <code>whisper-1</code>。</p>
+              <p class="tl">给一个"提示词"，像是提前跟耳朵打个招呼："这是日记，别漏掉标点"，帮它转录得更准确。</p>
+              <p class="tl">发出请求，等它把文字结果传回来。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: code translation 3 (the handoff) -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">第三站：大脑整理完，交给笔记本</h2>
+        <p>这段代码来自 <code>src/app/api/process/route.ts</code>——是整条接力棒的核心衔接点：大脑整理完，立刻交给笔记本归档。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">const</span> review = <span class="code-keyword">await</span> <span class="code-function">generateDailyReview</span>(journal, date);</span>
+<span class="code-line"><span class="code-comment">// 拿到 Claude 生成的结构化结果后...</span></span>
+<span class="code-line"><span class="code-keyword">await</span> <span class="code-function">findOrCreateWeekPage</span>(date);</span>
+<span class="code-line"><span class="code-keyword">await</span> <span class="code-function">appendDailySummary</span>(date, journal);</span>
+<span class="code-line"><span class="code-keyword">await</span> <span class="code-function">appendReviewBlocks</span>(weekPageId, review);</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">让大脑（Claude）读一遍你今天的日记文字，生成一份结构化的复盘。</p>
+              <p class="tl">从这里开始，我们手里已经是大脑整理好的结果了。</p>
+              <p class="tl">先去笔记本里找这周的页面——没有就新建一页。</p>
+              <p class="tl">把今天的原始日记内容追加进笔记本里存一份底稿。</p>
+              <p class="tl">再把大脑整理出的复盘内容，也写进这周的页面里。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">🔗</div>
+          <div class="callout-content">
+            <strong class="callout-title">为什么要拆开这三步</strong>
+            <p>把"整理复盘"和"存进笔记本"拆成两个独立步骤，是因为它们各自可能出错——如果只有存笔记本失败了，你不用重新整理一遍复盘。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验一下：你能追踪这条链路吗？</h2>
+        <p>这三道题不考你背代码，考你能不能用这条链路去推理新情况。</p>
+
+        <div class="quiz-container" id="quiz-module1">
+
+          <div class="quiz-question-block"
+               data-correct="opt-b"
+               data-explanation-right="没错！Whisper 只负责'把声音变成文字'，如果你本来就是打字输入，文字已经有了，这一步完全没有存在的必要——录音、上传音频、转文字这三步都会被跳过。"
+               data-explanation-wrong="再想想：Whisper（耳朵）在整条链路里唯一的工作是什么？如果你的输入本来就已经是文字了，耳朵还有活干吗？">
+            <h3 class="quiz-question">1. 如果你选择打字而不是录音，上面这条链路会跳过哪一步？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>大脑整理复盘那一步会被跳过</span>
+              </button>
+              <button class="quiz-option" data-value="opt-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>耳朵（Whisper）转文字那一步会被跳过</span>
+              </button>
+              <button class="quiz-option" data-value="opt-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>存进笔记本（Notion）那一步会被跳过</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="opt-b"
+               data-explanation-right="正确！转录出来的文字是错别字，说明问题发生在'声音变文字'这一步，也就是 /api/transcribe 里调用 Whisper 的那段代码——可以从这里检查录音质量、prompt 提示词是否给得合适。"
+               data-explanation-wrong="提示：错别字出现在'文字'这个环节，而不是'整理格式'或'存储'环节。想想链路里哪一步的工作就是'把声音变成文字'？">
+            <h3 class="quiz-question">2. 如果转录出来的文字全是错别字，问题最可能出在链路的哪个环节？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>大脑（Claude）整理复盘那一步</span>
+              </button>
+              <button class="quiz-option" data-value="opt-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>耳朵（Whisper）转文字那一步</span>
+              </button>
+              <button class="quiz-option" data-value="opt-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>笔记本（Notion）存档那一步</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="opt-a"
+               data-explanation-right="没错——当前用的 Claude 版本是接收文字输入的，它没办法直接'听'一段音频。所以链路必须先经过耳朵把声音转成文字，大脑才能读懂并整理。"
+               data-explanation-wrong="再想一层：大脑（Claude）在这条链路里收到的输入是什么类型？是一段音频，还是一段文字？">
+            <h3 class="quiz-question">3. 为什么要先转文字、再让大脑整理，而不是让大脑直接"听"录音？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为当前用的这个大脑（Claude）版本走的是文字输入，听不懂音频</span>
+              </button>
+              <button class="quiz-option" data-value="opt-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为这样存进笔记本的速度会更快</span>
+              </button>
+              <button class="quiz-option" data-value="opt-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为浏览器不允许直接上传音频文件</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1')">检查答案</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1')">重新作答</button>
+        </div>
+      </section>
+
+      <!-- Connection to next module -->
+      <section class="screen animate-in">
+        <div class="callout callout-info">
+          <div class="callout-icon">➡️</div>
+          <div class="callout-content">
+            <strong class="callout-title">下一站</strong>
+            <p>现在你已经知道声音走过了哪些"站"。下一个模块，我们会打开地图，看看这条链路背后到底有哪些文件、分别是谁在负责哪一段。</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>

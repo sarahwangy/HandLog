@@ -1,0 +1,335 @@
+<section class="module" id="module-4" style="background: var(--color-bg)">
+  <div class="module-content">
+
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">外部世界</h1>
+      <p class="module-subtitle">那些不属于这个项目、却撑起整个 App 的服务</p>
+    </header>
+
+    <div class="module-body">
+
+      <!-- Screen 1: Opening hook + metaphor -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">HandLog 其实什么都不会</h2>
+        <p>HandLog 这个 App 自己不会转录声音、不会理解你写了什么、也不会画画。这些活它全部"外包"给了专业公司。</p>
+
+        <div class="icon-rows">
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🎙️</div>
+            <div>
+              <strong>听你说话 → 外包给 OpenAI Whisper</strong>
+              <p>HandLog 自己完全不懂声音信号是什么</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🧠</div>
+            <div>
+              <strong>理解你写的文字 → 外包给 Anthropic Claude</strong>
+              <p>把杂乱的日记整理成结构化复盘，这个"理解能力"不是 HandLog 自己造的</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-4)">🎨</div>
+            <div>
+              <strong>画配图 → 外包给 OpenAI DALL-E</strong>
+              <p>手帐风水彩画，是另一家公司的模型画出来的</p>
+            </div>
+          </div>
+          <div class="icon-row">
+            <div class="icon-circle" style="background: var(--color-actor-3)">📓</div>
+            <div>
+              <strong>记住一切 → 外包给 Notion</strong>
+              <p>所有日记和复盘数据，其实都存在别人的数据库里</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🧩</div>
+          <div class="callout-content">
+            <strong class="callout-title">外包顾问团</strong>
+            <p>想象 HandLog 是一个只有一个人的小工作室——它不自己养团队，而是雇了一群<span class="term" data-definition="API 是 Application Programming Interface 的缩写，指一家公司开放出来、让别的程序调用自己服务的接口——就像一个电话号码，你拨过去说清楚需求，对方就把结果传回来。">专业外部顾问</span>：一个负责听写，一个负责思考，一个负责画画，一个负责记笔记。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 2: The cost of outsourcing -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">外包有好处，也有代价</h2>
+        <p>雇外部顾问不用自己从零造轮子，但也意味着三件事：要按用量<span class="term" data-definition="按用量付费（pay-as-you-go）指不是买断，而是每次实际使用了多少就付多少钱——用得越多，账单越高。">付钱</span>、对方服务器挂了你也跟着挂、每家公司的"接口合同"格式都不一样，要一个个学。</p>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">✓</div>
+            <p>不用自己训练语音识别模型</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">💸</div>
+            <p>但每次转录都要付费</p>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">⚠️</div>
+            <p>对方挂了，这个功能也挂了</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 3: Service cards -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">六位"外包顾问"的名片</h2>
+        <p>把上面提到的服务摊开来看——每一位负责什么、怎么收费、有什么值得注意的脾气。</p>
+
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🧠</div>
+            <h4 class="pattern-title">Anthropic Claude</h4>
+            <p class="pattern-desc">把日记整理成结构化复盘、回答你的追问</p>
+            <span class="badge-code" style="display:inline-block; margin-top:8px;">按 <span class="term" data-definition="Token 是 AI 模型处理文字的最小单位，大致相当于半个词到一个词。输入和输出的文字越多，消耗的 token 越多，账单也越高。">token</span> 计费</span>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🎙️</div>
+            <h4 class="pattern-title">OpenAI Whisper</h4>
+            <p class="pattern-desc">语音转文字，给它一句示范文本当提示，引导标点输出</p>
+            <span class="badge-code" style="display:inline-block; margin-top:8px;">按音频时长计费</span>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">🎨</div>
+            <h4 class="pattern-title">OpenAI DALL-E 3</h4>
+            <p class="pattern-desc">生成手帐风配图，是可选功能，不是每次都会触发</p>
+            <span class="badge-code" style="display:inline-block; margin-top:8px;">按张数计费（比文字贵很多）</span>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">📓</div>
+            <h4 class="pattern-title">Notion API</h4>
+            <p class="pattern-desc">存储所有日记与复盘数据，单次最多处理 100 个 blocks，要分批</p>
+            <span class="badge-code" style="display:inline-block; margin-top:8px;">个人使用免费</span>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🔑</div>
+            <h4 class="pattern-title">Google OAuth</h4>
+            <p class="pattern-desc">负责登录，只允许一个白名单邮箱进门——这不是多用户产品</p>
+            <span class="badge-code" style="display:inline-block; margin-top:8px;">免费</span>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-accent-muted)">
+            <div class="pattern-icon" style="background: var(--color-accent-muted)">⚡</div>
+            <h4 class="pattern-title">Vercel KV</h4>
+            <p class="pattern-desc">临时存草稿、缓存。草稿存 7 天，Notion 缓存只存 5 分钟——不同数据有不同"保质期"</p>
+            <span class="badge-code" style="display:inline-block; margin-top:8px;">小额按量 / 有免费额度</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 4: auth.ts translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">门口只站着一个保安</h2>
+        <p>登录环节最像一个只认一张脸的<span class="term" data-definition="门禁/白名单是一份允许通过的名单，只有名单上的人能进——别人即使拿到正确的钥匙也进不去。">门禁</span>。HandLog 不是要给所有人用的产品，而是自己给自己做的私人工具。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE · src/lib/auth.ts</span>
+            <pre><code>
+<span class="code-line"><span class="code-keyword">const</span> ALLOWED_EMAIL = (process.env.ALLOWED_EMAIL ?? <span class="code-string">""</span>).trim();</span>
+<span class="code-line"></span>
+<span class="code-line">  <span class="code-comment">// 登录时检查邮箱白名单</span></span>
+<span class="code-line">  <span class="code-keyword">async</span> <span class="code-function">signIn</span>({ user }) {</span>
+<span class="code-line">    <span class="code-keyword">return</span> user.email === ALLOWED_EMAIL;</span>
+<span class="code-line">  },</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">先从<span class="term" data-definition="Environment variable（环境变量）是存在服务器配置里、不写进代码文件的秘密值，比如密码或白名单邮箱。这样即使代码被别人看到，敏感信息也不会泄露。">环境变量</span>里读出"允许登录的邮箱"，这个值不会被硬编码进代码里。</p>
+              <p class="tl">每次有人尝试登录，都会跑这段检查。</p>
+              <p class="tl">只有一件事被问：你的邮箱和白名单上那一个邮箱，是不是完全一样？</p>
+              <p class="tl">不一样，直接拒绝——没有"第二个用户"这回事。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Key Insight</strong>
+            <p>很多"登录系统"教程会讲注册、找回密码、多用户管理——但 HandLog 的登录只回答一个问题："你是不是那唯一一个人？"这提醒我们：需求决定架构复杂度，不是功能越全越好。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 5: middleware flow -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">保安站在哪个岗位上？</h2>
+        <p>门禁检查不是分散在每个页面里各查一次，而是在<span class="term" data-definition="Middleware（中间件）是请求到达具体页面之前、必经的一段检查逻辑——像大楼入口的保安岗，所有人进大楼前都要先经过这里。">中间件</span>这一个岗位上统一拦截。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE · src/middleware.ts</span>
+            <pre><code>
+<span class="code-line">  <span class="code-keyword">const</span> token = <span class="code-keyword">await</span> <span class="code-function">getToken</span>({ req, secret: ... });</span>
+<span class="code-line">  <span class="code-keyword">if</span> (!token) {</span>
+<span class="code-line">    <span class="code-comment">// 未登录跳转到登录页，保留当前 URL 作为 callbackUrl</span></span>
+<span class="code-line">    <span class="code-keyword">const</span> loginUrl = <span class="code-keyword">new</span> <span class="code-function">URL</span>(<span class="code-string">"/en/login"</span>, req.url);</span>
+<span class="code-line">    loginUrl.searchParams.<span class="code-function">set</span>(<span class="code-string">"callbackUrl"</span>, req.url);</span>
+<span class="code-line">    <span class="code-keyword">return</span> NextResponse.<span class="code-function">redirect</span>(loginUrl);</span>
+<span class="code-line">  }</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">先问："这个访问者手里有没有登录凭证（<span class="term" data-definition="Token 在登录场景里指一段加密过的登录凭证，证明"这个人已经登录过"，不用每次都重新输密码。">token</span>）？"</p>
+              <p class="tl">没有凭证的话……</p>
+              <p class="tl">就把他带去登录页，同时记下他原本想去哪儿。</p>
+              <p class="tl">这样登录完能自动送回他本来要去的地方。</p>
+              <p class="tl">没有凭证，一律不放行。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Screen 6: DALL-E translation -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">画画顾问按张收费，而且比较贵</h2>
+        <p>配图功能默认不自动触发——它是用户手动点一下才会调用的"加价服务"。</p>
+
+        <div class="translation-block animate-in">
+          <div class="translation-code">
+            <span class="translation-label">CODE · src/app/api/handlog/generate/route.ts</span>
+            <pre><code>
+<span class="code-line">  <span class="code-keyword">const</span> res = <span class="code-keyword">await</span> openai.images.<span class="code-function">generate</span>({</span>
+<span class="code-line">    model: <span class="code-string">"dall-e-3"</span>,</span>
+<span class="code-line">    prompt: <span class="code-function">buildPrompt</span>(review),</span>
+<span class="code-line">    n: <span class="code-number">1</span>,</span>
+<span class="code-line">    size: <span class="code-string">"1024x1024"</span>,</span>
+<span class="code-line">    response_format: <span class="code-string">"url"</span>,</span>
+<span class="code-line">  });</span>
+            </code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">打个电话给 DALL-E 顾问，说"帮我画一张"。</p>
+              <p class="tl">用哪个型号的画笔（3 代模型）。</p>
+              <p class="tl"><span class="term" data-definition="Prompt（提示词）是喂给 AI 模型、描述你想要什么结果的文字指令——写得越具体，出来的结果越贴近预期。">提示词</span>是根据当天心情分数、地点动态拼出来的一段"日式手帐水彩画"风格描述。</p>
+              <p class="tl">只要一张，不用一次画一堆。</p>
+              <p class="tl">图片尺寸固定为 1024×1024。</p>
+              <p class="tl">让顾问直接把图片网址传回来，而不是传一大坨二进制数据。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <strong class="callout-title">留意这里</strong>
+            <p>DALL-E 这张"账单"比文字请求贵得多，所以它被设计成用户手动触发的可选功能，而不是每次生成复盘都自动画一张——这是一个成本上的克制。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quiz -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">检验一下</h2>
+        <p>下面几题不是考记忆，而是看你能不能用刚才学到的架构去判断新情况。</p>
+
+        <div class="quiz-container" id="quiz-module4">
+
+          <div class="quiz-question-block"
+               data-correct="opt-a"
+               data-explanation-right="没错——Whisper 转录和 DALL-E 配图都来自 OpenAI，OpenAI 挂了这两个功能都会受影响；但 Claude 是 Anthropic 的服务，两家公司服务器是独立的，所以整理复盘、聊天问答这些功能不受影响。"
+               data-explanation-wrong="再想想：题目问的是'哪家公司'挂了。Whisper 和 DALL-E 同属 OpenAI，Claude 属于 Anthropic——不同公司的服务器是彼此独立的。">
+            <h3 class="quiz-question">如果 OpenAI 的服务器今天挂了，HandLog 的哪些功能会受影响？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>语音转录和配图功能会挂，但整理复盘、聊天问答不受影响，因为那是另一家公司（Anthropic）的服务</span>
+              </button>
+              <button class="quiz-option" data-value="opt-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>整个 App 都会挂，因为所有 AI 功能都是"AI"，属于同一类服务</span>
+              </button>
+              <button class="quiz-option" data-value="opt-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>什么都不会受影响，因为 Notion 存了所有数据</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="opt-b"
+               data-explanation-right="正确——把一周的日记攒起来，一次性交给 Claude 处理，只产生一次 token 账单；如果每天都调用一次再手动拼接，等于为同样的内容多付好几次钱，还要多写代码去合并结果。"
+               data-explanation-wrong="再想一步：按 token 计费的服务，调用次数和账单大小是挂钩的。想想'一周一次'和'一天一次连续七天'哪个调用次数更少。">
+            <h3 class="quiz-question">为什么周复盘/月复盘设计成"整周一次调用 Claude"，而不是"每天调用一次再拼起来"？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>因为 Claude 一天只能被调用一次，有次数限制</span>
+              </button>
+              <button class="quiz-option" data-value="opt-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>按 token 计费的服务，调用次数越少越省钱——一次性处理一整周比拆成七次调用更经济</span>
+              </button>
+              <button class="quiz-option" data-value="opt-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>纯粹是代码写起来更方便，跟钱没关系</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="opt-a"
+               data-explanation-right="对——登录逻辑只认 ALLOWED_EMAIL 这一个值，想让朋友也能用，最少要把白名单机制改成'多邮箱名单'或更完整的用户系统，而不是仅仅改一下前端文案。"
+               data-explanation-wrong="再看一眼 auth.ts 里的 signIn 那段代码：它比较的是哪个变量？改哪里才能让'第二个人'也通过这个判断？">
+            <h3 class="quiz-question">如果你想让朋友也能用你的 HandLog，最少需要改哪部分代码？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>signIn 里的白名单判断逻辑——从"只认一个邮箱"改成"认一份名单"或更完整的用户系统</span>
+              </button>
+              <button class="quiz-option" data-value="opt-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>只需要把网站链接发给朋友就行，代码不用动</span>
+              </button>
+              <button class="quiz-option" data-value="opt-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>把 DALL-E 配图关掉就可以了</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="opt-b"
+               data-explanation-right="正是——HandLog 现在就是这么做的：配图是用户手动触发的可选功能（对应一个单独的生成接口），不是每次复盘自动画一张。这样预算可控，也不会因为一次请求同时等文字+图片而变慢。"
+               data-explanation-wrong="回想一下 DALL-E 的收费方式和它在代码里被调用的位置——它是复盘生成流程里必然发生的一步，还是一个单独、可选的动作？">
+            <h3 class="quiz-question">DALL-E 配图如果预算有限，该设计成默认开启还是手动触发？HandLog 现在是怎么做的？</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="opt-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>默认每次生成复盘都自动配一张图，体验更完整</span>
+              </button>
+              <button class="quiz-option" data-value="opt-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>设计成用户手动触发的可选功能——HandLog 正是这么做的，因为配图比文字贵很多</span>
+              </button>
+              <button class="quiz-option" data-value="opt-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>预算有限跟这个功能怎么设计没有关系</span>
+              </button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4')">Try Again</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</section>
